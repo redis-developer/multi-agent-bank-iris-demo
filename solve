@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# Fast-forward the workshop code to a section's solution snapshot.
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$ROOT_DIR"
+
+TARGET="${1:-}"
+if [[ -z "$TARGET" ]]; then
+  cat >&2 <<'USAGE'
+Usage: ./solve <target>
+
+Targets:
+  1      Section 1 has no code changes (data exploration only).
+  2      Apply the Section 2 solution (semantic routing).
+  3      Apply the Section 3 solution (RAG over the loan docs).
+  4      Apply the Section 4 solution (multi-agent LangGraph).
+  5      Apply the Section 5 solution (agent memory).
+  6      Apply the Section 6 solution (semantic caching).
+  full   Apply the full solution (same as 6).
+  reset  Restore the starter state.
+USAGE
+  exit 1
+fi
+
+case "$TARGET" in
+  1)            echo "Section 1 is exploration only — nothing to apply."; exit 0 ;;
+  2|3|4|5|6)    SNAPSHOT="$TARGET" ;;
+  7|full)       SNAPSHOT="6" ;;
+  reset|starter) SNAPSHOT="starter" ;;
+  *) echo "Unknown solve target '$TARGET'." >&2; exit 1 ;;
+esac
+
+SRC="solutions/python/$SNAPSHOT/src"
+DEST="code/python/src"
+
+if [[ ! -d "$SRC" ]]; then
+  echo "Solution snapshot '$SRC' not found." >&2
+  exit 1
+fi
+
+echo "Applying snapshot '$SNAPSHOT' to $DEST ..."
+( cd "$SRC" && find . -type f -name '*.py' ) | while read -r file; do
+  mkdir -p "$DEST/$(dirname "$file")"
+  cp "$SRC/$file" "$DEST/$file"
+  echo "  -> $file"
+done
+
+# The chat pipeline is built once at startup, so restart the api container
+# to pick the snapshot up (uvicorn --reload catches most edits, but a clean
+# restart also rebuilds the router/cache/memory indexes).
+if command -v docker >/dev/null 2>&1 \
+   && [[ -n "$(docker compose ps -q api 2>/dev/null)" ]]; then
+  echo "Restarting the api container..."
+  docker compose restart api
+fi
+
+echo "Done. Snapshot '$SNAPSHOT' applied."

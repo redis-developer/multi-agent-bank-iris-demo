@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bank WhatsApp Bot — Redis Iris Workshop</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="phone">
+    <header class="wa-header">
+      <div class="wa-avatar">🏦</div>
+      <div class="wa-title">
+        <div class="wa-name">YourBank Loans</div>
+        <div class="wa-status" id="status">connecting…</div>
+      </div>
+      <div class="wa-controls">
+        <select id="customer" title="Simulate a verified WhatsApp number"></select>
+        <button id="new-session" title="Start a new conversation thread">⟳ new chat</button>
+      </div>
+    </header>
+
+    <main class="wa-chat" id="chat">
+      <div class="wa-day">Today</div>
+      <div class="bubble bot">
+        Namaste! 👋 You're chatting with <b>YourBank Loans</b>.
+        Try: <i>"what's my loan status"</i>, <i>"what is the foreclosure
+        charge?"</i>, <i>"I need an NOC"</i>, or <i>"do I have any offers?"</i>
+      </div>
+    </main>
+
+    <footer class="wa-input">
+      <input id="message" type="text" placeholder="Type a message"
+             autocomplete="off" />
+      <button id="send">➤</button>
+    </footer>
+  </div>
+
+  <aside class="inspector">
+    <h2>Pipeline inspector</h2>
+    <p class="hint">What Redis did for the last message.</p>
+    <dl>
+      <dt>Route (semantic router)</dt><dd id="i-route">—</dd>
+      <dt>Agent</dt><dd id="i-agent">—</dd>
+      <dt>Semantic cache</dt><dd id="i-cached">—</dd>
+      <dt>Latency</dt><dd id="i-latency">—</dd>
+      <dt>Citations (RAG)</dt><dd id="i-citations">—</dd>
+    </dl>
+    <div class="quick">
+      <h3>Quick messages</h3>
+      <button class="q">What's my loan status?</button>
+      <button class="q">What is the foreclosure charge on a personal loan?</button>
+      <button class="q">I need an NOC for my closed loan</button>
+      <button class="q">Do I have any pre-approved offers?</button>
+      <button class="q">Calculate EMI for 5 lakhs at 11.5% for 4 years</button>
+      <button class="q">I'm renovating my home this year</button>
+    </div>
+  </aside>
+
+  <script src="js/script.js"></script>
+</body>
+</html>

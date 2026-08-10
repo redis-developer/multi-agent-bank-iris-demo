@@ -1,0 +1,136 @@
+{
+  "customers": [
+    {
+      "customer_id": "CUST1001",
+      "name": "Ananya Sharma",
+      "phone": "+91-98XXX-11001",
+      "segment": "existing",
+      "city": "Mumbai",
+      "kyc_status": "verified",
+      "credit_score": 782,
+      "preapproved": true
+    },
+    {
+      "customer_id": "CUST1002",
+      "name": "Rohit Verma",
+      "phone": "+91-98XXX-11002",
+      "segment": "existing",
+      "city": "Delhi",
+      "kyc_status": "verified",
+      "credit_score": 731,
+      "preapproved": true
+    },
+    {
+      "customer_id": "CUST1003",
+      "name": "Priya Nair",
+      "phone": "+91-98XXX-11003",
+      "segment": "existing",
+      "city": "Bengaluru",
+      "kyc_status": "verified",
+      "credit_score": 804,
+      "preapproved": false
+    },
+    {
+      "customer_id": "CUST1004",
+      "name": "Arjun Mehta",
+      "phone": "+91-98XXX-11004",
+      "segment": "new",
+      "city": "Pune",
+      "kyc_status": "pending",
+      "credit_score": 695,
+      "preapproved": false
+    }
+  ],
+  "loans": [
+    {
+      "lan": "LAN20240001",
+      "customer_id": "CUST1001",
+      "product": "personal_loan",
+      "principal": 500000,
+      "annual_rate": 11.5,
+      "tenure_months": 48,
+      "emi": 13044,
+      "months_paid": 30,
+      "outstanding": 238101,
+      "status": "active",
+      "disbursed_on": "2024-02-15"
+    },
+    {
+      "lan": "LAN20220042",
+      "customer_id": "CUST1001",
+      "product": "personal_loan",
+      "principal": 200000,
+      "annual_rate": 12.0,
+      "tenure_months": 24,
+      "emi": 9415,
+      "months_paid": 24,
+      "outstanding": 0,
+      "status": "closed",
+      "disbursed_on": "2022-06-10",
+      "closed_on": "2024-06-10"
+    },
+    {
+      "lan": "LAN20230307",
+      "customer_id": "CUST1002",
+      "product": "home_decor_loan",
+      "principal": 300000,
+      "annual_rate": 13.0,
+      "tenure_months": 36,
+      "emi": 10108,
+      "months_paid": 20,
+      "outstanding": 148772,
+      "status": "active",
+      "disbursed_on": "2023-11-01"
+    },
+    {
+      "lan": "LAN20210118",
+      "customer_id": "CUST1003",
+      "product": "personal_loan",
+      "principal": 400000,
+      "annual_rate": 11.0,
+      "tenure_months": 36,
+      "emi": 13096,
+      "months_paid": 36,
+      "outstanding": 0,
+      "status": "closed",
+      "disbursed_on": "2021-04-20",
+      "closed_on": "2024-04-20"
+    }
+  ],
+  "offers": [
+    {
+      "customer_id": "CUST1001",
+      "offers": [
+        {
+          "product": "topup_loan",
+          "amount": 300000,
+          "annual_rate": 11.25,
+          "max_tenure_months": 48,
+          "valid_till": "2026-09-30",
+          "note": "Pre-approved top-up on active personal loan LAN20240001; zero processing fee."
+        },
+        {
+          "product": "personal_loan",
+          "amount": 800000,
+          "annual_rate": 10.99,
+          "max_tenure_months": 60,
+          "valid_till": "2026-10-15",
+          "note": "Festive pre-approved personal loan; instant disbursal after e-sign."
+        }
+      ]
+    },
+    {
+      "customer_id": "CUST1002",
+      "offers": [
+        {
+          "product": "balance_transfer",
+          "amount": 148772,
+          "annual_rate": 10.75,
+          "max_tenure_months": 36,
+          "valid_till": "2026-09-15",
+          "note": "Transfer your home decor loan balance and drop your rate by 2.25%."
+        }
+      ]
+    }
+  ]
+}

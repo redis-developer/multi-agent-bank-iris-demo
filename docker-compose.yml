@@ -1,0 +1,89 @@
+name: bank-iris-workshop
+
+services:
+
+  redis:
+    image: redis:8.0.2
+    container_name: workshop-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: workshop-redisinsight
+    ports:
+      - "5540:5540"
+    environment:
+      - RI_REDIS_HOST=redis
+      - RI_REDIS_PORT=6379
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  # Redis Agent Memory Server — the Agent Memory component of Redis Iris.
+  # Owns working (session) memory and long-term memory, including automatic
+  # fact extraction from conversations (Section 5).
+  agent-memory:
+    image: redislabs/agent-memory-server:latest
+    container_name: workshop-agent-memory
+    ports:
+      - "8088:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - OPENAI_API_KEY=${OPENAI_API_KEY:?set OPENAI_API_KEY in .env}
+      - LONG_TERM_MEMORY=true
+      - DISABLE_AUTH=true
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    container_name: workshop-api
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - AGENT_MEMORY_URL=http://agent-memory:8000
+      - DATA_DIR=/workshop/data
+      - OPENAI_API_KEY=${OPENAI_API_KEY:?set OPENAI_API_KEY in .env}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-text-embedding-3-small}
+    volumes:
+      - ./code/python:/app
+      - ./data:/workshop/data:ro
+    depends_on:
+      redis:
+        condition: service_healthy
+      agent-memory:
+        condition: service_started
+    command: >
+      uvicorn src.main:app --host 0.0.0.0 --port 8000
+      --reload --reload-dir /app/src
+
+  web:
+    image: nginx:alpine
+    container_name: workshop-web
+    ports:
+      - "3000:80"
+    volumes:
+      - ./code/web:/usr/share/nginx/html:ro
+      - ./docker/web/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - api
+
+  docs:
+    image: nginx:alpine
+    container_name: workshop-docs
+    ports:
+      - "3001:80"
+    volumes:
+      - ./docs:/usr/share/nginx/html:ro

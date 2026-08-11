@@ -28,16 +28,17 @@ container seeded everything on first boot so you can focus on the agent side.
 
 ## The starter bot <!-- {docsify-ignore} -->
 
-The chat pipeline (`code/python/src/chat/service.py`) is mostly a shell:
-one piece — the semantic router — ships already working, and Section 2 is a
-guided read of it. Everything else you build:
+The chat pipeline (`code/python/src/chat/service.py`) is mostly a shell.
+The agent-framework pieces — the semantic router and the LangGraph
+multi-agent graph — ship already working, with guided reads in Sections 2
+and 4. What *you* build is the Redis context layer:
 
 | File | Section |
 |---|---|
 | `src/router/semantic_router.py` | 2 — **provided**: read & test it |
 | `src/chat/service.py` | 3, 4, 5, 6 — the pipeline call-sites |
 | `src/retrieval/rag.py` | 3 — keyword & hybrid search (going deeper) |
-| `src/agents/graph.py` | 4 — the LangGraph supervisor graph |
+| `src/agents/graph.py` | 4 — **provided**: the multi-agent graph, read & test it |
 | `src/memory/redis_memory.py` | 5 — agent memory |
 | `src/cache/semantic_cache.py` | 6 — semantic caching |
 

@@ -52,9 +52,11 @@ separate tabs.)
 
 ## How the exercises work
 
-- You edit files under `code/python/src/` in the **Code** panel. Five files
-  carry `SECTION N` exercise banners; the semantic router is provided and
-  Section 2 walks you through reading it. Everything else is complete.
+- You edit files under `code/python/src/` in the **Code** panel. The
+  exercises focus on the Redis context layer — retrieval, memory, caching —
+  in files carrying `SECTION N` banners. The agent-framework code (the
+  semantic router, the LangGraph multi-agent graph) is provided, with
+  guided reads in Sections 2 and 4.
 - The api runs uvicorn with `--reload`: saving a file rebuilds the whole
   pipeline in a second or two. No restarts needed.
 - Stuck, or joining late? Fast-forward any section from the **Terminal**

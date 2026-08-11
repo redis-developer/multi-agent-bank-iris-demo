@@ -48,9 +48,13 @@ the message for the cost of one embedding. The supervisor only spends an LLM
 call on messages the router abstained on. Cheap path first, smart path as
 fallback — a pattern worth stealing for production.
 
-The specialists are provided (the tool loop, the RAG node from Section 3, the
-supervisor). Your exercise is the orchestration itself: the graph's nodes,
-edges, and compilation.
+The whole graph — specialists, tool loop, RAG node, supervisor, wiring — is
+**provided**: this workshop's exercises are the Redis context layer, not the
+agent framework. This section is a guided read of the orchestration, and one
+line of code: handing the pipeline over to the team. Every Redis capability
+you build before and after this section is what these agents run on —
+routing decides who acts, retrieval grounds them, and (next sections) memory
+and caching make them personal and fast.
 
 [steps](multi-agent-steps.md ':include')
 

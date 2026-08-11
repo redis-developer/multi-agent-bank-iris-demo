@@ -1,37 +1,29 @@
 ## Steps
 
+> The multi-agent code is **provided** — this workshop's exercises focus on
+> the Redis context layer, not the agent framework. Steps 1–3 are a guided
+> read; step 4 is the section's only edit (one line).
+
 1. **Meet the team.** Open `code/python/src/agents/personas.py` (provided):
    five personas, each a system prompt plus an allowed-tools list. Then skim
    `src/agents/tools.py` — every tool hits Redis: `get_customer_loans`,
    `check_noc_eligibility`, `issue_noc`, `calculate_emi`,
    `qualify_documents`, `generate_lan`, `initiate_disbursement`,
-   `get_preapproved_offers`.
+   `get_preapproved_offers`. Note that the toolbox *is* the permission
+   model: only the journey agent can move money.
 
-2. **Read the provided nodes** in `code/python/src/agents/graph.py`:
-   `make_tool_agent_node` (the think→act→observe loop),
-   `make_loan_docs_node` (Section 3's RAG as a graph node), and
-   `make_supervisor_node` (trust `state["route"]`, else ask the LLM).
+2. **Read the nodes** in `code/python/src/agents/graph.py` (provided):
+   `make_tool_agent_node` (the think→act→observe loop — watch a tool call
+   go out and a `ToolMessage` come back), `make_loan_docs_node` (Section
+   3's RAG as a graph node), and `make_supervisor_node` — notice it trusts
+   `state["route"]` from the Section 2 router first and only asks the LLM
+   when the router abstained.
 
-3. **Wire the graph.** Replace the `return None` under the `SECTION 4`
-   banner in `build_agent_graph` with:
-
-   ```python
-   graph = StateGraph(BotState)
-   graph.add_node("supervisor", supervisor)
-   for name, node in agent_nodes.items():
-       graph.add_node(name, node)
-
-   graph.add_edge(START, "supervisor")
-   graph.add_conditional_edges(
-       "supervisor",
-       lambda state: state["agent"],
-       {name: name for name in agent_nodes},
-   )
-   for name in agent_nodes:
-       graph.add_edge(name, END)
-
-   return graph.compile()
-   ```
+3. **Read the wiring** at the bottom of the same file: `build_agent_graph`
+   is the whole org chart in ~15 lines — `START → supervisor`, a
+   conditional edge to whichever agent the supervisor picked, every agent
+   `→ END`. If you ever add a sixth journey, this (plus a persona and a
+   route) is everything it takes.
 
 4. **Hand the pipeline to the graph.** In `src/chat/service.py`, under the
    `SECTION 3 - RAG / SECTION 4 - MULTI-AGENT` banner, replace the Section 3

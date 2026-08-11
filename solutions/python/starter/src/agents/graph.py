@@ -1,10 +1,10 @@
 """The multi-agent LangGraph: one supervisor, five specialists.
 
 ═══════════════════════════════════════════════════════════════════════
-SECTION 4 - MULTI-AGENT: this file is an exercise file.
+SECTION 4 - MULTI-AGENT: this file is PROVIDED — read it, don't write
+it. The section's steps walk through each piece; the workshop's
+exercises focus on the Redis side (retrieval, memory, caching).
 ═══════════════════════════════════════════════════════════════════════
-
-Shape of the graph you will wire up:
 
                        START
                          │
@@ -15,10 +15,6 @@ Shape of the graph you will wire up:
       └─────────┴────────┴─────────┴───────────┘
                          │
                         END
-
-Everything above the SECTION 4 banner is provided: the shared state, the
-tool-calling agent nodes, the RAG node, and the supervisor. The exercise
-is the graph wiring itself.
 """
 
 import json
@@ -149,13 +145,18 @@ def build_agent_graph(llm, retriever: LoanDocsRetriever):
                    for p in TOOL_AGENTS}
     agent_nodes["loan_docs"] = make_loan_docs_node(llm, retriever)
 
-    # ═══════════════════════════════════════════════════════════════════
-    # SECTION 4 - MULTI-AGENT: wire the graph.
-    #   1. Create a StateGraph over BotState.
-    #   2. Add the supervisor node and every agent node.
-    #   3. START → supervisor.
-    #   4. supervisor → (conditional on state["agent"]) → the chosen agent.
-    #   5. Every agent → END.
-    #   6. Compile and return the compiled graph.
-    # ═══════════════════════════════════════════════════════════════════
-    return None
+    graph = StateGraph(BotState)
+    graph.add_node("supervisor", supervisor)
+    for name, node in agent_nodes.items():
+        graph.add_node(name, node)
+
+    graph.add_edge(START, "supervisor")
+    graph.add_conditional_edges(
+        "supervisor",
+        lambda state: state["agent"],
+        {name: name for name in agent_nodes},
+    )
+    for name in agent_nodes:
+        graph.add_edge(name, END)
+
+    return graph.compile()

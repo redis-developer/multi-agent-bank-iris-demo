@@ -5,14 +5,14 @@
    the first exchange entirely.
 
 2. **Meet the memory server.** It's already running as the `agent-memory`
-   container:
+   container. In the **Terminal** panel:
 
    ```bash
-   curl http://localhost:8088/v1/health
+   curl http://agent-memory:8000/v1/health
    ```
 
-   From inside the pipeline it's reached at `http://agent-memory:8000`
-   (`AGENT_MEMORY_URL` in `src/config.py`).
+   That hostname is how the pipeline reaches it too (`AGENT_MEMORY_URL`
+   in `src/config.py`).
 
 3. **Open the exercise file** `code/python/src/memory/redis_memory.py`.
    The `AgentMemory` class already holds an `httpx` client pointed at the
@@ -84,9 +84,10 @@
    ```
 
    (`_run_graph` already accepts `history` and prepends it to the graph's
-   messages, and injects `memories` into every agent's system prompt.)
+   messages, and the graph injects `memories` as a note next to the latest
+   message — see `_messages_with_memories` in `src/agents/graph.py`.)
 
-8. **Restart and re-run step 1.** `docker compose restart api`. The
+8. **Save and re-run step 1.** The api reloads on save; the
    follow-up now resolves "the first one" from working memory. Click
    **⟳ new chat** — a fresh `session_id` starts blank, as it should.
 
@@ -100,10 +101,12 @@
    server extracted:
 
    ```bash
-   curl -s -X POST http://localhost:8088/v1/long-term-memory/search \
+   curl -s -X POST http://agent-memory:8000/v1/long-term-memory/search \
      -H 'Content-Type: application/json' \
      -d '{"text": "renovation", "user_id": {"eq": "CUST1001"}, "limit": 5}'
    ```
+
+   (run it in the Terminal panel)
 
 10. **Verify isolation.** Switch to Rohit (CUST1002) and ask the same
     "extra funds" question — no renovation memory surfaces. The `user_id`

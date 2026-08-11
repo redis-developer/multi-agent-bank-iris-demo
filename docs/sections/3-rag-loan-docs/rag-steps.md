@@ -25,7 +25,7 @@
                                   route or "fallback", [])
    ```
 
-4. **Restart and ask a policy question.** `docker compose restart api`, then:
+4. **Save and test.** The api reloads automatically when files change (uvicorn `--reload`; a second or two), then ask:
 
    > What is the foreclosure charge on a personal loan?
 
@@ -49,7 +49,7 @@
    answer, and the persona instructs the model to say so rather than invent
    a rate. Grounding is as much about refusing as answering.
 
-7. **(Optional) Watch the retrieval itself.** In Redis Insight, profile a
+7. **(Optional) Watch the retrieval itself.** In the Redis Insight panel, profile a
    query the way the app runs it:
 
    ```bash

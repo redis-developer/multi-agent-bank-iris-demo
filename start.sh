@@ -15,9 +15,8 @@ docker compose up -d --build
 
 echo
 echo "Workshop is starting:"
-echo "  Chat UI        http://localhost:3000"
-echo "  Workshop docs  http://localhost:3001"
-echo "  API            http://localhost:8000/api/health"
-echo "  Redis Insight  http://localhost:5540"
+echo "  Workbench      http://localhost/          <- open this"
+echo "  (direct: chat UI :3000, docs :3001, api :8000, Redis Insight :5540,"
+echo "   Agent Memory Server :8088)"
 echo
-echo "First boot builds the api image and embeds the loan documents (~1 min)."
+echo "First boot builds the images and embeds the loan documents (~1 min)."

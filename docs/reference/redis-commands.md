@@ -1,7 +1,7 @@
 # Redis commands cheat sheet
 
-Run these in Redis Insight's Workbench (<http://localhost:5540>) or
-`docker compose exec redis redis-cli`.
+Run these in the **Redis Insight** panel's Workbench, or from the
+**Terminal** panel with `redis-cli -h redis`.
 
 ## The bank's data
 
@@ -47,8 +47,8 @@ FT.SEARCH wa-journey-router "*" LIMIT 0 5 RETURN 2 reference route_name
 SCAN 0 MATCH *memory* COUNT 200
 
 # Section 5 — but its REST API is the intended window (from your terminal):
-#   curl http://localhost:8088/v1/working-memory/
-#   curl -s -X POST http://localhost:8088/v1/long-term-memory/search \
+#   curl http://agent-memory:8000/v1/working-memory/
+#   curl -s -X POST http://agent-memory:8000/v1/long-term-memory/search \
 #     -H 'Content-Type: application/json' \
 #     -d '{"text": "renovation", "user_id": {"eq": "CUST1001"}, "limit": 5}'
 
@@ -64,5 +64,5 @@ GET counter:lan
 ```bash
 # Wipe everything and reseed on next api restart
 FLUSHALL
-# then: docker compose restart api
+# then, from the host: docker compose restart api agent-memory
 ```

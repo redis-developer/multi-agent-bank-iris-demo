@@ -39,23 +39,26 @@ cp .env.example .env        # set OPENAI_API_KEY
 ./start.sh
 ```
 
-Then open:
+Then open **<http://localhost/>** — the workshop **workbench** (layout from
+[redislabs-training/btc-rag-chatbot](https://github.com/redislabs-training/btc-rag-chatbot)):
+one browser tab framing the Instructions sidebar plus **Code** (VS Code),
+**App** (the chat UI + pipeline inspector), **Terminal**, and **Redis
+Insight** panels, all same-origin behind a single nginx.
 
-- **Chat UI + pipeline inspector** — <http://localhost:3000>
-- **Workshop docs** — <http://localhost:3001>
-- **Redis Insight** — <http://localhost:5540>
-- **API** — <http://localhost:8000/api/health>
-- **Agent Memory Server** — <http://localhost:8088/v1/health>
+Each service is also exposed directly: api <http://localhost:8000/api/health>,
+chat UI :3000, docs :3001, Redis Insight :5540, Agent Memory Server
+<http://localhost:8088/v1/health>.
 
 ## Repository layout
 
 ```
+workbench/          the single-tab workshop shell (nginx + panels)
 code/python/        the app participants edit (5 files carry SECTION banners)
 code/web/           WhatsApp-style chat UI + pipeline inspector
 data/               seed dataset: customers, loans, offers, loan documents
 docs/               Docsify workshop guide (sections 1–7 + reference)
 solutions/python/   per-section solution snapshots (starter, 2, 3, 4, 5, 6)
-docker/             container build files
+docker/             container build files (api, terminal, vscode, web)
 solve               fast-forward: ./solve 3 | ./solve full | ./solve reset
 ```
 

@@ -2,6 +2,67 @@ name: bank-iris-workshop
 
 services:
 
+  # The workbench shell (from redislabs-training/btc-rag-chatbot): one nginx
+  # on port 80 that frames docs, VS Code, the app, terminals, and Redis
+  # Insight as same-origin panels.
+  workbench:
+    image: nginx:alpine
+    container_name: bank-workbench
+    ports:
+      - "80:80"
+    volumes:
+      - ./workbench:/usr/share/nginx/html:ro
+      - ./workbench/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./workbench/proxy:/etc/nginx/proxy:ro
+    depends_on:
+      - docs
+      - web
+      - terminal
+      - redisinsight
+
+  # One-shot init: fixes vscode-data ownership and seeds user settings.json
+  # so the welcome page / chat command center stay disabled on first launch.
+  vscode-init:
+    image: alpine:3.20
+    container_name: bank-vscode-init
+    entrypoint: ["/bin/sh", "/init.sh"]
+    volumes:
+      - vscode-data:/home/coder/.local/share/code-server
+      - ./code:/home/coder/code
+      - ./docker/vscode/init.sh:/init.sh:ro
+      - ./docker/vscode/settings.json:/seed/settings.json:ro
+      - ./docker/vscode/extensions/workshop-open-file:/seed/extensions/workshop-open-file:ro
+    restart: "no"
+
+  vscode:
+    image: codercom/code-server:latest
+    container_name: bank-vscode
+    depends_on:
+      vscode-init:
+        condition: service_completed_successfully
+    environment:
+      - VSCODE_RECONNECTION_GRACE_TIME=30000
+    volumes:
+      - ./code:/home/coder/code
+      - vscode-data:/home/coder/.local/share/code-server
+    command: >-
+      --auth none
+      --bind-addr 0.0.0.0:8080
+      --disable-update-check
+      --disable-workspace-trust
+      --trusted-origins "*"
+      /home/coder/code/python
+
+  # The Terminal panel: ttyd + tmux with the repo mounted, so participants
+  # can run ./solve, curl the api / memory server, and use redis-cli.
+  terminal:
+    build: ./docker/terminal
+    container_name: bank-terminal
+    restart: unless-stopped
+    working_dir: /workshop
+    volumes:
+      - .:/workshop
+
   redis:
     image: redis:8.0.2
     container_name: bank-redis
@@ -19,8 +80,11 @@ services:
     ports:
       - "5540:5540"
     environment:
+      - RI_PROXY_PATH=/redisinsight
       - RI_REDIS_HOST=redis
       - RI_REDIS_PORT=6379
+      - RI_REDIS_ALIAS=Workshop Redis
+      - RI_ACCEPT_TERMS_AND_CONDITIONS=true
     depends_on:
       redis:
         condition: service_healthy
@@ -103,3 +167,7 @@ services:
       - "3001:80"
     volumes:
       - ./docs:/usr/share/nginx/html:ro
+      - ./docker/docs-nginx.conf:/etc/nginx/conf.d/default.conf:ro
+
+volumes:
+  vscode-data:

@@ -67,7 +67,7 @@
                               route or "fallback", [])
    ```
 
-5. **Restart and test:** `docker compose restart api`, then in the chat UI:
+5. **Save and test.** The api reloads automatically when files change (uvicorn `--reload`; a second or two), then in the **App** panel:
 
    - *"when is my next EMI due?"* → routed to **servicing**
    - *"how much to close my loan early?"* → **loan_docs**
@@ -76,7 +76,7 @@
 
    Watch the **route chip** under each reply and the pipeline inspector.
 
-6. **Peek behind the curtain.** In Redis Insight:
+6. **Peek behind the curtain.** In the Redis Insight panel:
 
    ```bash
    FT.SEARCH wa-journey-router "*" LIMIT 0 30 RETURN 2 reference route_name
@@ -86,5 +86,6 @@
    this classifier. Adding a journey is appending a `Route`, not retraining.
 
 7. **(Optional) Tune the threshold.** Set `ROUTER_DISTANCE_THRESHOLD=0.5` in
-   `.env`, `docker compose restart api` (stricter → more fallbacks), then put
+   `.env` and `docker compose restart api` from the host (env changes need a
+   restart; stricter → more fallbacks), then put
    it back. This threshold-tuning trade-off returns in Section 6.

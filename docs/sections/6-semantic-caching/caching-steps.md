@@ -44,7 +44,7 @@
        self.cache.store(request.message, reply)
    ```
 
-6. **Restart and measure.** `docker compose restart api`, then ask:
+6. **Save and test.** The api reloads automatically when files change (uvicorn `--reload`; a second or two), then ask:
 
    > What is the foreclosure charge on a personal loan?
 

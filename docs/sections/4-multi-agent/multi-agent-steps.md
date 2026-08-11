@@ -46,7 +46,7 @@
    memories, and session history into the graph state and invokes it.
    `history` and `memories` stay empty until Section 5 fills them.)
 
-5. **Restart and run the journeys.** `docker compose restart api`, then, as
+5. **Save and test.** The api reloads automatically when files change (uvicorn `--reload`; a second or two), then, as
    **Ananya Sharma (CUST1001)**:
 
    - *"what's the outstanding on my loans?"* → **servicing** reads both her
@@ -65,7 +65,7 @@
 
 7. **See a tool write state.** Run a mini end-to-end journey: *"I accept the
    pre-approved top-up, documents are PAN and Aadhaar, generate my LAN"*,
-   then confirm disbursement when asked. In Redis Insight:
+   then confirm disbursement when asked. In the Redis Insight panel:
 
    ```bash
    GET counter:lan

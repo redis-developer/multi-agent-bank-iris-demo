@@ -1,7 +1,7 @@
 ## Steps
 
-1. **Meet a customer.** In Redis Insight (<http://localhost:5540>) open the
-   Workbench and run:
+1. **Meet a customer.** Open the **Redis Insight** panel from the workbench
+   tabs, go to its Workbench view, and run:
 
    ```bash
    HGETALL customer:CUST1001
@@ -49,6 +49,6 @@
    Lexical search struggles unless terms match. The bot's retrieval
    (Section 3) will embed the *question* and match by meaning instead.
 
-6. **Send the bot a message.** In the chat UI (<http://localhost:3000>) ask
+6. **Send the bot a message.** In the **App** panel ask
    *"What is the foreclosure charge?"* — you get the fallback reply. The data
    is all here; the brain isn't. That's the rest of the workshop.

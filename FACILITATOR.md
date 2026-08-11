@@ -40,8 +40,10 @@ paying off.
 - **Someone's router matches everything / nothing**: they typo'd the
   threshold (0.07 vs 0.7). `ROUTER_DISTANCE_THRESHOLD` in `.env` wins over
   code edits.
-- **`docker compose restart api` forgotten**: the #1 "my solution doesn't
-  work". The pipeline is built at startup; say it once per section.
+- **"My solution doesn't work"**: the api auto-reloads on save (uvicorn
+  --reload rebuilds the whole pipeline) — check `docker compose logs api`
+  for `Chat pipeline ready` or a traceback from their edit. Only `.env`
+  changes need a manual `docker compose restart api`.
 - **State weirdness after experiments**: `FLUSHALL` + restart api reseeds
   in ~30s. Cached replies survive FLUSHALL only in participants' minds.
   (`FLUSHALL` also wipes the memory server's data — it shares the same

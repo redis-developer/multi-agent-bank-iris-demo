@@ -99,7 +99,8 @@ initiate_disbursement.
 """,
     "tools": [tools.calculate_emi, tools.qualify_documents,
               tools.generate_lan, tools.initiate_disbursement,
-              tools.get_preapproved_offers, tools.get_customer_profile],
+              tools.get_preapproved_offers, tools.get_customer_profile,
+              tools.get_customer_loans, tools.get_loan_details],
 }
 
 # The loan_docs agent is retrieval-grounded rather than tool-calling: it

@@ -40,6 +40,54 @@ def customers() -> list[CustomerSummary]:
     return result
 
 
+@router.get("/retrieval/compare")
+def retrieval_compare(q: str, k: int = 3, http_request: Request = None) -> dict:
+    """Race the three retrieval modes over the loan-docs index (Section 3,
+    'going deeper'). Provided — not an exercise."""
+    import time
+
+    service = http_request.app.state.chat_service
+    if service is None:
+        return {"error": "chat pipeline not started — check OPENAI_API_KEY"}
+    retriever = service.retriever
+
+    modes = {
+        "keyword": retriever.keyword_search,
+        "vector": retriever.search,
+        "hybrid": retriever.hybrid_search,
+    }
+    report: dict = {"query": q, "modes": {}}
+    for mode, fn in modes.items():
+        t0 = time.perf_counter()
+        try:
+            chunks = fn(q, k)
+        except Exception as error:
+            report["modes"][mode] = {"error": str(error)}
+            continue
+        latency_ms = round((time.perf_counter() - t0) * 1000)
+        if chunks is None:
+            report["modes"][mode] = {
+                "status": "not implemented yet — see the SECTION 3 GOING "
+                          "DEEPER banner in src/retrieval/rag.py"}
+            continue
+        report["modes"][mode] = {
+            "latency_ms": latency_ms,
+            "results": [
+                {
+                    "rank": i,
+                    "doc_title": c["doc_title"],
+                    "section": c["section"],
+                    **({"bm25_score": c["score"]} if "score" in c else {}),
+                    **({"distance": round(c["distance"], 3)}
+                       if "distance" in c else {}),
+                    "snippet": c["content"][:90] + "…",
+                }
+                for i, c in enumerate(chunks, start=1)
+            ],
+        }
+    return report
+
+
 @router.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest, http_request: Request) -> ChatResponse:
     service = http_request.app.state.chat_service

@@ -52,7 +52,7 @@ separate tabs.)
 
 ## How the exercises work
 
-- You edit files under `code/python/src/` in the **Code** panel. Four files
+- You edit files under `code/python/src/` in the **Code** panel. Five files
   carry `SECTION N` exercise banners; the semantic router is provided and
   Section 2 walks you through reading it. Everything else is complete.
 - The api runs uvicorn with `--reload`: saving a file rebuilds the whole

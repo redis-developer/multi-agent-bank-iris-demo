@@ -64,7 +64,7 @@ services:
       - .:/workshop
 
   redis:
-    image: redis:8.0.2
+    image: redis:8.4
     container_name: bank-redis
     ports:
       - "6379:6379"

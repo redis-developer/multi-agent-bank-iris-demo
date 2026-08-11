@@ -29,8 +29,35 @@ That's retrieval-augmented generation (RAG), three moves:
 The system prompt (the `loan_docs` persona in `src/agents/personas.py`) is
 already written to enforce grounding: answer strictly from context, cite
 passages, never guess. What's missing is the plumbing that gets the context
-there — that's this section's exercise, in the `loan_docs` branch of the chat
-pipeline.
+there — that's this section's first exercise, in the `loan_docs` branch of
+the chat pipeline.
+
+## Three ways to retrieve <!-- {docsify-ignore} -->
+
+Vector search is not the only retrieval mode — and not always the best one.
+The same Redis index that answers vector queries also holds every chunk's
+raw text, and that supports two more modes:
+
+- **Keyword (full-text)** — Redis indexes `TEXT` fields with an inverted
+  index: each term points at the chunks containing it. Matches are ranked
+  with **BM25** (term frequency × rarity × field length). No embedding call,
+  so it answers in a millisecond or two — and nothing beats it on exact
+  jargon: a customer who types "eNACH" means *eNACH*, not "something
+  semantically similar to auto-debit".
+- **Vector** — what you just wired: matches meaning, survives paraphrase,
+  costs an embedding call per query.
+- **Hybrid** — run both, then fuse the two ranked lists with **Reciprocal
+  Rank Fusion (RRF)**. RRF works on ranks, not scores — which matters
+  because a BM25 score and a cosine distance aren't the same unit and can't
+  be averaged honestly. Redis exposes this as a single command,
+  [`FT.HYBRID`](https://redis.io/docs/latest/commands/ft.hybrid/); RedisVL
+  wraps it as `HybridQuery`.
+
+Real bank queries mix both needs — "penalty for ending my eNACH loan early"
+has an exact anchor (*eNACH*) and a paraphrase (*penalty for ending early* =
+foreclosure charges). The *going deeper* exercises below make you build all
+three modes and race them, so the retrieval choice behind your RAG stops
+being a default and becomes a decision.
 
 [steps](rag-steps.md ':include')
 

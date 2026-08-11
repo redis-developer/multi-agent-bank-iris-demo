@@ -3,7 +3,7 @@
 ═══════════════════════════════════════════════════════════════════════
 SECTION 3 - RAG: `search` (vector) is PROVIDED — it is the retrieval
 step behind the loan_docs agent. The GOING DEEPER exercises add
-`keyword_search` and `hybrid_search`, then race all three.
+`keyword_search` and `hybrid_search`, then race all three.        SOLVED.
 ═══════════════════════════════════════════════════════════════════════
 
 The loan policy documents (in production these are PDFs; here they are
@@ -62,10 +62,20 @@ class LoanDocsRetriever:
         ═══════════════════════════════════════════════════════════════
         SECTION 3 - GOING DEEPER (keyword): build a TextQuery over the
         `content` field with the BM25STD scorer and return the chunks
-        (include the BM25 score in each dict, e.g. via self._chunk).
+        (include the BM25 score). Solved.
         ═══════════════════════════════════════════════════════════════
         """
-        return None
+        text_query = TextQuery(
+            text=query,
+            text_field_name="content",
+            text_scorer="BM25STD",
+            return_fields=RETURN_FIELDS,
+            num_results=k,
+            stopwords=None,
+        )
+        results = self.index.query(text_query)
+        return [self._chunk(r, score=round(float(r["score"]), 2))
+                for r in results]
 
     def hybrid_search(self, query: str,
                       k: int = config.RETRIEVAL_TOP_K) -> list[dict] | None:
@@ -76,10 +86,23 @@ class LoanDocsRetriever:
         ═══════════════════════════════════════════════════════════════
         SECTION 3 - GOING DEEPER (hybrid): embed the query, then build a
         HybridQuery over the text field and the vector field with
-        combination_method="RRF".
+        combination_method="RRF". Solved.
         ═══════════════════════════════════════════════════════════════
         """
-        return None
+        embedding = self.vectorizer.embed(query)
+        hybrid_query = HybridQuery(
+            text=query,
+            text_field_name="content",
+            vector=embedding,
+            vector_field_name="embedding",
+            vector_search_method="KNN",
+            combination_method="RRF",
+            return_fields=RETURN_FIELDS,
+            num_results=k,
+            stopwords=None,
+        )
+        results = self.index.query(hybrid_query)
+        return [self._chunk(r) for r in results]
 
     @staticmethod
     def _chunk(record: dict, **extra) -> dict:

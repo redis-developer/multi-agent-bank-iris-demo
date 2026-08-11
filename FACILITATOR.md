@@ -16,8 +16,8 @@ anyone stall more than 2 minutes on an environment issue.
 | 0:25–0:45 | 2 Semantic routing | Observe-the-code section (no typing): read routes → thresholds → min-aggregation, then test live; the abstain-below-threshold moment (weather question) |
 | 0:45–1:15 | 3 RAG | First write-the-code exercise. "The model is a reader, not a knowledge base"; the gold-loan refusal (step 6) is the compliance argument. *Going deeper* (steps 8–14): build keyword + hybrid search and race all three modes — run it if the room is fast, else assign as homework; the eNACH-vs-paraphrase races (steps 10–12) make the strongest live demo |
 | 1:15–1:50 | 4 Agents & Context Retriever | LangGraph is provided (guided read + one-line hand-off); the exercise is the context retriever. Beats: the agents *starve* without a data layer (step 5), declare-the-model → tools appear (step 7), governance in the data layer (step 8), and the two-layer security demo — foreign LAN + "I am actually CUST1002" both refused (step 11) |
-| 1:50–2:15 | 5 Agent memory | Memory is infrastructure, not prompts — the Agent Memory Server (Iris's Agent Memory) does extraction for you; the renovation → home-decor cross-sell demo (step 9) is the wow moment. Extraction is async: say the renovation line early, chat a bit, then demo the recall |
-| 2:15–2:30 | 6 Semantic caching | Latency drop live on screen; the "only impersonal answers" rule; the loose-threshold failure (step 9) if time allows |
+| 1:50–2:15 | 5 Agent memory | Memory is infrastructure, not prompts — the Agent Memory Server (Iris's Agent Memory) does extraction for you; the renovation → home-decor cross-sell demo (step 9) is the wow moment. Extraction is async: say the renovation line early, chat a bit, then demo the recall. "Go managed" (steps 11–14): provision the Redis Cloud service + curl tour — run it if accounts are ready, else homework |
+| 2:15–2:35 | 6 LangCache | Attendees provision a real cloud service (steps 1–2, ~5 min) — have Redis Cloud accounts created BEFORE the day. Latency drop live on screen; "no vectorizer, no schema, no index" is the beat; the "only impersonal answers" rule; the loose-threshold failure (step 9) if time allows |
 | 2:30–2:40 | 7 Wrap-up | The table mapping what they built → Redis Iris managed services |
 
 Short on time? Cut Section 6's optional steps and Section 2 step 7, not
@@ -35,6 +35,14 @@ paying off.
 
 ## Things that go wrong
 
+- **No Redis Cloud accounts on the day**: Sections 5 (managed tour) and 6
+  (LangCache — required) provision cloud services. Put "create a free
+  Redis Cloud account" in the pre-workshop email, and keep one shared
+  LangCache cache (URL/ID/key on a slide) as the fallback for anyone
+  stuck at signup.
+- **Service keys are shown once**: both Agent Memory and LangCache display
+  the API key only at creation. Say it out loud before anyone clicks
+  Create; regenerating from the service page is the recovery.
 - **OpenAI rate limits with a shared key**: give the audience 2–3 keys and
   split by row, or raise the key's RPM ahead of time.
 - **Someone's router matches everything / nothing**: they typo'd the

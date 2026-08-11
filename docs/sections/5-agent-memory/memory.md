@@ -14,8 +14,11 @@ extraction prompt there, a vector index for recall, deduplication,
 forgetting policies…) and that pile of plumbing is exactly what Redis ships
 as a component: the **Agent Memory Server** — the Agent Memory piece of
 Redis Iris. It runs beside your app (the `agent-memory` container in this
-workshop, a managed service on Redis Cloud) and exposes two tiers of memory
-over a small REST API.
+workshop) and exposes two tiers of memory over a small REST API. At the end
+of this section you'll also provision the **managed version on Redis
+Cloud** — same component, plus production controls the container doesn't
+give you: per-tier TTLs, extraction cadence, automatic session
+summarization, custom memory types, and sensitive-data exclusions.
 
 ## Working memory: the conversation session <!-- {docsify-ignore} -->
 

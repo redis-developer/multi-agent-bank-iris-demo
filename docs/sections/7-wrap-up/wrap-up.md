@@ -27,7 +27,7 @@ Every arrow in that diagram is Redis:
 | Tool state | LAN counter, loan status, NOC records | Section 4 |
 | Working memory | Agent Memory Server sessions (per `session_id`) | Section 5 |
 | Long-term memory | Agent Memory Server auto-extracted facts (per `user_id`) | Section 5 |
-| Semantic cache | `wa-reply-cache` answer embeddings | Section 6 |
+| Semantic cache | **LangCache** service on Redis Cloud (cache-aside REST) | Section 6 |
 
 One database serving seven different jobs is the actual lesson: the agent
 stack's *context problem* — what does the model get to read, at what cost,
@@ -39,11 +39,13 @@ Everything you hand-built has a managed counterpart in
 [Redis Iris](https://redis.io/iris/), Redis's real-time context engine for
 agents:
 
-- **Redis LangCache** — Section 6 as a service: managed semantic caching
-  with API access, threshold tuning, and analytics.
-- **Redis Agent Memory** — you already used it: Section 5 ran the Agent
-  Memory Server (the same component, self-hosted). On Redis Cloud it's
-  fully managed — same API, no container to run.
+- **Redis LangCache** — you already used it: Section 6's cache *is* the
+  managed service, provisioned from the Redis Cloud console, with
+  threshold tuning and hit-rate analytics built in.
+- **Redis Agent Memory** — you used both forms: Section 5 built against
+  the self-hosted Agent Memory Server, then provisioned the managed
+  service on Redis Cloud (TTLs, extraction cadence, summarization, custom
+  memory types, sensitive-data exclusions).
 - **Redis Context Retriever** — Section 4's miniature, productised: model
   entities with the `ctxctl` CLI or the Cloud UI, and the generated tools
   are served over MCP with scoped agent keys and access tags

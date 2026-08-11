@@ -25,6 +25,9 @@ component stack of [Redis Iris](https://redis.io/iris/).
 
 - Docker Desktop (or Docker Engine + Compose v2)
 - An OpenAI API key (used for the LLM **and** embeddings)
+- A **Redis Cloud account** (free tier) — Sections 5 and 6 provision the
+  managed Iris services (Agent Memory, LangCache) from the console. Sign
+  up at <https://cloud.redis.io/> before the workshop.
 - ~2 GB free RAM for the containers
 
 ## Boot the workshop

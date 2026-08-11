@@ -29,6 +29,12 @@ DATA_DIR = Path(os.getenv("DATA_DIR", str(_DEFAULT_DATA_DIR)))
 # Redis Agent Memory Server (the Agent Memory component of Redis Iris)
 AGENT_MEMORY_URL = os.getenv("AGENT_MEMORY_URL", "http://localhost:8088")
 
+# Redis LangCache (managed semantic caching on Redis Cloud — Section 6).
+# Created in the Redis Cloud console; the section's steps walk through it.
+LANGCACHE_URL = os.getenv("LANGCACHE_URL", "")
+LANGCACHE_CACHE_ID = os.getenv("LANGCACHE_CACHE_ID", "")
+LANGCACHE_API_KEY = os.getenv("LANGCACHE_API_KEY", "")
+
 # Redis key / index names
 DOCS_INDEX_NAME = "idx:loan_docs"
 DOCS_KEY_PREFIX = "doc:"
@@ -38,9 +44,9 @@ OFFERS_KEY_PREFIX = "offers:"
 NOC_KEY_PREFIX = "noc:"
 LAN_COUNTER_KEY = "counter:lan"
 ROUTER_NAME = "wa-journey-router"
-CACHE_NAME = "wa-reply-cache"
 
 # Tuning knobs surfaced in the workshop sections
 ROUTER_DISTANCE_THRESHOLD = float(os.getenv("ROUTER_DISTANCE_THRESHOLD", "0.7"))
-CACHE_DISTANCE_THRESHOLD = float(os.getenv("CACHE_DISTANCE_THRESHOLD", "0.25"))
+CACHE_SIMILARITY_THRESHOLD = float(os.getenv("CACHE_SIMILARITY_THRESHOLD",
+                                             "0.85"))
 RETRIEVAL_TOP_K = int(os.getenv("RETRIEVAL_TOP_K", "4"))

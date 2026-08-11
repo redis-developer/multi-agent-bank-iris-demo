@@ -137,6 +137,10 @@ services:
       - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
       - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
       - EMBEDDING_MODEL=${EMBEDDING_MODEL:-text-embedding-3-small}
+      - LANGCACHE_URL=${LANGCACHE_URL:-}
+      - LANGCACHE_CACHE_ID=${LANGCACHE_CACHE_ID:-}
+      - LANGCACHE_API_KEY=${LANGCACHE_API_KEY:-}
+      - CACHE_SIMILARITY_THRESHOLD=${CACHE_SIMILARITY_THRESHOLD:-0.85}
     volumes:
       - ./code/python:/app
       - ./data:/workshop/data:ro

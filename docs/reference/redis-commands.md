@@ -52,8 +52,11 @@ SCAN 0 MATCH *memory* COUNT 200
 #     -H 'Content-Type: application/json' \
 #     -d '{"text": "renovation", "user_id": {"eq": "CUST1001"}, "limit": 5}'
 
-# Section 6 — semantic cache entries
-FT.SEARCH wa-reply-cache "*" LIMIT 0 5 RETURN 2 prompt response
+# Section 6 — the cache lives in LangCache (Redis Cloud), not this Redis.
+# Inspect it via its REST API from the Terminal panel:
+#   curl -s -X POST "$LANGCACHE_URL/v1/caches/$LANGCACHE_CACHE_ID/entries/search" \
+#     -H "Authorization: Bearer $LANGCACHE_API_KEY" \
+#     -H 'Content-Type: application/json' -d '{"prompt": "foreclosure charges?"}'
 
 # Loan Account Number counter used by generate_lan
 GET counter:lan

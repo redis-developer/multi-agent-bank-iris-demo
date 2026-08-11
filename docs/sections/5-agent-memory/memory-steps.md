@@ -111,3 +111,64 @@
 10. **Verify isolation.** Switch to Rohit (CUST1002) and ask the same
     "extra funds" question — no renovation memory surfaces. The `user_id`
     filter is the privacy boundary.
+
+---
+
+### Go managed: Agent Memory on Redis Cloud
+
+Everything above ran against the self-hosted Agent Memory Server container.
+The same component is a **managed service on Redis Cloud** — with extras
+the container doesn't give you: configurable TTLs per memory tier,
+extraction cadence, automatic session summarization, custom memory types,
+and sensitive-data exclusions. Provision one now and take it for a spin
+(you need a [Redis Cloud](https://cloud.redis.io/) account; free tier is
+enough).
+
+11. **Create the service.** In the [Redis Cloud
+    console](https://cloud.redis.io/), select **Agent Memory** from the
+    left-hand menu, then **Quick create** (it uses — or creates — your free
+    database). Copy the **service API key** when it appears — *it is shown
+    only once*. Then open the service's **Configuration** tab and copy the
+    **Endpoint** and **Store ID**.
+
+12. **Set up the Terminal panel** and check the service:
+
+    ```bash
+    export AGENT_MEMORY_CLOUD='<ENDPOINT>'   # include https://
+    export STORE_ID='<STORE_ID>'
+    export API_KEY='<API_KEY>'
+
+    curl -s -H "Authorization: Bearer $API_KEY" "$AGENT_MEMORY_CLOUD/health" | jq
+    ```
+
+13. **Replay the bank scenario against the cloud.** Add Ananya's renovation
+    message as a session event:
+
+    ```bash
+    curl -s -X POST \
+      -H "Authorization: Bearer $API_KEY" -H 'Content-Type: application/json' \
+      "$AGENT_MEMORY_CLOUD/v1/stores/$STORE_ID/session-memory/events" \
+      -d "{\"sessionId\": \"bank-demo\", \"actorId\": \"CUST1001\",
+           \"role\": \"USER\",
+           \"content\": [{\"text\": \"We are redoing our home interiors this year, modular kitchen and wardrobes\"}],
+           \"createdAt\": \"$(date -u +'%Y-%m-%dT%H:%M:%SZ')\"}" | jq
+    ```
+
+14. **Search the extracted memory** (give the extraction cadence a minute
+    or two, then):
+
+    ```bash
+    curl -s -X POST \
+      -H "Authorization: Bearer $API_KEY" -H 'Content-Type: application/json' \
+      "$AGENT_MEMORY_CLOUD/v1/stores/$STORE_ID/long-term-memory/search" \
+      -d '{"text": "renovation plans",
+           "filter": {"ownerId": {"eq": "CUST1001"}},
+           "limit": 5}' | jq
+    ```
+
+    Same two-tier model you just built against, productised: sessions are
+    store-scoped (`/v1/stores/{storeId}/…`) and long-term memories filter
+    by `ownerId` — the managed counterpart of the `user_id` privacy
+    boundary from step 10. Swapping the app over is re-implementing
+    `AgentMemory`'s three methods against these endpoints — see the
+    [Agent Memory API reference](https://redis.io/docs/latest/develop/ai/context-engine/agent-memory/api-reference).

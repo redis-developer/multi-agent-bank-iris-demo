@@ -1,14 +1,14 @@
 ## Steps
 
-1. **Open the exercise file** `code/python/src/router/semantic_router.py`.
-   The five journeys are described in the module docstring; `ROUTES` is
-   empty and `build_router` returns `None`.
+> This section is a **code walkthrough** — the router ships already built.
+> Nothing to write; the goal is that by step 4 you could add a sixth
+> journey yourself.
 
-2. **Define the five routes.** Under the `SECTION 2` banner, fill `ROUTES`
-   with a `Route` per journey — `servicing`, `loan_docs`, `noc`, `sales`,
-   `journey` — each with 5–7 reference utterances a real customer would
-   type, and `distance_threshold=config.ROUTER_DISTANCE_THRESHOLD`. For
-   example:
+1. **Open the provided file** `src/router/semantic_router.py` in the
+   **Code** panel and start with `ROUTES`. Five `Route` objects, one per
+   journey — and notice what each one is: just a name, a handful of
+   reference utterances a real customer would type, and a distance
+   threshold. No training data, no model, no rules. For example:
 
    ```python
    Route(
@@ -23,56 +23,43 @@
    ),
    ```
 
-3. **Build the router.** Replace the `return None` stub in `build_router`:
+2. **Read `build_router`.** Three things worth noticing:
 
-   ```python
-   return SemanticRouter(
-       name=config.ROUTER_NAME,
-       vectorizer=get_vectorizer(),
-       routes=ROUTES,
-       redis_url=redis_url,
-       overwrite=True,
-       # Route on the single nearest reference. The default averages the
-       # distances of every matched reference per route, which dilutes an
-       # (almost) exact match with the route's unrelated references.
-       routing_config=RoutingConfig(aggregation_method="min", max_k=1),
-   )
-   ```
+   - the `vectorizer` — the same embedding model used everywhere else in
+     this workshop turns each reference into a vector, stored in Redis
+     under the router's own index (`overwrite=True` rebuilds it at boot);
+   - `distance_threshold` — the honesty knob from the concept page;
+   - `routing_config=RoutingConfig(aggregation_method="min", max_k=1)` —
+     *nearest reference wins*. This is a real design decision: the
+     default (`avg`) scores a route by the average distance of all its
+     matched references, which dilutes an almost-exact match with the
+     route's unrelated references. For journeys defined by a few sharp
+     examples, `min` is what you want.
 
-   That `routing_config` is worth a pause: aggregation strategy is a real
-   design decision in semantic routing. *Nearest reference wins* (`min`)
-   rewards routes for their best match; *average* rewards routes whose
-   references all cluster near the message. For journeys defined by a few
-   sharp example utterances, `min` is what you want.
+3. **Read `route_message`.** One embedding lookup, and one honest path:
+   if no reference is within the threshold, it returns `None` — the
+   router *abstains* instead of guessing. In Section 4 the supervisor
+   uses an LLM as the fallback classifier for exactly those messages, so
+   LLM judgment is spent only where the cheap path gave up.
 
-4. **Wire it into the pipeline.** In `code/python/src/chat/service.py`,
-   under the `SECTION 2 - SEMANTIC ROUTING` banner, replace:
-
-   ```python
-   route = None
-   ```
-
-   with:
+4. **Find the call-site.** In `src/chat/service.py`, `chat()` runs
 
    ```python
    route = route_message(self.router, request.message)
    ```
 
-   and under the `SECTION 3 - RAG / SECTION 4 - MULTI-AGENT` banner, make the
-   reply *show* the routing while the agents are still stubs — replace the
-   fallback line with:
+   on every message, before anything else spends a token. The reply is
+   still canned per journey (the agents arrive in Sections 3–4) — which
+   makes routing easy to *see* in the next step.
 
-   ```python
-   reply, agent, citations = (self._canned_reply(route),
-                              route or "fallback", [])
-   ```
-
-5. **Save and test.** The api reloads automatically when files change (uvicorn `--reload`; a second or two), then in the **App** panel:
+5. **Test it in the App panel:**
 
    - *"when is my next EMI due?"* → routed to **servicing**
    - *"how much to close my loan early?"* → **loan_docs**
-   - *"where is my closure certificate?"* → **noc** — no keyword "NOC" needed
-   - *"what's the weather in Mumbai?"* → no route → fallback
+   - *"where is my closure certificate?"* → **noc** — no keyword "NOC"
+     needed; that's matching on meaning
+   - *"what's the weather in Mumbai?"* → no route → fallback (the abstain
+     path from step 3)
 
    Watch the **route chip** under each reply and the pipeline inspector.
 
@@ -82,10 +69,11 @@
    FT.SEARCH wa-journey-router "*" LIMIT 0 30 RETURN 2 reference route_name
    ```
 
-   Your reference utterances, embedded and indexed — the entire "model" of
-   this classifier. Adding a journey is appending a `Route`, not retraining.
+   The reference utterances, embedded and indexed — that is the *entire*
+   "model" of this classifier. Adding a sixth journey is appending a
+   `Route` and restarting, not retraining anything.
 
-7. **(Optional) Tune the threshold.** Set `ROUTER_DISTANCE_THRESHOLD=0.5` in
-   `.env` and `docker compose restart api` from the host (env changes need a
-   restart; stricter → more fallbacks), then put
-   it back. This threshold-tuning trade-off returns in Section 6.
+7. **(Optional) Tune the threshold.** Set `ROUTER_DISTANCE_THRESHOLD=0.5`
+   in `.env` and `docker compose restart api` from the host (env changes
+   need a restart; stricter → more fallbacks), then put it back. This
+   threshold-tuning trade-off returns in Section 6.

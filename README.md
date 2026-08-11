@@ -7,7 +7,7 @@ LangChain, and LangGraph** — one Redis Iris component per section:
 | Section | You build | Redis component |
 |---|---|---|
 | 1. Explore the bank | — (data walkthrough) | Hashes, JSON, vector index |
-| 2. Semantic routing | Route WA messages into journeys | RedisVL `SemanticRouter` |
+| 2. Semantic routing | Read & test the provided message router (observe-the-code section) | RedisVL `SemanticRouter` |
 | 3. RAG over loan docs | Grounded policy answers with citations | RedisVL vector search |
 | 4. Multi-agent orchestration | Supervisor + 5 specialist agents with tools | LangGraph + Redis as tool state |
 | 5. Agent memory | Session threads + auto-extracted customer facts | **Redis Agent Memory Server** (the Iris Agent Memory component) |

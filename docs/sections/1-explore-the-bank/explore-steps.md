@@ -50,5 +50,8 @@
    (Section 3) will embed the *question* and match by meaning instead.
 
 6. **Send the bot a message.** In the **App** panel ask
-   *"What is the foreclosure charge?"* — you get the fallback reply. The data
-   is all here; the brain isn't. That's the rest of the workshop.
+   *"What is the foreclosure charge?"* — the bot already knows this belongs
+   to the *loan docs* journey (watch the route chip; that's Section 2's
+   router at work) but can only answer with a placeholder. It knows *where*
+   every message belongs and nothing about *what to do there*. Closing that
+   gap is the rest of the workshop.

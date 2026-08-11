@@ -28,8 +28,10 @@ supervisor uses the LLM as the *fallback* classifier for exactly those
 messages, so you pay for LLM judgment only when the cheap path abstains.
 
 This is RedisVL's `SemanticRouter`, and it's the front door of the whole
-pipeline: from this section on, every message is classified before any agent
-sees it.
+pipeline: every message is classified before any agent sees it. The router
+ships **already built** in this workshop — this section is a guided read of
+the code and a test drive, so you understand exactly what the front door is
+doing before you start building the rooms behind it.
 
 [steps](routing-steps.md ':include')
 

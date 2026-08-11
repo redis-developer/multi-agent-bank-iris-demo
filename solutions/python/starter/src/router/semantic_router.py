@@ -1,7 +1,8 @@
 """Semantic routing of WhatsApp messages into journeys.
 
 ═══════════════════════════════════════════════════════════════════════
-SECTION 2 - SEMANTIC ROUTING: this file is an exercise file.
+SECTION 2 - SEMANTIC ROUTING: this file is PROVIDED — read it, don't
+write it. The section's steps walk through what each piece does.
 ═══════════════════════════════════════════════════════════════════════
 
 Every incoming WhatsApp message must land in one of five journeys:
@@ -23,31 +24,86 @@ from redisvl.extensions.router import Route, RoutingConfig, SemanticRouter
 from src import config
 from src.llm.client import get_vectorizer
 
-# ═══════════════════════════════════════════════════════════════════════
-# SECTION 2 - SEMANTIC ROUTING: define the five routes.
-# Each Route needs a name, reference utterances, and a distance threshold.
-# Example:
-#
-#   Route(
-#       name="servicing",
-#       references=[
-#           "what is my loan status",
-#           "when is my next EMI due",
-#       ],
-#       distance_threshold=config.ROUTER_DISTANCE_THRESHOLD,
-#   ),
-# ═══════════════════════════════════════════════════════════════════════
-ROUTES: list[Route] = []
+ROUTES: list[Route] = [
+    Route(
+        name="servicing",
+        references=[
+            "what is my loan status",
+            "what's my outstanding balance",
+            "when is my next EMI due",
+            "show my repayment history",
+            "I need my loan statement",
+            "my EMI got debited twice, please check",
+        ],
+        distance_threshold=config.ROUTER_DISTANCE_THRESHOLD,
+    ),
+    Route(
+        name="loan_docs",
+        references=[
+            "what documents are needed for a personal loan",
+            "what is the foreclosure charge",
+            "what are the interest rates on personal loans",
+            "am I eligible for a personal loan",
+            "how is EMI calculated on reducing balance",
+            "what is the processing fee",
+            "explain the rules for balance transfer",
+            "how much does it cost to close my loan early",
+            "what are the charges for prepaying or foreclosing a loan",
+        ],
+        distance_threshold=config.ROUTER_DISTANCE_THRESHOLD,
+    ),
+    Route(
+        name="noc",
+        references=[
+            "I need an NOC for my closed loan",
+            "send me my loan closure certificate",
+            "issue a no objection certificate",
+            "my loan is closed but the bureau still shows it active",
+            "where is my NOC, it has been two weeks",
+        ],
+        distance_threshold=config.ROUTER_DISTANCE_THRESHOLD,
+    ),
+    Route(
+        name="sales",
+        references=[
+            "I want a top up on my existing loan",
+            "can I transfer my loan to get a lower rate",
+            "I want a loan for renovating my home",
+            "do I have any pre-approved offers",
+            "tell me about the home decor loan",
+            "I need some extra funds, what are my options",
+        ],
+        distance_threshold=config.ROUTER_DISTANCE_THRESHOLD,
+    ),
+    Route(
+        name="journey",
+        references=[
+            "I want to apply for the loan now",
+            "calculate the EMI for 5 lakhs over 4 years",
+            "here are my documents, please verify them",
+            "generate my loan account number",
+            "please disburse my loan",
+            "I accept the offer, let's proceed",
+        ],
+        distance_threshold=config.ROUTER_DISTANCE_THRESHOLD,
+    ),
+]
 
 
 def build_router(redis_url: str = config.REDIS_URL) -> SemanticRouter | None:
-    """Build the SemanticRouter over ROUTES.
-
-    ═══════════════════════════════════════════════════════════════════
-    SECTION 2 - SEMANTIC ROUTING: build and return the SemanticRouter.
-    ═══════════════════════════════════════════════════════════════════
-    """
-    return None
+    """Build the SemanticRouter over ROUTES. The reference utterances are
+    embedded and stored in Redis under the router's own index."""
+    return SemanticRouter(
+        name=config.ROUTER_NAME,
+        vectorizer=get_vectorizer(),
+        routes=ROUTES,
+        redis_url=redis_url,
+        overwrite=True,
+        # Route on the single nearest reference. The default averages the
+        # distances of every matched reference per route, which dilutes an
+        # (almost) exact match with the route's unrelated references.
+        routing_config=RoutingConfig(aggregation_method="min", max_k=1),
+    )
 
 
 def route_message(router: SemanticRouter | None, message: str) -> str | None:

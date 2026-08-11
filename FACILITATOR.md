@@ -13,8 +13,8 @@ anyone stall more than 2 minutes on an environment issue.
 |---|---|---|
 | 0:00–0:10 | Setup check | Everyone sees the chat UI + fallback reply |
 | 0:10–0:25 | 1 Explore the bank | One Redis, four data shapes; semantic vs lexical search demo (step 5) |
-| 0:25–0:50 | 2 Semantic routing | Classification as vector distance; the abstain-below-threshold moment (weather question) |
-| 0:50–1:15 | 3 RAG | "The model is a reader, not a knowledge base"; the gold-loan refusal (step 6) is the compliance argument |
+| 0:25–0:45 | 2 Semantic routing | Observe-the-code section (no typing): read routes → thresholds → min-aggregation, then test live; the abstain-below-threshold moment (weather question) |
+| 0:45–1:15 | 3 RAG | First write-the-code exercise. "The model is a reader, not a knowledge base"; the gold-loan refusal (step 6) is the compliance argument |
 | 1:15–1:50 | 4 Multi-agent | Toolbox = permission model; the CUST1002 NOC refusal (step 6); a chat that mutates Redis (step 7) |
 | 1:50–2:15 | 5 Agent memory | Memory is infrastructure, not prompts — the Agent Memory Server (Iris's Agent Memory) does extraction for you; the renovation → home-decor cross-sell demo (step 9) is the wow moment. Extraction is async: say the renovation line early, chat a bit, then demo the recall |
 | 2:15–2:30 | 6 Semantic caching | Latency drop live on screen; the "only impersonal answers" rule; the loose-threshold failure (step 9) if time allows |
@@ -55,10 +55,11 @@ paying off.
 
 ## Solution snapshots
 
-`solutions/python/<n>/` is the full state of all five exercise files *after*
-section n. `./solve n` copies them over `code/python/src/` and restarts the
-api. `./solve reset` restores the starter. Diff any two snapshots to see
-exactly what a section adds:
+`solutions/python/<n>/` (n = 3–6) is the full state of the exercise files
+*after* section n; sections 1 and 2 change no code, and the semantic router
+ships already solved in the starter. `./solve n` copies a snapshot over
+`code/python/src/` (the api auto-reloads). `./solve reset` restores the
+starter. Diff any two snapshots to see exactly what a section adds:
 
 ```bash
 diff -r solutions/python/3/src solutions/python/4/src
@@ -70,7 +71,7 @@ The bank scenario (journeys, products, tools) lives in three places only:
 
 - `data/` — customers, loans, offers, and the loan documents
 - `src/agents/personas.py` + `src/agents/tools.py` — the team and its powers
-- `src/router/semantic_router.py` — the journeys (solution snapshot)
+- `src/router/semantic_router.py` — the journeys (provided file)
 
 Swap those and the same workshop teaches the same Redis stack on any
 domain — insurance claims, telco plans, e-commerce returns.

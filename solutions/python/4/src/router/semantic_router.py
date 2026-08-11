@@ -1,7 +1,8 @@
 """Semantic routing of WhatsApp messages into journeys.
 
 ═══════════════════════════════════════════════════════════════════════
-SECTION 2 - SEMANTIC ROUTING: solved.
+SECTION 2 - SEMANTIC ROUTING: this file is PROVIDED — read it, don't
+write it. The section's steps walk through what each piece does.
 ═══════════════════════════════════════════════════════════════════════
 
 Every incoming WhatsApp message must land in one of five journeys:

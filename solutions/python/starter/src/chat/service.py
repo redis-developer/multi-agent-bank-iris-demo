@@ -1,7 +1,9 @@
 """The chat pipeline — every WhatsApp message flows through here.
 
 ═══════════════════════════════════════════════════════════════════════
-EXERCISE FILE: sections 2, 3, 4, 5, and 6 each replace one stub below.
+EXERCISE FILE: sections 3, 4, 5, and 6 each replace one stub below.
+(Semantic routing — Section 2 — is already wired: you study it, then
+watch it classify every message that flows through here.)
 ═══════════════════════════════════════════════════════════════════════
 
 The full pipeline you will assemble over the workshop:
@@ -74,15 +76,16 @@ class ChatService:
             return self._response(cached_reply, route="cache", agent="cache",
                                   cached=True, t0=t0)
 
-        # ── SECTION 2 - SEMANTIC ROUTING: classify the message ─────────────
-        route = None
+        # ── SECTION 2 - SEMANTIC ROUTING: classify the message (provided) ──
+        route = route_message(self.router, request.message)
 
         # ── SECTION 5 - AGENT MEMORY: recall this customer's context ───────
         history = []      # short-term: this session's prior turns
         memories = []     # long-term: durable facts about the customer
 
         # ── SECTION 3 - RAG / SECTION 4 - MULTI-AGENT: generate the reply ──
-        reply, agent, citations = FALLBACK_REPLY, "fallback", []
+        reply, agent, citations = (self._canned_reply(route),
+                                   route or "fallback", [])
 
         # ── SECTION 5 - AGENT MEMORY: remember this turn ───────────────────
 

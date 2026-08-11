@@ -28,14 +28,14 @@ container seeded everything on first boot so you can focus on the agent side.
 
 ## The starter bot <!-- {docsify-ignore} -->
 
-The chat pipeline (`code/python/src/chat/service.py`) is currently a shell:
-every message falls through to a fallback reply. The five files with
-`SECTION N` banners are yours to complete:
+The chat pipeline (`code/python/src/chat/service.py`) is mostly a shell:
+one piece — the semantic router — ships already working, and Section 2 is a
+guided read of it. Everything else you build:
 
 | File | Section |
 |---|---|
-| `src/router/semantic_router.py` | 2 — semantic routing |
-| `src/chat/service.py` | 2, 3, 4, 5, 6 — the pipeline call-sites |
+| `src/router/semantic_router.py` | 2 — **provided**: read & test it |
+| `src/chat/service.py` | 3, 4, 5, 6 — the pipeline call-sites |
 | `src/agents/graph.py` | 4 — the LangGraph supervisor graph |
 | `src/memory/redis_memory.py` | 5 — agent memory |
 | `src/cache/semantic_cache.py` | 6 — semantic caching |

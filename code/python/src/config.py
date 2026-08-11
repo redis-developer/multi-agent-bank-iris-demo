@@ -18,7 +18,12 @@ EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
 EMBEDDING_DIMS = int(os.getenv("EMBEDDING_DIMS", "1536"))
 
 # Data directory (mounted at /workshop/data inside the api container)
-_DEFAULT_DATA_DIR = Path(__file__).resolve().parents[3] / "data"
+try:
+    # repo checkout: <root>/code/python/src/config.py -> <root>/data
+    _DEFAULT_DATA_DIR = Path(__file__).resolve().parents[3] / "data"
+except IndexError:
+    # container layout is shallower (/app/src); DATA_DIR env is set there
+    _DEFAULT_DATA_DIR = Path("/workshop/data")
 DATA_DIR = Path(os.getenv("DATA_DIR", str(_DEFAULT_DATA_DIR)))
 
 # Redis Agent Memory Server (the Agent Memory component of Redis Iris)

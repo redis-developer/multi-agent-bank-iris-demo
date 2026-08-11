@@ -4,7 +4,7 @@ services:
 
   redis:
     image: redis:8.0.2
-    container_name: workshop-redis
+    container_name: bank-redis
     ports:
       - "6379:6379"
     healthcheck:
@@ -15,7 +15,7 @@ services:
 
   redisinsight:
     image: redis/redisinsight:latest
-    container_name: workshop-redisinsight
+    container_name: bank-redisinsight
     ports:
       - "5540:5540"
     environment:
@@ -30,7 +30,7 @@ services:
   # fact extraction from conversations (Section 5).
   agent-memory:
     image: redislabs/agent-memory-server:latest
-    container_name: workshop-agent-memory
+    container_name: bank-agent-memory
     ports:
       - "8088:8000"
     environment:
@@ -46,7 +46,7 @@ services:
     build:
       context: .
       dockerfile: docker/api/Dockerfile
-    container_name: workshop-api
+    container_name: bank-api
     ports:
       - "8000:8000"
     environment:
@@ -71,7 +71,7 @@ services:
 
   web:
     image: nginx:alpine
-    container_name: workshop-web
+    container_name: bank-web
     ports:
       - "3000:80"
     volumes:
@@ -82,7 +82,7 @@ services:
 
   docs:
     image: nginx:alpine
-    container_name: workshop-docs
+    container_name: bank-docs
     ports:
       - "3001:80"
     volumes:

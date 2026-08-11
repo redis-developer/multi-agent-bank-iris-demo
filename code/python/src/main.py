@@ -21,13 +21,22 @@ log = logging.getLogger("workshop")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    summary = loader.ensure_loaded()
-    if summary["skipped"]:
-        log.info("Dataset already loaded — skipping seed.")
-    else:
-        log.info("Seeded dataset: %s", summary)
-    app.state.chat_service = ChatService()
-    log.info("Chat pipeline ready.")
+    app.state.chat_service = None
+    try:
+        summary = loader.ensure_loaded()
+        if summary["skipped"]:
+            log.info("Dataset already loaded — skipping seed.")
+        else:
+            log.info("Seeded dataset: %s", summary)
+        app.state.chat_service = ChatService()
+        log.info("Chat pipeline ready.")
+    except Exception:
+        # Most often a missing/invalid OPENAI_API_KEY (seeding embeds the
+        # loan docs). Stay up so /api/health can report the problem; fix
+        # .env and `docker compose restart api`.
+        log.exception("Startup seeding/pipeline failed — API running "
+                      "degraded. Check OPENAI_API_KEY in .env, then "
+                      "restart the api container.")
     yield
 
 

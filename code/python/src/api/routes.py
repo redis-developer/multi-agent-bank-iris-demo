@@ -1,6 +1,6 @@
 """HTTP endpoints for the WhatsApp-style chat UI."""
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException, Request
 
 from src import config
 from src.api.schemas import (ChatRequest, ChatResponse, CustomerSummary,
@@ -43,4 +43,11 @@ def customers() -> list[CustomerSummary]:
 @router.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest, http_request: Request) -> ChatResponse:
     service = http_request.app.state.chat_service
+    if service is None:
+        raise HTTPException(
+            status_code=503,
+            detail="The chat pipeline failed to start — usually a missing "
+                   "or invalid OPENAI_API_KEY in .env. Fix it, then run: "
+                   "docker compose restart api",
+        )
     return service.chat(request)

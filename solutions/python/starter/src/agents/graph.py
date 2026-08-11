@@ -80,7 +80,17 @@ def make_tool_agent_node(persona: dict, llm):
                         "citations": []}
             messages.append(response)
             for call in response.tool_calls:
-                result = tools_by_name[call["name"]].invoke(call["args"])
+                tool = tools_by_name[call["name"]]
+                args = dict(call["args"])
+                # Identity is non-negotiable: the verified customer comes
+                # from the session state, never from the model. Any tool
+                # with a customer_id argument gets it injected here, so a
+                # manipulated prompt cannot read or act on another
+                # customer's data — the context retriever then enforces
+                # row-level access on top (Section 4).
+                if "customer_id" in (tool.args or {}):
+                    args["customer_id"] = state["customer_id"]
+                result = tool.invoke(args)
                 messages.append(ToolMessage(content=str(result),
                                             tool_call_id=call["id"]))
         return {"messages": [AIMessage(content=(

@@ -23,6 +23,7 @@ Every arrow in that diagram is Redis:
 | Operational data | customer hashes, loan JSON, offers | Section 1 (seeded) |
 | Vector retrieval | `idx:loan_docs` — embedded policy chunks | Sections 1 & 3 |
 | Semantic routing | `wa-journey-router` reference embeddings | Section 2 |
+| Governed retrieval | the context retriever's entity model over customer/loan/offer records | Section 4 |
 | Tool state | LAN counter, loan status, NOC records | Section 4 |
 | Working memory | Agent Memory Server sessions (per `session_id`) | Section 5 |
 | Long-term memory | Agent Memory Server auto-extracted facts (per `user_id`) | Section 5 |
@@ -43,8 +44,10 @@ agents:
 - **Redis Agent Memory** — you already used it: Section 5 ran the Agent
   Memory Server (the same component, self-hosted). On Redis Cloud it's
   fully managed — same API, no container to run.
-- **Redis Context Retriever** — Sections 1 & 3 productised: governed,
-  schema-first data access tools your agents can call.
+- **Redis Context Retriever** — Section 4's miniature, productised: model
+  entities with the `ctxctl` CLI or the Cloud UI, and the generated tools
+  are served over MCP with scoped agent keys and access tags
+  (`pip install redis-context-retriever`).
 - **Redis Data Integration (RDI)** — the pipeline we faked with a seed
   script: CDC that keeps Redis continuously in sync with core banking
   systems, so agents act on live data.

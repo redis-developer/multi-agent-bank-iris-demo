@@ -39,6 +39,7 @@ and 4. What *you* build is the Redis context layer:
 | `src/chat/service.py` | 3, 4, 5, 6 — the pipeline call-sites |
 | `src/retrieval/rag.py` | 3 — keyword & hybrid search (going deeper) |
 | `src/agents/graph.py` | 4 — **provided**: the multi-agent graph, read & test it |
+| `src/context/retriever.py` | 4 — the context retriever (semantic model + governance) |
 | `src/memory/redis_memory.py` | 5 — agent memory |
 | `src/cache/semantic_cache.py` | 6 — semantic caching |
 

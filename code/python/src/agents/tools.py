@@ -1,9 +1,13 @@
-"""Banking tools the agents can call.
+"""Banking ACTION tools the agents can call.
 
-Each tool reads or writes real state in Redis, so the demo behaves like a
-live servicing system: loans have balances, NOCs are only issued for closed
-loans, LANs are generated from a Redis counter, and disbursements flip
-journey state.
+Each tool writes (or gates a write to) real state in Redis: NOCs are only
+issued for closed loans, LANs are generated from a Redis counter, and
+disbursements flip journey state.
+
+Note what is NOT here: the read tools (profile, loans, offers). Those are
+*generated* from the semantic model in `src/context/retriever.py` — the
+Section 4 Context Retriever exercise. Hand-written code is for actions;
+retrieval is declared, not coded.
 """
 
 import json
@@ -20,39 +24,6 @@ REQUIRED_DOCS = {
                       "business proof"],
     "preapproved": ["pan", "aadhaar"],
 }
-
-
-@tool
-def get_customer_profile(customer_id: str) -> str:
-    """Fetch a customer's profile: name, segment, KYC status, credit score."""
-    profile = get_redis().hgetall(f"{config.CUSTOMER_KEY_PREFIX}{customer_id}")
-    return json.dumps(profile) if profile else "No customer found."
-
-
-@tool
-def get_customer_loans(customer_id: str) -> str:
-    """List all loans (active and closed) held by a customer, with status,
-    outstanding balance, EMI, and rate."""
-    r = get_redis()
-    lans = r.smembers(f"{config.CUSTOMER_KEY_PREFIX}{customer_id}:loans")
-    loans = [r.json().get(f"{config.LOAN_KEY_PREFIX}{lan}") for lan in sorted(lans)]
-    loans = [loan for loan in loans if loan]
-    return json.dumps(loans) if loans else "No loans found for this customer."
-
-
-@tool
-def get_loan_details(lan: str) -> str:
-    """Fetch one loan by its Loan Account Number (LAN)."""
-    loan = get_redis().json().get(f"{config.LOAN_KEY_PREFIX}{lan}")
-    return json.dumps(loan) if loan else f"No loan found for LAN {lan}."
-
-
-@tool
-def get_preapproved_offers(customer_id: str) -> str:
-    """List the customer's live pre-approved offers (product, amount, rate,
-    validity). Use this before pitching any cross-sell."""
-    offers = get_redis().json().get(f"{config.OFFERS_KEY_PREFIX}{customer_id}")
-    return json.dumps(offers) if offers else "No pre-approved offers right now."
 
 
 @tool

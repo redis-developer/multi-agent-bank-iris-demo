@@ -1,4 +1,4 @@
-# Section 4: Multi-agent orchestration
+# Section 4: Agents & the Context Retriever
 
 ## Why five agents beat one <!-- {docsify-ignore} -->
 
@@ -10,21 +10,49 @@ touched the sales pitch too.
 
 The multi-agent pattern splits the bot the way the bank itself is split:
 **specialists with narrow prompts and narrow toolboxes**. The servicing agent
-can read loans but cannot disburse money. The NOC agent holds exactly three
-tools and a hard rule: closed loans only. The journey agent is the only one
+can read loans but cannot disburse money. The journey agent is the only one
 that can generate a LAN or initiate disbursement. Small prompts behave
 better, and the toolbox *is* the permission model.
 
-## Agents that act: the tool loop <!-- {docsify-ignore} -->
+The whole LangGraph orchestration — specialists, tool loop, supervisor,
+wiring — is **provided**: this workshop's exercises are the Redis context
+layer, not the agent framework. What you build in this section is the layer
+the agents *read through*.
 
-An agent is an LLM in a loop with tools. The model reads the conversation and
-either answers or asks for a tool call — `get_customer_loans("CUST1001")` —
-your code executes it against Redis, appends the result, and the model looks
-again. Think → act → observe, until it can answer. Every account fact in a
-reply comes out of a tool result, not the model's imagination — the tools in
-`src/agents/tools.py` read and write real Redis state (EMI math, LAN
-counters, loan status flips), which is why a disbursement in the chat shows
-up in `JSON.GET loan:...` afterwards.
+## The tool zoo problem <!-- {docsify-ignore} -->
+
+Look at what the agents need to know about the bank: profiles, loans,
+offers. The obvious approach is a hand-written tool per question —
+`get_customer_profile`, `get_customer_loans`, `get_loan_details`,
+`get_preapproved_offers`… four today; then someone needs cards, then
+disputes, then branches, and every agent team writes its own variants. That
+sprawl has a name — the **tool zoo** — and it comes with a worse problem:
+every one of those tools trusts the LLM to pass the right `customer_id`. A
+prompt that says *"never act for another customer"* is a policy written in
+hope.
+
+## Schema-first, governed retrieval <!-- {docsify-ignore} -->
+
+Redis Iris's **Context Retriever** inverts the tool zoo. You declare the
+*semantic model* of your business data once — entities, fields, key
+patterns, ownership, relationships — and the retrieval tools are
+**generated from the model**. Three consequences:
+
+- **One definition, consistent surface.** Adding "cards" to the bot becomes
+  declaring an entity, not writing and reviewing another tool.
+- **Agents stay out of the database.** They call generated tools that
+  follow the declared entity paths — no hand-rolled queries, no guessing.
+- **Governance by design, not by prompt.** Access rules live in the
+  retriever: every fetch is scoped to the verified customer, *row by row*.
+  An agent asking for someone else's loan is refused by the data layer —
+  even if the LLM was talked into asking.
+
+This section's exercise builds a working miniature of that idea in
+`src/context/retriever.py`: an `ENTITIES` model, a generated tool surface,
+and row-level governance. The managed version on Redis Cloud does the same
+as a service — `pip install redis-context-retriever`, model entities with
+the `ctxctl` CLI or the Cloud UI, and agents call the generated tools over
+MCP with scoped agent keys and access tags.
 
 ## The supervisor graph <!-- {docsify-ignore} -->
 
@@ -48,17 +76,10 @@ the message for the cost of one embedding. The supervisor only spends an LLM
 call on messages the router abstained on. Cheap path first, smart path as
 fallback — a pattern worth stealing for production.
 
-The whole graph — specialists, tool loop, RAG node, supervisor, wiring — is
-**provided**: this workshop's exercises are the Redis context layer, not the
-agent framework. This section is a guided read of the orchestration, and one
-line of code: handing the pipeline over to the team. Every Redis capability
-you build before and after this section is what these agents run on —
-routing decides who acts, retrieval grounds them, and (next sections) memory
-and caching make them personal and fast.
-
 [steps](multi-agent-steps.md ':include')
 
-The team works — but it has amnesia. Ask a follow-up ("and the second one?")
-and the bot has no idea what "the second one" is. Memory is next.
+The team works, and reads the bank through a governed model. But it has
+amnesia — ask a follow-up ("and the second one?") and the bot has no idea
+what "the second one" is. Memory is next.
 
 > **Next section →** [Section 5: Agent memory](/sections/5-agent-memory/memory.md)

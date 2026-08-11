@@ -65,4 +65,4 @@ One journey is now genuinely useful. But servicing, NOC, sales, and the loan
 journey need more than reading — they need to *act*: look up accounts, check
 eligibility, generate LANs. That takes agents with tools.
 
-> **Next section →** [Section 4: Multi-agent orchestration](/sections/4-multi-agent/multi-agent.md)
+> **Next section →** [Section 4: The Context Retriever](/sections/4-context-retriever/context-retriever.md)

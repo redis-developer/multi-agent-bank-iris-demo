@@ -9,7 +9,7 @@ LangChain, and LangGraph** — one Redis Iris component per section:
 | 1. Explore the bank | — (data walkthrough) | Hashes, JSON, vector index |
 | 2. Semantic routing | Read & test the provided message router (observe-the-code section) | RedisVL `SemanticRouter` |
 | 3. RAG over loan docs | Grounded policy answers with citations, plus a keyword / vector / hybrid retrieval lab | RedisVL `VectorQuery`, `TextQuery` (BM25), `HybridQuery` (`FT.HYBRID` + RRF) |
-| 4. Agents & the Context Retriever | Read the provided supervisor + 5 agents; build a miniature **Context Retriever**: declare the entity model, get generated read tools, enforce row-level governance | Schema-first governed retrieval (the Iris Context Retriever pattern) + LangGraph provided |
+| 4. The Context Retriever | Build a miniature **Context Retriever**: declare the entity model, get generated read tools, enforce row-level governance (the multi-agent graph is provided plumbing) | Schema-first governed retrieval (the Iris Context Retriever pattern) |
 | 5. Agent memory | Session threads + auto-extracted customer facts; then provision the **managed Agent Memory service** on Redis Cloud | Redis Agent Memory Server (self-hosted) + Redis Cloud |
 | 6. Semantic caching | Zero-token answers for repeat questions via **LangCache**, provisioned on Redis Cloud during the workshop | Redis LangCache (managed) |
 | 7. Wrap-up | — | Map to Redis Iris (LangCache, Agent Memory, Context Retriever, RDI) |

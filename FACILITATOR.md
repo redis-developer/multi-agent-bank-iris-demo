@@ -15,7 +15,7 @@ anyone stall more than 2 minutes on an environment issue.
 | 0:10–0:25 | 1 Explore the bank | One Redis, four data shapes; semantic vs lexical search demo (step 5) |
 | 0:25–0:45 | 2 Semantic routing | Observe-the-code section (no typing): read routes → thresholds → min-aggregation, then test live; the abstain-below-threshold moment (weather question) |
 | 0:45–1:15 | 3 RAG | First write-the-code exercise. "The model is a reader, not a knowledge base"; the gold-loan refusal (step 6) is the compliance argument. *Going deeper* (steps 8–14): build keyword + hybrid search and race all three modes — run it if the room is fast, else assign as homework; the eNACH-vs-paraphrase races (steps 10–12) make the strongest live demo |
-| 1:15–1:50 | 4 Agents & Context Retriever | LangGraph is provided (guided read + one-line hand-off); the exercise is the context retriever. Beats: the agents *starve* without a data layer (step 5), declare-the-model → tools appear (step 7), governance in the data layer (step 8), and the two-layer security demo — foreign LAN + "I am actually CUST1002" both refused (step 11) |
+| 1:15–1:50 | 4 Context Retriever | Pure Redis section — LangGraph is invisible plumbing (one-line hand-off, step 1). Beats: the agents *starve* without a data layer (step 2), declare-the-model → tools appear (step 4), governance in the data layer (step 5), and the two-layer security demo — foreign LAN + "I am actually CUST1002" both refused (step 7) |
 | 1:50–2:15 | 5 Agent memory | Memory is infrastructure, not prompts — the Agent Memory Server (Iris's Agent Memory) does extraction for you; the renovation → home-decor cross-sell demo (step 9) is the wow moment. Extraction is async: say the renovation line early, chat a bit, then demo the recall. "Go managed" (steps 11–14): provision the Redis Cloud service + curl tour — run it if accounts are ready, else homework |
 | 2:15–2:35 | 6 LangCache | Attendees provision a real cloud service (steps 1–2, ~5 min) — have Redis Cloud accounts created BEFORE the day. Latency drop live on screen; "no vectorizer, no schema, no index" is the beat; the "only impersonal answers" rule; the loose-threshold failure (step 9) if time allows |
 | 2:30–2:40 | 7 Wrap-up | The table mapping what they built → Redis Iris managed services |
@@ -53,9 +53,10 @@ paying off.
   for `Chat pipeline ready` or a traceback from their edit. Only `.env`
   changes need a manual `docker compose restart api`.
 - **State weirdness after experiments**: `FLUSHALL` + restart api reseeds
-  in ~30s. Cached replies survive FLUSHALL only in participants' minds.
-  (`FLUSHALL` also wipes the memory server's data — it shares the same
-  Redis; restart `agent-memory` too if it acts confused.)
+  in ~30s. (`FLUSHALL` also wipes the memory server's data — it shares the
+  same Redis; restart `agent-memory` too if it acts confused.) Note that
+  LangCache entries live in the cloud service and *survive* FLUSHALL —
+  clear them from the service's page in the Redis Cloud console.
 - **Section 5 recall "doesn't work"**: 90% of the time it's the async
   extraction — the fact isn't searchable the instant the message is sent.
   Demo something else for 20 seconds, then search again.

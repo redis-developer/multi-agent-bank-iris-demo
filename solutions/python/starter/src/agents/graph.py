@@ -1,9 +1,10 @@
 """The multi-agent LangGraph: one supervisor, five specialists.
 
 ═══════════════════════════════════════════════════════════════════════
-SECTION 4 - MULTI-AGENT: this file is PROVIDED — read it, don't write
-it. The section's steps walk through each piece; the workshop's
-exercises focus on the Redis side (retrieval, memory, caching).
+PROVIDED — the multi-agent plumbing. The workshop doesn't make you
+write agent-framework code; skim this if you're curious how the team
+is orchestrated. The exercises live in the Redis context layer
+(retrieval, context retriever, memory, caching).
 ═══════════════════════════════════════════════════════════════════════
 
                        START

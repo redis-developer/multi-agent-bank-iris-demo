@@ -18,7 +18,7 @@ the route whose references sit closest in vector space — one embedding
 lookup, no LLM call, sub-millisecond routing.
 """
 
-from redisvl.extensions.router import Route, SemanticRouter
+from redisvl.extensions.router import Route, RoutingConfig, SemanticRouter
 
 from src import config
 from src.llm.client import get_vectorizer
@@ -46,6 +46,8 @@ ROUTES: list[Route] = [
             "how is EMI calculated on reducing balance",
             "what is the processing fee",
             "explain the rules for balance transfer",
+            "how much does it cost to close my loan early",
+            "what are the charges for prepaying or foreclosing a loan",
         ],
         distance_threshold=config.ROUTER_DISTANCE_THRESHOLD,
     ),
@@ -96,6 +98,10 @@ def build_router(redis_url: str = config.REDIS_URL) -> SemanticRouter | None:
         routes=ROUTES,
         redis_url=redis_url,
         overwrite=True,
+        # Route on the single nearest reference. The default averages the
+        # distances of every matched reference per route, which dilutes an
+        # (almost) exact match with the route's unrelated references.
+        routing_config=RoutingConfig(aggregation_method="min", max_k=1),
     )
 
 

@@ -42,5 +42,5 @@ CACHE_NAME = "wa-reply-cache"
 
 # Tuning knobs surfaced in the workshop sections
 ROUTER_DISTANCE_THRESHOLD = float(os.getenv("ROUTER_DISTANCE_THRESHOLD", "0.7"))
-CACHE_DISTANCE_THRESHOLD = float(os.getenv("CACHE_DISTANCE_THRESHOLD", "0.13"))
+CACHE_DISTANCE_THRESHOLD = float(os.getenv("CACHE_DISTANCE_THRESHOLD", "0.25"))
 RETRIEVAL_TOP_K = int(os.getenv("RETRIEVAL_TOP_K", "4"))

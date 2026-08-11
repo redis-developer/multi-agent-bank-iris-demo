@@ -32,8 +32,18 @@
        routes=ROUTES,
        redis_url=redis_url,
        overwrite=True,
+       # Route on the single nearest reference. The default averages the
+       # distances of every matched reference per route, which dilutes an
+       # (almost) exact match with the route's unrelated references.
+       routing_config=RoutingConfig(aggregation_method="min", max_k=1),
    )
    ```
+
+   That `routing_config` is worth a pause: aggregation strategy is a real
+   design decision in semantic routing. *Nearest reference wins* (`min`)
+   rewards routes for their best match; *average* rewards routes whose
+   references all cluster near the message. For journeys defined by a few
+   sharp example utterances, `min` is what you want.
 
 4. **Wire it into the pipeline.** In `code/python/src/chat/service.py`,
    under the `SECTION 2 - SEMANTIC ROUTING` banner, replace:

@@ -90,12 +90,14 @@
    follow-up now resolves "the first one" from working memory. Click
    **⟳ new chat** — a fresh `session_id` starts blank, as it should.
 
-9. **See the cross-sell payoff.** As Ananya: say *"I'm renovating my flat
-   this year"*. Give the server a few seconds — extraction runs in the
-   background — then click **⟳ new chat** (fresh session, working memory
-   gone) and ask *"I need some extra funds, what are my options?"*. The
-   sales agent leads with the **home decor loan**: long-term memory
-   recalled the renovation across sessions. See what the server extracted:
+9. **See the cross-sell payoff.** As Ananya: say *"We are redoing our home
+   interiors this year, modular kitchen and wardrobes"*. Give the server
+   **about a minute** — extraction is a background job with a trailing
+   debounce, plus an LLM call — then click **⟳ new chat** (fresh session,
+   working memory gone) and ask *"I need some extra funds, what are my
+   options?"*. The sales agent leads with the **home decor loan**:
+   long-term memory recalled the renovation across sessions. See what the
+   server extracted:
 
    ```bash
    curl -s -X POST http://localhost:8088/v1/long-term-memory/search \

@@ -40,14 +40,26 @@ class BotState(MessagesState):
 
 
 def _system_prompt(persona: dict, state: BotState) -> str:
-    """Persona prompt + the verified customer + long-term memories."""
-    prompt = (persona["prompt"]
-              + f"\nVerified customer_id: {state['customer_id']}")
+    """Persona prompt + the verified customer."""
+    return (persona["prompt"]
+            + f"\nVerified customer_id: {state['customer_id']}")
+
+
+def _messages_with_memories(state: BotState) -> list:
+    """The conversation, with long-term memories injected as a system note
+    right before the latest message. Placement matters: models weigh recent
+    context most, so a memory buried at the end of a long system prompt is
+    easy to ignore, while one sitting next to the question shapes the reply."""
+    messages = list(state["messages"])
     memories = state.get("memories") or []
-    if memories:
-        prompt += ("\nKnown about this customer from earlier conversations:\n- "
-                   + "\n- ".join(memories))
-    return prompt
+    if not memories:
+        return messages
+    note = SystemMessage(content=(
+        "Long-term memory about this customer (from earlier conversations). "
+        "Tailor your reply to it — when a memory reveals a need or life "
+        "event, lead with the product or answer that fits it:\n- "
+        + "\n- ".join(memories)))
+    return messages[:-1] + [note, messages[-1]]
 
 
 def make_tool_agent_node(persona: dict, llm):
@@ -58,7 +70,7 @@ def make_tool_agent_node(persona: dict, llm):
 
     def node(state: BotState):
         messages = ([SystemMessage(content=_system_prompt(persona, state))]
-                    + list(state["messages"]))
+                    + _messages_with_memories(state))
         for _ in range(MAX_TOOL_ROUNDS):
             response = llm_with_tools.invoke(messages)
             if not response.tool_calls:
@@ -88,7 +100,7 @@ def make_loan_docs_node(llm, retriever: LoanDocsRetriever):
                   + "\n\nContext passages:\n"
                   + retriever.format_context(chunks))
         response = llm.invoke([SystemMessage(content=system)]
-                              + list(state["messages"]))
+                              + _messages_with_memories(state))
         citations = [{"doc_title": c["doc_title"], "section": c["section"]}
                      for c in chunks]
         return {"messages": [response], "agent": "loan_docs",

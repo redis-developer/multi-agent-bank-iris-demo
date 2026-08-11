@@ -18,7 +18,7 @@ the route whose references sit closest in vector space — one embedding
 lookup, no LLM call, sub-millisecond routing.
 """
 
-from redisvl.extensions.router import Route, SemanticRouter
+from redisvl.extensions.router import Route, RoutingConfig, SemanticRouter
 
 from src import config
 from src.llm.client import get_vectorizer

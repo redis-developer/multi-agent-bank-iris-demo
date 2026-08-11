@@ -42,6 +42,22 @@ services:
       redis:
         condition: service_healthy
 
+  # The memory server's background worker: runs the scheduled extraction
+  # tasks that promote working-memory turns into long-term memories.
+  # Without it, extraction is scheduled but never executes.
+  agent-memory-worker:
+    image: redislabs/agent-memory-server:latest
+    container_name: bank-agent-memory-worker
+    command: ["agent-memory", "task-worker"]
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - OPENAI_API_KEY=${OPENAI_API_KEY:?set OPENAI_API_KEY in .env}
+      - LONG_TERM_MEMORY=true
+      - DISABLE_AUTH=true
+    depends_on:
+      redis:
+        condition: service_healthy
+
   api:
     build:
       context: .

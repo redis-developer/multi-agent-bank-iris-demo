@@ -51,7 +51,7 @@
    Note the latency in the inspector (a full RAG round trip, seconds). Now
    ask the *paraphrase*:
 
-   > how much does it cost to close my loan early?
+   > what foreclosure charges apply if I close my personal loan early?
 
    **⚡ cache hit** — same answer, tens of milliseconds, zero LLM tokens.
    The route chip reads `cache`: the router, graph, and LLM never ran.
@@ -68,7 +68,8 @@
    ```
 
 9. **(Optional) Break it on purpose.** Set `CACHE_DISTANCE_THRESHOLD=0.5`
-   in `.env`, restart, and ask *"what is the processing fee?"* after the
-   foreclosure questions — watch a too-loose threshold serve a wrong cached
-   answer. Put it back to `0.13`. That experiment is the whole operational
-   story of semantic caching in one minute.
+   in `.env`, restart, and ask *"how much does it cost to close my loan
+   early?"* — at 0.5 this related-but-different question (measured distance
+   ≈0.43 from the cached one) now serves the cached personal-loan answer,
+   right or not. Put the threshold back to `0.25`. That experiment is the
+   whole operational story of semantic caching in one minute.

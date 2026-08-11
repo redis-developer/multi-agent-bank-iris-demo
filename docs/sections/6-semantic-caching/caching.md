@@ -20,8 +20,13 @@ FAQ-heavy traffic).
 
 The threshold tension from Section 2 returns sharper here: too loose and
 "foreclosure charge on *personal* loans" could serve the *home decor* answer
-— a wrong answer delivered confidently and cheaply. Start strict
-(`CACHE_DISTANCE_THRESHOLD=0.13`), measure the hit rate, loosen carefully.
+— a wrong answer delivered confidently and cheaply. With this workshop's
+embedding model, measured distances give the intuition: true paraphrases of
+the same question land around 0.18–0.24, related-but-different questions
+("cost to close early" vs "foreclosure charge on a personal loan") around
+0.4, and unrelated questions 0.6+. The default here
+(`CACHE_DISTANCE_THRESHOLD=0.25`) catches paraphrases and nothing else —
+measure your own traffic before loosening it.
 
 And there's a second rule that matters more than the threshold: **only
 impersonal answers may be cached**. The loan_docs agent's policy answers are

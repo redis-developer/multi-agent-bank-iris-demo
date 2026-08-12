@@ -1,7 +1,5 @@
 # Section 4: The Context Retriever
 
-## The bot becomes a team (provided) <!-- {docsify-ignore} -->
-
 From this section on, every message is handled by a team of five
 specialists — servicing, loan_docs, noc, sales, journey — orchestrated by a
 supervisor that trusts the Section 2 route and asks the LLM only when the
@@ -12,9 +10,8 @@ router abstained:
 ```
 
 All of that is **provided** (`src/agents/graph.py`, `src/agents/personas.py`
-— skim them if you're curious; this workshop doesn't make you write
-agent-framework code). You'll switch the team on with one line. This
-section's real subject is the layer the team *reads the bank through*.
+— skim them if you're curious). You'll switch the team on with one line.
+This section's real subject is the layer the team *reads the bank through*.
 
 ## The tool zoo problem <!-- {docsify-ignore} -->
 

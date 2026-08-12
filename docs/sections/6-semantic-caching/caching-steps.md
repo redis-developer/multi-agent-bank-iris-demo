@@ -20,7 +20,8 @@
    LANGCACHE_API_KEY=<your-service-key>
    ```
 
-   then `docker compose restart api` (env changes need a restart). Until
+   then `docker compose up -d api` from the host — env changes need the
+   container *recreated*; a plain restart keeps the old values. Until
    these are set, the api logs a warning and simply skips caching.
 
 3. **Open the exercise file** `code/python/src/cache/semantic_cache.py`.
@@ -86,7 +87,8 @@
    console's LangCache page also shows entries and hit-rate metrics.
 
 9. **(Optional) Break it on purpose.** Set
-   `CACHE_SIMILARITY_THRESHOLD=0.5` in `.env`, restart, and ask *"what is
+   `CACHE_SIMILARITY_THRESHOLD=0.5` in `.env`, `docker compose up -d
+   api`, and ask *"what is
    the processing fee on a personal loan?"* — at 0.5, this related-but-
    different question can serve the cached *foreclosure* answer, right or
    not. Put it back to `0.85`. That experiment is the whole operational

@@ -41,7 +41,8 @@
    CTX_ADMIN_KEY=<your-admin-key>
    ```
 
-   then `docker compose restart api` (env changes need a restart).
+   then `docker compose up -d api` from the host — env changes need the
+   container *recreated*; a plain restart keeps the old values.
 
 4. **Exercise — model the bank.** Open `src/context/models.py`. The
    `Customer` entity is the worked example: a `ContextModel` with a

@@ -58,7 +58,9 @@ paying off.
 - **"My solution doesn't work"**: the api auto-reloads on save (uvicorn
   --reload rebuilds the whole pipeline) — check `docker compose logs api`
   for `Chat pipeline ready` or a traceback from their edit. Only `.env`
-  changes need a manual `docker compose restart api`.
+  changes need a manual step — and it must be `docker compose up -d api`
+  (recreate): a plain `restart` does NOT re-read `.env`. This is the #2
+  "my config change did nothing".
 - **State weirdness after experiments**: `FLUSHALL` + restart api reseeds
   in ~30s. (`FLUSHALL` also wipes the memory server's data — it shares the
   same Redis; restart `agent-memory` too if it acts confused.) Note that

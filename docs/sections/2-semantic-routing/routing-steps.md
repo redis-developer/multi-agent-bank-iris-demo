@@ -74,6 +74,7 @@
    `Route` and restarting, not retraining anything.
 
 7. **(Optional) Tune the threshold.** Set `ROUTER_DISTANCE_THRESHOLD=0.5`
-   in `.env` and `docker compose restart api` from the host (env changes
-   need a restart; stricter → more fallbacks), then put it back. This
+   in `.env` and `docker compose up -d api` from the host (env changes
+   need the container recreated — a plain restart keeps the old values;
+   stricter → more fallbacks), then put it back. This
    threshold-tuning trade-off returns in Section 6.

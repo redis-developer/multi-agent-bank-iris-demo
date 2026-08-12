@@ -33,7 +33,7 @@ touches it.
 Redis Iris's **Context Retriever** inverts the tool zoo. You declare the
 *semantic model* of your business data once — entities, fields, key
 patterns, ownership, relationships — and the retrieval tools are
-**generated from the model**. Three consequences:
+**generated from the model**:
 
 - **One definition, consistent surface.** Adding "cards" to the bot becomes
   declaring an entity, not writing and reviewing another tool.

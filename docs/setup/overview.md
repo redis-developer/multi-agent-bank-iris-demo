@@ -39,14 +39,24 @@ attach to it. Do this before booting:
 1. Sign up (or sign in) at <https://cloud.redis.io/>.
 2. Create a **free database**: **Databases → New database → Free**. The
    free 30MB tier is enough.
-3. On the database's page, copy the **public endpoint** and the **default
-   user password**, and put the connection string into `.env`:
+3. In the cloned repo, create your `.env` from the template:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   (`.env.example` is the committed template — never put keys in it;
+   `.env` is your gitignored copy where all secrets live.)
+4. On the database's page in the console, copy the **public endpoint** and
+   the **default user password**, and fill in `.env` — the connection
+   string and your OpenAI key while you're there:
 
    ```bash
    REDIS_URL=redis://default:<password>@<public-endpoint-host>:<port>
+   OPENAI_API_KEY=sk-...
    ```
 
-4. Keep the console tab open — Sections 4, 5, and 6 each come back here to
+5. Keep the console tab open — Sections 4, 5, and 6 each come back here to
    create their service.
 
 > Service API keys are shown **only once**, at creation time. When a
@@ -56,13 +66,14 @@ attach to it. Do this before booting:
 
 ## Boot the workshop
 
+With `.env` filled in from Step 0:
+
 ```bash
-cp .env.example .env      # then set OPENAI_API_KEY
 ./start.sh
 ```
 
-First boot builds the images and embeds the loan documents into Redis
-(about a minute). Then open **<http://localhost/>** — the workshop
+First boot builds the images and embeds the FAQ knowledge base into your
+database (about a minute). Then open **<http://localhost/>** — the workshop
 workbench. Everything lives in one browser tab:
 
 | Where | What |

@@ -25,53 +25,47 @@ component stack of [Redis Iris](https://redis.io/iris/).
 
 - Docker Desktop (or Docker Engine + Compose v2)
 - An OpenAI API key (used for the LLM **and** embeddings)
-- A **Redis Cloud account** (free tier is enough) — set up below
+- A **Redis Cloud account** (free tier is enough) — set up in Step 1
 - ~2 GB free RAM for the containers
 
-## Step 0: Set up Redis Cloud
+## Step 1: Clone and configure
 
-This workshop runs on **your Redis Cloud database from the very first
-message** — the FAQ index, the agents' records, memory, everything lives
-there, and the Iris services you provision later (**Context Retriever** in
-Section 4, **Agent Memory** in Section 5, **LangCache** in Section 6)
-attach to it. Do this before booting:
+Everything the workshop needs is set up once, right after cloning:
 
-1. Sign up (or sign in) at <https://cloud.redis.io/>.
-2. Create a **free database**: **Databases → New database → Free**. The
-   free 30MB tier is enough.
-3. Open a terminal in the cloned repo and create your `.env` file:
+1. Clone the repo and create your `.env` from the template:
 
    ```bash
+   git clone <this-repo> && cd multi-agent-bank-iris-demo
    cp .env.example .env
    ```
-4. On the database's page in the console, copy the **public endpoint** and
-   the **default user password**, and fill in `.env` — the connection
-   string and your OpenAI key while you're there:
+
+2. Sign up (or sign in) at <https://cloud.redis.io/> and create a **free
+   database**: **Databases → New database → Free**. The free 30MB tier is
+   enough. Keep the console tab open — Sections 4, 5, and 6 come back
+   here to create their Iris services (Context Retriever, Agent Memory,
+   LangCache).
+
+3. Fill in `.env` with your two keys — your OpenAI key, and the
+   connection string from your database's page in the console (public
+   endpoint + default-user password):
 
    ```bash
-   REDIS_URL=redis://default:<password>@<public-endpoint-host>:<port>
    OPENAI_API_KEY=sk-...
+   REDIS_URL=redis://default:<password>@<public-endpoint-host>:<port>
    ```
 
-5. Keep the console tab open — Sections 4, 5, and 6 each come back here to
-   create their service.
+   The workshop runs on **your Redis Cloud database**: the FAQ index, the
+   agents' records, memory, and the Iris services all attach to it.
 
-> Service API keys are shown **only once**, at creation time. When a
-> section has you create a service, copy the key immediately.
-> (If `REDIS_URL` is left unset, the stack falls back to a local Redis
-> container — offline mode; the facilitator may use it as a backup.)
-
-## Boot the workshop
-
-With `.env` filled in from Step 0:
+## Step 2: Boot the workshop
 
 ```bash
 ./start.sh
 ```
 
-First boot builds the images and embeds the FAQ knowledge base into your
-database (about a minute). Then open **<http://localhost/>** — the workshop
-workbench. Everything lives in one browser tab:
+First boot builds the images and seeds the FAQ knowledge base into your
+database (~1–2 min). Then open **<http://localhost/>** — the workshop
+workbench. From here on, everything happens in this one browser tab:
 
 | Where | What |
 |---|---|
@@ -84,6 +78,13 @@ workbench. Everything lives in one browser tab:
 (Each service is also exposed directly — api :8000, chat UI :3000, docs
 :3001, Redis Insight :5540, Agent Memory Server :8088 — if you prefer
 separate tabs.)
+
+> The service keys you create later (Sections 4 and 6) go into `.env` too
+> — it's editable right in the **Code** panel at the workspace root, and
+> the api reloads itself when you save. Service API keys are shown **only
+> once**, at creation time: copy them immediately.
+> (If `REDIS_URL` is left empty, the stack falls back to a local Redis
+> container — offline mode; the facilitator may use it as a backup.)
 
 ## How the exercises work
 

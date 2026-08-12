@@ -35,9 +35,13 @@ a live servicing system.
 ```bash
 git clone <this-repo>
 cd multi-agent-bank-iris-demo
-cp .env.example .env        # set OPENAI_API_KEY + REDIS_URL (your Redis
-./start.sh                  # Cloud database — see Getting started, Step 0)
+cp .env.example .env    # fill in OPENAI_API_KEY + REDIS_URL (your Redis
+./start.sh              # Cloud database) — see Getting started, Step 1
 ```
+
+Also runs in **GitHub Codespaces** (devcontainer included): open the repo
+in a codespace, fill in `.env` the same way, run `./start.sh` in the
+Codespaces terminal, and open the forwarded port 80.
 
 Then open **<http://localhost/>** — the workshop **workbench** (layout from
 [redislabs-training/btc-rag-chatbot](https://github.com/redislabs-training/btc-rag-chatbot)):

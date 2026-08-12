@@ -9,7 +9,7 @@
 - A **Redis Cloud account** (free tier) with a free database — Section 4
   provisions a Context Retriever service, Section 5 an Agent Memory
   service, and Section 6 LangCache, all from the console; create the
-  account and database before the workshop (Getting started, Step 0)
+  account and database before the workshop (Getting started, Step 1)
 - Ports free: 80 (workbench), 3000 (chat UI), 3001 (docs), 8000 (API),
   8088 (Agent Memory Server), 5540 (Redis Insight), 6379 (Redis)
 
@@ -17,16 +17,18 @@
 
 ```bash
 cp .env.example .env
-# edit .env → OPENAI_API_KEY=sk-...
-#            → REDIS_URL=redis://default:<password>@<host>:<port>
-#              (your Redis Cloud database; unset = local fallback container)
+# fill in .env → OPENAI_API_KEY=sk-...
+#              → REDIS_URL=redis://default:<password>@<host>:<port>
+#                (your Redis Cloud database; empty = local fallback container)
 ./start.sh                # = docker compose up -d --build
 ```
 
-First boot: builds the API image (~1–2 min) and seeds your database with
-the FAQ knowledge base, embedded into `idx:faqs`. The bank's structured
-records (customers, loans, offers) arrive in Section 4 through the Context
-Retriever.
+Configure first, boot once: all keys go into `.env` right after cloning
+(Getting started, Step 1). First boot seeds the FAQ knowledge base into
+your database; the bank's structured records (customers, loans, offers)
+arrive in Section 4 through the Context Retriever. The service keys added
+mid-workshop (CTX_ADMIN_KEY, LANGCACHE_*) are edited in the Code panel —
+the api reloads .env on save.
 
 Verify: `curl http://localhost:8000/api/health` →
 `{"status":"ok","redis":true,"dataset_loaded":true}`.
@@ -36,10 +38,10 @@ Verify: `curl http://localhost:8000/api/health` →
 ```bash
 docker compose logs -f api        # watch the pipeline (routing, tools, errors)
 ./solve <2|3|4|5|6|full|reset>    # apply a solution snapshot (api auto-reloads)
-# .env edits: open .env in the Code panel (or /workshop/.env in the
-# Terminal), save — the api watches it and reloads itself. Boot-time
-# values consumed by OTHER containers (REDIS_URL, OPENAI_API_KEY for
-# agent-memory) still need: docker compose up -d
+# mid-workshop .env edits (CTX_ADMIN_KEY, LANGCACHE_*): open .env in the
+# Code panel, save — the api reloads itself. If you ever change REDIS_URL
+# or OPENAI_API_KEY after boot: docker compose restart agent-memory
+# agent-memory-worker (they re-read .env on restart)
 docker compose down               # stop (keeps Redis data volume-free: data
                                   # is reseeded from ./data on next boot)
 ```

@@ -3,7 +3,7 @@
 ## Your database, before the bank moves in <!-- {docsify-ignore} -->
 
 Everything in this workshop runs against the Redis Cloud database you
-created in Step 0. Right now it holds exactly one thing, seeded at boot:
+connected in Step 1. Right now it holds exactly one thing, seeded at boot:
 the bank's **FAQ knowledge base** — ~20 question/answer pairs covering
 rates, foreclosure, top-ups, balance transfers, NOCs, documents, and
 disbursement. Each FAQ is stored with its text, a `product` tag, and a

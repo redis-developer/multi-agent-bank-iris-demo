@@ -98,9 +98,16 @@ services:
     container_name: bank-agent-memory
     ports:
       - "8088:8000"
+    # The entrypoint sources non-empty values from .env at start, so a
+    # plain `docker compose restart agent-memory agent-memory-worker`
+    # applies .env changes — no recreation needed.
+    entrypoint: ["/bin/sh", "/workshop-root/docker/agent-memory/entrypoint.sh"]
+    command: ["agent-memory", "api", "--host", "0.0.0.0", "--port", "8000"]
+    volumes:
+      - ./:/workshop-root:ro
     environment:
       - REDIS_URL=${REDIS_URL:-redis://redis:6379}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:?set OPENAI_API_KEY in .env}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-unset}
       - LONG_TERM_MEMORY=true
       - DISABLE_AUTH=true
     depends_on:
@@ -113,10 +120,13 @@ services:
   agent-memory-worker:
     image: redislabs/agent-memory-server:latest
     container_name: bank-agent-memory-worker
+    entrypoint: ["/bin/sh", "/workshop-root/docker/agent-memory/entrypoint.sh"]
     command: ["agent-memory", "task-worker"]
+    volumes:
+      - ./:/workshop-root:ro
     environment:
       - REDIS_URL=${REDIS_URL:-redis://redis:6379}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:?set OPENAI_API_KEY in .env}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-unset}
       - LONG_TERM_MEMORY=true
       - DISABLE_AUTH=true
     depends_on:

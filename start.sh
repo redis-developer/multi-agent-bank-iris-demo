@@ -5,9 +5,11 @@ set -euo pipefail
 cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [[ ! -f .env ]]; then
-  echo "No .env found — copying .env.example."
   cp .env.example .env
-  echo "Edit .env and set OPENAI_API_KEY, then re-run ./start.sh"
+  echo "Created .env from the template. Fill it in, then re-run ./start.sh:"
+  echo "  OPENAI_API_KEY   your OpenAI key (LLM + embeddings)"
+  echo "  REDIS_URL        your Redis Cloud database connection string"
+  echo "                   (console -> your database -> public endpoint)"
   exit 1
 fi
 
@@ -19,4 +21,4 @@ echo "  Workbench      http://localhost/          <- open this"
 echo "  (direct: chat UI :3000, docs :3001, api :8000, Redis Insight :5540,"
 echo "   Agent Memory Server :8088)"
 echo
-echo "First boot builds the images and embeds the loan documents (~1 min)."
+echo "First boot builds images and seeds the FAQ knowledge base (~1-2 min)."

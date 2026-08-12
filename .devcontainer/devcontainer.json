@@ -1,0 +1,16 @@
+{
+  "name": "Multi-agent Bank Bot — Redis Iris Workshop",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "forwardPorts": [80],
+  "portsAttributes": {
+    "80": { "label": "Workshop workbench", "onAutoForward": "openBrowser" }
+  },
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "8gb",
+    "storage": "32gb"
+  }
+}

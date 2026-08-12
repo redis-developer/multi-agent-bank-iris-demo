@@ -38,10 +38,10 @@ paying off.
 - **No Redis Cloud accounts on the day**: Sections 4 (Context Retriever —
   required), 5 (managed tour), and 6 (LangCache — required) provision
   cloud services. Put "create a free Redis Cloud account + free database"
-  in the pre-workshop email (it's Step 0 of Getting started), and keep
+  in the pre-workshop email (it's Step 1 of Getting started), and keep
   one shared set of service credentials on a slide as the fallback for
   anyone stuck at signup.
-- **VERIFY BEFORE THE DAY — the cloud path end to end**: run Step 0 +
+- **VERIFY BEFORE THE DAY — the cloud path end to end**: run Step 1 +
   Sections 1 and 4 once against a real Redis Cloud database and Context
   Retriever service. Three things to confirm: the client integration
   (deploy + generated tool names + MCP calls — built against
@@ -62,11 +62,11 @@ paying off.
   --reload rebuilds the whole pipeline) — check `docker compose logs api`
   for `Chat pipeline ready` or a traceback from their edit. `.env` is
   the same: it's visible at the Code panel's workspace root and the api
-  reloads when it's saved. Two footguns remain: `sed -i`/vim-style
-  atomic rewrites of `.env` from the Terminal can break its VS Code
-  mount (use the Code panel or `nano`), and boot-time values consumed
-  by other containers (REDIS_URL, OPENAI_API_KEY for agent-memory)
-  still need `docker compose up -d` from the host.
+  reloads when it's saved. If REDIS_URL or the OpenAI key change after
+  boot, restart the memory server (`docker compose restart agent-memory
+  agent-memory-worker` — it re-reads `.env` on restart). One footgun:
+  `sed -i`/vim-style atomic rewrites of `.env` from the Terminal can
+  break its VS Code mount — use the Code panel or `nano`.
 - **Keys on screen**: `.env` (with API keys) is now editable in the Code
   panel — presenters sharing their screen should keep it closed after
   editing.

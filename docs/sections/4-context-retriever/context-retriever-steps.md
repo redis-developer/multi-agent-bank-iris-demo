@@ -1,7 +1,7 @@
 ## Steps
 
 > This section provisions the Context Retriever on Redis Cloud (the
-> account and free database from Getting started, Step 0). The
+> account and free database from Getting started, Step 1). The
 > multi-agent plumbing is provided — step 1 switches it on with one line;
 > everything after that is the Context Retriever.
 

@@ -3,13 +3,18 @@
 import os
 from pathlib import Path
 
-from dotenv import load_dotenv
+from dotenv import dotenv_values, find_dotenv
 
 # In the containers, DOTENV_PATH points at the repo's .env through a
-# directory mount, and override=True lets a freshly saved .env win over
-# the values compose injected at container creation — so editing .env in
-# the Code panel and saving reconfigures the api (uvicorn watches it).
-load_dotenv(os.getenv("DOTENV_PATH") or None, override=True)
+# directory mount. A freshly saved .env wins over the values compose
+# injected at container creation — so editing .env in the Code panel and
+# saving reconfigures the api (uvicorn watches the file). Empty lines in
+# .env (the template ships every key blank) must NOT override, or a blank
+# REDIS_URL= would clobber the compose default.
+for _key, _value in dotenv_values(
+        os.getenv("DOTENV_PATH") or find_dotenv()).items():
+    if _value:
+        os.environ[_key] = _value
 
 # Redis
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")

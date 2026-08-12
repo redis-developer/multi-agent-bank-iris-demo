@@ -35,14 +35,14 @@ Redis Iris's **Context Retriever** inverts the tool zoo. You declare the
 patterns, ownership, relationships — and the retrieval tools are
 **generated from the model**:
 
-- **One definition, consistent surface.** Adding "cards" to the bot becomes
-  declaring an entity, not writing and reviewing another tool.
-- **Agents stay out of the database.** They call generated tools that
-  follow the declared entity paths — no hand-rolled queries, no guessing.
-- **Governance by design, not by prompt.** Access rules live in the
-  retriever: every fetch is scoped to the verified customer, *row by row*.
-  An agent asking for someone else's loan is refused by the data layer —
-  even if the LLM was talked into asking.
+- **You define the data once.** To give the bot a new object — say,
+  cards — you add an entity to the model. There is no new tool to write.
+- **Agents never query the database.** They use the generated tools, which
+  only follow the paths declared in the model.
+- **Access control is built in.** The retriever checks that every record
+  belongs to the verified customer before returning it. A request for
+  another customer's loan is simply refused, no matter what the LLM asks
+  for.
 
 This section's exercise builds a working miniature of that idea in
 `src/context/retriever.py`: an `ENTITIES` model, a generated tool surface,

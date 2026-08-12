@@ -3,8 +3,8 @@
 PROVIDED — not an exercise file. The exercise is the semantic model in
 `src/context/models.py`; this module is the runtime glue.
 
-Once the model is deployed (POST /api/context/deploy — Section 4), the
-Context Retriever service exposes generated retrieval tools over MCP:
+Once the model is deployed (`python -m src.context.deploy` — Section
+4), the Context Retriever service exposes generated tools over MCP:
 get / filter / search tools for every entity, named and described from
 the model. This module asks the service for that tool list
 (`list_tools`) and wraps each one as a LangChain tool that calls
@@ -27,7 +27,7 @@ from src.data.loader import get_redis
 
 log = logging.getLogger("workshop")
 
-DEPLOYMENT_KEY = "ctx:deployment"  # local Redis hash set by /api/context/deploy
+DEPLOYMENT_KEY = config.CTX_DEPLOYMENT_KEY  # set by src.context.deploy
 
 _JSON_TYPES = {"string": str, "integer": int, "number": float,
                "boolean": bool}
@@ -100,8 +100,8 @@ def _placeholder_tool() -> StructuredTool:
     def missing(query: str = "") -> str:
         return ("The Context Retriever is not deployed yet — the bank's "
                 "data model hasn't been pushed to the service. Complete "
-                "the Section 4 exercise (src/context/models.py, then "
-                "POST /api/context/deploy).")
+                "the Section 4 exercise (src/context/models.py, then run "
+                "python -m src.context.deploy from the Terminal).")
     return StructuredTool.from_function(
         func=missing,
         name="bank_data_lookup",

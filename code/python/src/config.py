@@ -33,6 +33,8 @@ AGENT_MEMORY_URL = os.getenv("AGENT_MEMORY_URL", "http://localhost:8088")
 # key comes from the service you create in the console; the client's
 # CTX_API_URL / CTX_MCP_URL env vars override the managed endpoints.
 CTX_ADMIN_KEY = os.getenv("CTX_ADMIN_KEY", "")
+# Where the deployed surface id + agent key are stored (local Redis)
+CTX_DEPLOYMENT_KEY = "ctx:deployment"
 
 # Redis LangCache (managed semantic caching on Redis Cloud — Section 6).
 # Created in the Redis Cloud console; the section's steps walk through it.

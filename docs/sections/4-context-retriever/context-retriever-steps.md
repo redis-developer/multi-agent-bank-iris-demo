@@ -52,18 +52,23 @@
    declare **Loan** and **Offer** the same way (the banner lists their
    keys and fields), and add both to `BANK_ENTITIES`.
 
-5. **Deploy the model.** From the **Terminal** panel:
+5. **Deploy the model — with the Python client.** From the **Terminal**
+   panel:
 
    ```bash
-   curl -s -X POST http://api:8000/api/context/deploy | jq
+   cd /workshop/code/python
+   python -m src.context.deploy
    ```
 
-   Watch what one call does: your model becomes a **context surface** on
-   the service, a scoped **agent key** is minted for the bot, and the
-   bank's records (4 customers, 4 loans, 3 offers) are imported *through
-   the service* — validated against your model on the way in. The response
-   lists the **generated tools**. Then reload the api: save any file in
-   the Code panel (or `docker compose restart api` from the host).
+   Open `src/context/deploy.py` and read what you just ran — it's the
+   `redis-context-retriever` client end to end: `export_data_model(...)`
+   turns your classes into the model, `create_context_surface(...)`
+   deploys it, `create_agent_key(...)` mints the bot's scoped key, and
+   `import_data(...)` pushes the bank's records (4 customers, 4 loans,
+   3 offers) *through the service*, validated against your model on the
+   way in. The output lists the **generated tools**. Then reload the api:
+   save any file in the Code panel (or `docker compose restart api` from
+   the host).
 
 6. **Look at what you didn't write.** In the Terminal panel:
 

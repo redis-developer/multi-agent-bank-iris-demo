@@ -1,7 +1,12 @@
 """Deploy the bank's semantic model to the Redis Context Retriever.
 
-PROVIDED — not an exercise file. Called by POST /api/context/deploy once
-the Section 4 exercise (src/context/models.py) is complete. It:
+PROVIDED — not an exercise file. Run it yourself from the Terminal panel
+once the Section 4 exercise (src/context/models.py) is complete:
+
+    cd /workshop/code/python
+    python -m src.context.deploy
+
+It drives the `redis-context-retriever` Python client end to end:
 
   1. exports the data model from BANK_ENTITIES,
   2. creates a context surface on the service,
@@ -12,16 +17,17 @@ the Section 4 exercise (src/context/models.py) is complete. It:
 
 Requires CTX_ADMIN_KEY in .env (from your Context Retriever service in
 the Redis Cloud console). CTX_API_URL / CTX_MCP_URL default to the
-managed endpoints.
+managed endpoints. (POST /api/context/deploy runs this same function.)
 """
 
+import asyncio
 import json
 import logging
 
+import redis
+
 from src import config
 from src.context import models
-from src.context.retriever import DEPLOYMENT_KEY
-from src.data.loader import get_redis
 
 log = logging.getLogger("workshop")
 
@@ -32,7 +38,7 @@ async def deploy() -> dict:
     if not config.CTX_ADMIN_KEY:
         return {"error": "CTX_ADMIN_KEY is not set — create the Context "
                          "Retriever service in the Redis Cloud console, put "
-                         "its admin key in .env, and restart the api."}
+                         "its admin key in .env, and re-run this deploy."}
     if len(models.BANK_ENTITIES) < 3:
         return {"error": "The semantic model is incomplete — declare the "
                          "Loan and Offer entities in "
@@ -61,7 +67,7 @@ async def deploy() -> dict:
     imported = await client.import_data(config.CTX_ADMIN_KEY, surface.id,
                                         records)
 
-    get_redis().hset(DEPLOYMENT_KEY, mapping={
+    _redis().hset(config.CTX_DEPLOYMENT_KEY, mapping={
         "surface_id": str(surface.id),
         "agent_key": agent_key.key,
     })
@@ -77,6 +83,10 @@ async def deploy() -> dict:
                      "any file in the Code panel) so the agents pick up "
                      "the generated tools",
     }
+
+
+def _redis() -> redis.Redis:
+    return redis.Redis.from_url(config.REDIS_URL, decode_responses=True)
 
 
 def _bank_records() -> list:
@@ -96,3 +106,7 @@ def _bank_records() -> list:
                 k: offer[k] for k in models.Offer.model_fields
                 if k in offer}))
     return records
+
+
+if __name__ == "__main__":
+    print(json.dumps(asyncio.run(deploy()), indent=2, default=str))

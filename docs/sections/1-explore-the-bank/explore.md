@@ -38,7 +38,7 @@ Iris context layer:
 | `src/router/semantic_router.py` | 2 — **provided**: read & test it |
 | `src/chat/service.py` | 3, 4, 5, 6 — the pipeline call-sites |
 | `src/retrieval/rag.py` | 3 — keyword & hybrid search (going deeper) |
-| `src/context/retriever.py` | 4 — the context retriever (semantic model + governance) |
+| `src/context/models.py` | 4 — the Context Retriever's semantic model |
 | `src/memory/redis_memory.py` | 5 — agent memory |
 | `src/cache/semantic_cache.py` | 6 — semantic caching |
 | `src/agents/graph.py` | **provided** plumbing — skim if curious |

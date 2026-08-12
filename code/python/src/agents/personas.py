@@ -7,16 +7,20 @@ move money.
 Two kinds of tools appear below:
   * ACTION tools — hand-written in `src/agents/tools.py` (issue an NOC,
     generate a LAN, disburse).
-  * READ tools — **generated** from the semantic model by the context
-    retriever (`src/context/retriever.py`, the Section 4 exercise):
-    get_customer, list_customer_loans, get_loan, get_offers. Every read
-    is row-level scoped to the verified customer by the retriever itself.
+  * READ tools — **generated** by the Redis Context Retriever from the
+    semantic model in `src/context/models.py` (the Section 4 exercise).
+    Whatever get / filter / search tools the service generates for the
+    deployed model is exactly what the agents receive here.
 
 This file is complete and is not an exercise file.
 """
 
 from src.agents import tools
-from src.context.retriever import CONTEXT_TOOLS
+from src.context.retriever import context_read_tools
+
+# The generated read-tool surface (a placeholder until Section 4 deploys
+# the model). Loaded once at startup; a restart picks up a new deployment.
+READ_TOOLS = context_read_tools()
 
 COMMON_RULES = """
 You are part of a WhatsApp servicing bot for a retail bank. Rules:
@@ -43,10 +47,7 @@ and outstanding balance, EMI dates and amounts, repayment history questions,
 statement/amortisation-schedule requests, and general service requests.
 Always look the customer's loans up with your tools before answering.
 """,
-    "tools": [CONTEXT_TOOLS["get_customer"],
-              CONTEXT_TOOLS["list_customer_loans"],
-              CONTEXT_TOOLS["get_loan"],
-              tools.calculate_emi],
+    "tools": [*READ_TOOLS, tools.calculate_emi],
 }
 
 NOC = {
@@ -62,8 +63,7 @@ loan whose status is 'closed' with zero outstanding. Flow:
 4. If not eligible, explain exactly why (active loan / outstanding balance)
    and what closing the loan would take.
 """,
-    "tools": [CONTEXT_TOOLS["list_customer_loans"],
-              tools.check_noc_eligibility,
+    "tools": [*READ_TOOLS, tools.check_noc_eligibility,
               tools.issue_noc],
 }
 
@@ -80,20 +80,17 @@ Approach:
    — a renovation, a wedding, a big expense — open by acknowledging that
    need and lead with the product built for it (home renovation or
    interiors → the home decor loan), before any generic offer.
-2. Check get_offers — a live pre-approved offer is the lead
+2. Check the customer's pre-approved offers — a live offer is the lead
    pitch only when no known need points at a better-fitting product;
    otherwise it is the alternative (zero processing fee, fast disbursal).
-3. Use list_customer_loans to anchor the pitch in their real position (e.g.
+3. Look up the customer's loans to anchor the pitch in their real position (e.g.
    top-up on an active loan, balance transfer to cut their current rate).
 4. Quantify the value: use calculate_emi to show the EMI or interest saved.
 5. Be consultative, never pushy. One clear recommendation, one alternative.
 6. If they want to proceed, tell them you'll hand over to the loan journey
    to complete documents, LAN generation, and disbursement.
 """,
-    "tools": [CONTEXT_TOOLS["get_offers"],
-              CONTEXT_TOOLS["list_customer_loans"],
-              CONTEXT_TOOLS["get_customer"],
-              tools.calculate_emi],
+    "tools": [*READ_TOOLS, tools.calculate_emi],
 }
 
 JOURNEY = {
@@ -116,12 +113,8 @@ disbursed money, step by step:
 Only move one step at a time; confirm before generate_lan and before
 initiate_disbursement.
 """,
-    "tools": [tools.calculate_emi, tools.qualify_documents,
-              tools.generate_lan, tools.initiate_disbursement,
-              CONTEXT_TOOLS["get_offers"],
-              CONTEXT_TOOLS["get_customer"],
-              CONTEXT_TOOLS["list_customer_loans"],
-              CONTEXT_TOOLS["get_loan"]],
+    "tools": [*READ_TOOLS, tools.calculate_emi, tools.qualify_documents,
+              tools.generate_lan, tools.initiate_disbursement],
 }
 
 # The loan_docs agent is retrieval-grounded rather than tool-calling: it

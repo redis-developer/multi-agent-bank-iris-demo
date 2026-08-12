@@ -46,10 +46,11 @@ agents:
   the self-hosted Agent Memory Server, then provisioned the managed
   service on Redis Cloud (TTLs, extraction cadence, summarization, custom
   memory types, sensitive-data exclusions).
-- **Redis Context Retriever** — Section 4's miniature, productised: model
-  entities with the `ctxctl` CLI or the Cloud UI, and the generated tools
-  are served over MCP with scoped agent keys and access tags
-  (`pip install redis-context-retriever`).
+- **Redis Context Retriever** — you already used it: Section 4 modeled
+  the bank in `ContextModel` classes, deployed a context surface, and ran
+  the agents on service-generated MCP tools with a scoped agent key. The
+  same flow is scriptable with the `ctxctl` CLI that ships with
+  `redis-context-retriever`.
 - **Redis Data Integration (RDI)** — the pipeline we faked with a seed
   script: CDC that keeps Redis continuously in sync with core banking
   systems, so agents act on live data.

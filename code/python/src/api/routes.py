@@ -40,6 +40,31 @@ def customers() -> list[CustomerSummary]:
     return result
 
 
+@router.post("/context/deploy")
+async def context_deploy() -> dict:
+    """Deploy the Section 4 semantic model to the Redis Context Retriever
+    service (creates the surface, mints an agent key, imports the bank's
+    records). Provided — not an exercise."""
+    from src.context.deploy import deploy
+    try:
+        return await deploy()
+    except Exception as error:
+        return {"error": f"{type(error).__name__}: {error}"}
+
+
+@router.get("/context/tools")
+def context_tools() -> dict:
+    """The generated tool surface the agents currently hold."""
+    from src.context.retriever import context_read_tools, stored_deployment
+    tools = context_read_tools()
+    return {
+        "deployment": stored_deployment() and {
+            "surface_id": stored_deployment().get("surface_id")},
+        "tools": [{"name": t.name, "description": t.description}
+                  for t in tools],
+    }
+
+
 @router.get("/retrieval/compare")
 def retrieval_compare(q: str, k: int = 3, http_request: Request = None) -> dict:
     """Race the three retrieval modes over the loan-docs index (Section 3,

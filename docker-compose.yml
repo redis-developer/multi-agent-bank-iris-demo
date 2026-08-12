@@ -137,6 +137,9 @@ services:
       - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
       - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
       - EMBEDDING_MODEL=${EMBEDDING_MODEL:-text-embedding-3-small}
+      - CTX_ADMIN_KEY=${CTX_ADMIN_KEY:-}
+      - CTX_API_URL=${CTX_API_URL:-}
+      - CTX_MCP_URL=${CTX_MCP_URL:-}
       - LANGCACHE_URL=${LANGCACHE_URL:-}
       - LANGCACHE_CACHE_ID=${LANGCACHE_CACHE_ID:-}
       - LANGCACHE_API_KEY=${LANGCACHE_API_KEY:-}

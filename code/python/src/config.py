@@ -29,6 +29,11 @@ DATA_DIR = Path(os.getenv("DATA_DIR", str(_DEFAULT_DATA_DIR)))
 # Redis Agent Memory Server (the Agent Memory component of Redis Iris)
 AGENT_MEMORY_URL = os.getenv("AGENT_MEMORY_URL", "http://localhost:8088")
 
+# Redis Context Retriever (managed, Redis Cloud — Section 4). The admin
+# key comes from the service you create in the console; the client's
+# CTX_API_URL / CTX_MCP_URL env vars override the managed endpoints.
+CTX_ADMIN_KEY = os.getenv("CTX_ADMIN_KEY", "")
+
 # Redis LangCache (managed semantic caching on Redis Cloud — Section 6).
 # Created in the Redis Cloud console; the section's steps walk through it.
 LANGCACHE_URL = os.getenv("LANGCACHE_URL", "")

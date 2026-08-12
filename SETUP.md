@@ -6,9 +6,10 @@
 - An **OpenAI API key** — used by the chat model (`gpt-4o-mini` by default),
   embeddings (`text-embedding-3-small`), and the Agent Memory Server's own
   extraction LLM
-- A **Redis Cloud account** (free tier) — Section 5 provisions a managed
-  Agent Memory service and Section 6 provisions LangCache from the console;
-  create the account before the workshop
+- A **Redis Cloud account** (free tier) with a free database — Section 4
+  provisions a Context Retriever service, Section 5 an Agent Memory
+  service, and Section 6 LangCache, all from the console; create the
+  account and database before the workshop (Getting started, Step 0)
 - Ports free: 80 (workbench), 3000 (chat UI), 3001 (docs), 8000 (API),
   8088 (Agent Memory Server), 5540 (Redis Insight), 6379 (Redis)
 
@@ -70,6 +71,7 @@ and RedisVL's `OpenAITextVectorizer`).
 | 401 from OpenAI in api logs | Bad/expired key, or your proxy needs `OPENAI_BASE_URL` |
 | Replies say "brain is still being built" after solving a section | The reload usually takes 1–2s; check `docker compose logs api` for `Chat pipeline ready`, or `docker compose restart api` |
 | Router behaves oddly after threshold experiments | Reset thresholds in `.env`, `FLUSHALL`, restart api |
+| Section 4: agents say the Context Retriever isn't deployed | Complete `src/context/models.py`, set `CTX_ADMIN_KEY` in `.env` (restart api), then `POST /api/context/deploy` and reload the api |
 | Section 6: "LangCache is not configured" in api logs | Set `LANGCACHE_URL` / `LANGCACHE_CACHE_ID` / `LANGCACHE_API_KEY` in `.env`, restart api |
 | Section 6: 401/403 from LangCache | The service key is shown only once at creation — generate a new key from the service's page in the Redis Cloud console |
 | Section 5: follow-ups work but cross-session recall doesn't | Long-term extraction is a background job — wait a few seconds; check `docker compose logs agent-memory` |

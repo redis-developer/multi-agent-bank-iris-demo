@@ -25,10 +25,25 @@ component stack of [Redis Iris](https://redis.io/iris/).
 
 - Docker Desktop (or Docker Engine + Compose v2)
 - An OpenAI API key (used for the LLM **and** embeddings)
-- A **Redis Cloud account** (free tier) — Sections 5 and 6 provision the
-  managed Iris services (Agent Memory, LangCache) from the console. Sign
-  up at <https://cloud.redis.io/> before the workshop.
+- A **Redis Cloud account** (free tier is enough) — set up below
 - ~2 GB free RAM for the containers
+
+## Step 0: Set up Redis Cloud
+
+The Redis Iris services this workshop builds against — the **Context
+Retriever** (Section 4), **Agent Memory** (Section 5), and **LangCache**
+(Section 6) — are managed services you provision from the Redis Cloud
+console. Do this before the exercises:
+
+1. Sign up (or sign in) at <https://cloud.redis.io/>.
+2. Create a **free database** if you don't have one: **Databases → New
+   database → Free**. The free 30MB tier is enough; the Iris services
+   attach to it.
+3. Keep the console tab open — Sections 4, 5, and 6 each come back here to
+   create their service (Context Retriever, Agent Memory, LangCache).
+
+> Service API keys are shown **only once**, at creation time. When a
+> section has you create a service, copy the key immediately.
 
 ## Boot the workshop
 

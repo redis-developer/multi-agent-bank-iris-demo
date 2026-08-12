@@ -44,12 +44,13 @@ patterns, ownership, relationships — and the retrieval tools are
   another customer's loan is simply refused, no matter what the LLM asks
   for.
 
-This section's exercise builds a working miniature of that idea in
-`src/context/retriever.py`: an `ENTITIES` model, a generated tool surface,
-and row-level governance. The managed version on Redis Cloud does the same
-as a service — `pip install redis-context-retriever`, model entities with
-the `ctxctl` CLI or the Cloud UI, and agents call the generated tools over
-MCP with scoped agent keys and access tags.
+This section uses the **actual managed service**, provisioned from the
+Redis Cloud console you set up in Getting started. You'll model the bank's
+entities in code — `ContextModel` classes from the
+`redis-context-retriever` Python client — deploy them to a context
+surface, import the bank's records through the service, and watch the
+agents come alive on tools you never wrote: the service generates them
+from your model and serves them over MCP, called with a scoped agent key.
 
 [steps](context-retriever-steps.md ':include')
 

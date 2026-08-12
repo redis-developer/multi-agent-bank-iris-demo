@@ -5,7 +5,11 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
+# In the containers, DOTENV_PATH points at the repo's .env through a
+# directory mount, and override=True lets a freshly saved .env win over
+# the values compose injected at container creation — so editing .env in
+# the Code panel and saving reconfigures the api (uvicorn watches it).
+load_dotenv(os.getenv("DOTENV_PATH") or None, override=True)
 
 # Redis
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")

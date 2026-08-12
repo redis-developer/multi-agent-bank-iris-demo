@@ -35,14 +35,15 @@
    console](https://cloud.redis.io/), select **Context Retriever** from
    the left-hand menu and create a service against your free database.
    Copy the **admin API key** when it appears — *it is shown only once*.
-   Put it into `.env` (from the host machine):
+   In the **Code** panel, open `.env` (workspace root, next to `src/`),
+   add the line, and save:
 
    ```bash
    CTX_ADMIN_KEY=<your-admin-key>
    ```
 
-   then `docker compose up -d api` from the host — env changes need the
-   container *recreated*; a plain restart keeps the old values.
+   The api watches `.env` and reloads itself within a few seconds of
+   the save — no restarts, no leaving the browser.
 
 4. **Exercise — model the bank.** Open `src/context/models.py`. The
    `Customer` entity is the worked example: a `ContextModel` with a

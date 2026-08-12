@@ -60,10 +60,16 @@ paying off.
   code edits.
 - **"My solution doesn't work"**: the api auto-reloads on save (uvicorn
   --reload rebuilds the whole pipeline) — check `docker compose logs api`
-  for `Chat pipeline ready` or a traceback from their edit. Only `.env`
-  changes need a manual step — and it must be `docker compose up -d api`
-  (recreate): a plain `restart` does NOT re-read `.env`. This is the #2
-  "my config change did nothing".
+  for `Chat pipeline ready` or a traceback from their edit. `.env` is
+  the same: it's visible at the Code panel's workspace root and the api
+  reloads when it's saved. Two footguns remain: `sed -i`/vim-style
+  atomic rewrites of `.env` from the Terminal can break its VS Code
+  mount (use the Code panel or `nano`), and boot-time values consumed
+  by other containers (REDIS_URL, OPENAI_API_KEY for agent-memory)
+  still need `docker compose up -d` from the host.
+- **Keys on screen**: `.env` (with API keys) is now editable in the Code
+  panel — presenters sharing their screen should keep it closed after
+  editing.
 - **State weirdness after experiments**: `FLUSHALL` + restart api reseeds
   the FAQs in ~30s — but it runs against the attendee's *cloud* DB, so it
   also wipes Section 4's imported records (re-run the deploy) and the

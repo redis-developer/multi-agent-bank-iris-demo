@@ -36,9 +36,10 @@ Verify: `curl http://localhost:8000/api/health` →
 ```bash
 docker compose logs -f api        # watch the pipeline (routing, tools, errors)
 ./solve <2|3|4|5|6|full|reset>    # apply a solution snapshot (api auto-reloads)
-docker compose up -d api          # after .env changes (recreates the api with
-                                  # the new values — `restart` keeps old ones;
-                                  # code edits reload automatically)
+# .env edits: open .env in the Code panel (or /workshop/.env in the
+# Terminal), save — the api watches it and reloads itself. Boot-time
+# values consumed by OTHER containers (REDIS_URL, OPENAI_API_KEY for
+# agent-memory) still need: docker compose up -d
 docker compose down               # stop (keeps Redis data volume-free: data
                                   # is reseeded from ./data on next boot)
 ```
@@ -78,8 +79,8 @@ and RedisVL's `OpenAITextVectorizer`).
 | 401 from OpenAI in api logs | Bad/expired key, or your proxy needs `OPENAI_BASE_URL` |
 | Replies say "brain is still being built" after solving a section | The reload usually takes 1–2s; check `docker compose logs api` for `Chat pipeline ready`, or restart with `docker compose restart api` |
 | Router behaves oddly after threshold experiments | Reset thresholds in `.env`, `FLUSHALL`, restart api |
-| Section 4: agents say the Context Retriever isn't deployed | Complete `src/context/models.py`, set `CTX_ADMIN_KEY` in `.env` (`docker compose up -d api`), run `python -m src.context.deploy` from the Terminal, then reload the api |
-| Section 6: "LangCache is not configured" in api logs | Set `LANGCACHE_URL` / `LANGCACHE_CACHE_ID` / `LANGCACHE_API_KEY` in `.env`, then `docker compose up -d api` |
+| Section 4: agents say the Context Retriever isn't deployed | Complete `src/context/models.py`, set `CTX_ADMIN_KEY` in `.env` (Code panel, save — api reloads), run `python -m src.context.deploy` from the Terminal, then reload the api |
+| Section 6: "LangCache is not configured" in api logs | Set `LANGCACHE_URL` / `LANGCACHE_CACHE_ID` / `LANGCACHE_API_KEY` in `.env` (Code panel, save — api reloads) |
 | Section 6: 401/403 from LangCache | The service key is shown only once at creation — generate a new key from the service's page in the Redis Cloud console |
 | Section 5: follow-ups work but cross-session recall doesn't | Long-term extraction is a background job — wait a few seconds; check `docker compose logs agent-memory` |
 | Port already in use | Change the left-hand port in `docker-compose.yml` |

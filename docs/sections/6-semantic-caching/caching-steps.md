@@ -11,8 +11,8 @@
    the service's **Configuration** tab and copy the **Cache ID** and the
    **endpoint URL**.
 
-2. **Give the bot its cache.** Put the three values into `.env` (from the
-   host machine):
+2. **Give the bot its cache.** In the **Code** panel, open `.env`
+   (workspace root), add the three values, and save:
 
    ```bash
    LANGCACHE_URL=https://<your-endpoint-host>
@@ -20,9 +20,8 @@
    LANGCACHE_API_KEY=<your-service-key>
    ```
 
-   then `docker compose up -d api` from the host — env changes need the
-   container *recreated*; a plain restart keeps the old values. Until
-   these are set, the api logs a warning and simply skips caching.
+   The api watches `.env` and reloads within a few seconds of the save.
+   Until these are set, it logs a warning and simply skips caching.
 
 3. **Open the exercise file** `code/python/src/cache/semantic_cache.py`.
    The provided `__init__` already builds an authenticated httpx client
@@ -87,8 +86,8 @@
    console's LangCache page also shows entries and hit-rate metrics.
 
 9. **(Optional) Break it on purpose.** Set
-   `CACHE_SIMILARITY_THRESHOLD=0.5` in `.env`, `docker compose up -d
-   api`, and ask *"what is
+   `CACHE_SIMILARITY_THRESHOLD=0.5` in `.env` (Code panel, save), and
+   ask *"what is
    the processing fee on a personal loan?"* — at 0.5, this related-but-
    different question can serve the cached *foreclosure* answer, right or
    not. Put it back to `0.85`. That experiment is the whole operational

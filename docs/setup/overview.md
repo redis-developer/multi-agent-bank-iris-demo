@@ -39,14 +39,11 @@ attach to it. Do this before booting:
 1. Sign up (or sign in) at <https://cloud.redis.io/>.
 2. Create a **free database**: **Databases → New database → Free**. The
    free 30MB tier is enough.
-3. In the cloned repo, create your `.env` from the template:
+3. Open a terminal in the cloned repo and create your `.env` file:
 
    ```bash
    cp .env.example .env
    ```
-
-   (`.env.example` is the committed template — never put keys in it;
-   `.env` is your gitignored copy where all secrets live.)
 4. On the database's page in the console, copy the **public endpoint** and
    the **default user password**, and fill in `.env` — the connection
    string and your OpenAI key while you're there:

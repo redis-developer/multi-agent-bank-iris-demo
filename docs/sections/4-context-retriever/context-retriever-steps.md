@@ -52,6 +52,11 @@
    declare **Loan** and **Offer** the same way (the banner lists their
    keys and fields), and add both to `BANK_ENTITIES`.
 
+   > Modeling has three official paths — the Redis Cloud console UI, the
+   > `ctxctl` CLI, and the Python client. The workshop uses the Python
+   > client so the model lives in code, next to the bot that depends on
+   > it; the same classes could be clicked together in the console.
+
 5. **Deploy the model — with the Python client.** From the **Terminal**
    panel:
 
@@ -69,6 +74,13 @@
    way in. The output lists the **generated tools**. Then reload the api:
    save any file in the Code panel (or `docker compose restart api` from
    the host).
+
+   > **How this maps to production:** in a real bank the operational data
+   > is *already* in the Redis Cloud database — kept in sync from core
+   > banking by **Redis Data Integration (RDI)** — and the Context
+   > Retriever models over those existing keys. `import_data` (an
+   > official client method) stands in for that pipeline here, since the
+   > workshop has no core banking system behind it.
 
 6. **Look at what you didn't write.** In the Terminal panel:
 

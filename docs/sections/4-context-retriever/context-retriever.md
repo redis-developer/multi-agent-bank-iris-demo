@@ -20,9 +20,13 @@ approach is a hand-written tool per question — `get_customer_profile`,
 `get_customer_loans`, `get_loan_details`, `get_preapproved_offers`… four
 today; then someone needs cards, then disputes, then branches, and every
 agent team writes its own variants. That sprawl has a name — the **tool
-zoo** — and it comes with a worse problem: every one of those tools trusts
-the LLM to pass the right `customer_id`. A prompt that says *"never act for
-another customer"* is a policy written in hope.
+zoo** — and it hurts in compounding ways: every tool is written, reviewed,
+and maintained by hand, so tool descriptions drift from the data they
+describe; the same query logic gets duplicated with subtle differences
+across teams; and as the zoo grows, the agent faces dozens of overlapping
+tools and starts picking the wrong one. The data model lives in one place —
+the database — but its definition ends up smeared across every tool that
+touches it.
 
 ## Schema-first, governed retrieval <!-- {docsify-ignore} -->
 

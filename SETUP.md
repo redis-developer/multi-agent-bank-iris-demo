@@ -18,11 +18,15 @@
 ```bash
 cp .env.example .env
 # edit .env → OPENAI_API_KEY=sk-...
+#            → REDIS_URL=redis://default:<password>@<host>:<port>
+#              (your Redis Cloud database; unset = local fallback container)
 ./start.sh                # = docker compose up -d --build
 ```
 
-First boot: builds the API image (~1–2 min) and seeds Redis — customers,
-loans, offers, and the loan documents embedded into `idx:loan_docs`.
+First boot: builds the API image (~1–2 min) and seeds your database with
+the FAQ knowledge base, embedded into `idx:faqs`. The bank's structured
+records (customers, loans, offers) arrive in Section 4 through the Context
+Retriever.
 
 Verify: `curl http://localhost:8000/api/health` →
 `{"status":"ok","redis":true,"dataset_loaded":true}`.
@@ -41,8 +45,10 @@ docker compose down               # stop (keeps Redis data volume-free: data
 
 ## Resetting state
 
-- **Wipe conversations / NOCs / generated LANs but keep the dataset**: not
-  needed usually — restart with `FLUSHALL`:
+- **Wipe conversations / NOCs / generated LANs**: `FLUSHALL` — note it runs
+  against your *cloud* database and also removes Section 4's imported
+  records (re-run `python -m src.context.deploy`) and the memory server's
+  data:
   ```bash
   docker compose exec redis redis-cli FLUSHALL
   docker compose restart api      # reseeds everything

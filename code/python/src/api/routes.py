@@ -24,20 +24,15 @@ def health() -> HealthResponse:
 
 @router.get("/customers", response_model=list[CustomerSummary])
 def customers() -> list[CustomerSummary]:
-    r = get_redis()
-    result = []
-    for key in sorted(r.scan_iter(f"{config.CUSTOMER_KEY_PREFIX}CUST*")):
-        if key.count(":") > 1:
-            continue  # skip customer:<id>:loans sets
-        data = r.hgetall(key)
-        if data:
-            result.append(CustomerSummary(
-                customer_id=data["customer_id"],
-                name=data["name"],
-                segment=data["segment"],
-                preapproved=data.get("preapproved", "False") == "True",
-            ))
-    return result
+    """The demo personas for the chat UI. Served from the seed file: the
+    customers' *records* only enter the database in Section 4, imported
+    through the Context Retriever."""
+    import json
+    dataset = json.loads((config.DATA_DIR / "customers.json").read_text())
+    return [CustomerSummary(
+                customer_id=c["customer_id"], name=c["name"],
+                segment=c["segment"], preapproved=bool(c.get("preapproved")))
+            for c in dataset["customers"]]
 
 
 @router.post("/context/deploy")

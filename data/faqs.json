@@ -1,0 +1,124 @@
+{
+  "faqs": [
+    {
+      "id": "foreclosure-charge",
+      "product": "personal_loan",
+      "question": "What is the foreclosure charge on a personal loan?",
+      "answer": "Foreclosure is allowed after 6 EMIs with a foreclosure charge of 4% of the outstanding principal — nil for floating-rate loans. Foreclosure requests are processed within 7 working days, and the No Objection Certificate (NOC) is issued within 15 working days of closure."
+    },
+    {
+      "id": "part-prepayment",
+      "product": "personal_loan",
+      "question": "Can I part-prepay my personal loan?",
+      "answer": "Part-prepayment of up to 25% of the outstanding principal is allowed once per financial year at no charge, after 12 EMIs. A part-prepayment reduces the outstanding immediately: keep the EMI to shorten the tenure (saves more interest) or keep the tenure to lower the EMI."
+    },
+    {
+      "id": "interest-rates",
+      "product": "personal_loan",
+      "question": "What are the interest rates on personal loans?",
+      "answer": "Personal loan rates range from 10.99% to 16.50% per annum on reducing balance, based on credit score, income, and relationship history. A credit score of 700+ gets the best rates; 650–699 is considered with a premium of up to 1.5%. Existing customers with 12+ months of clean repayment get relationship pricing 0.25% below the card rate."
+    },
+    {
+      "id": "eligibility",
+      "product": "personal_loan",
+      "question": "Am I eligible for a personal loan?",
+      "answer": "Salaried applicants aged 21–58 with net monthly income of ₹25,000+ and 12 months of continuous employment are eligible. Self-employed applicants need 2 years of business vintage and 2 years of ITRs. Loan amounts run ₹50,000 to ₹25,00,000 with tenures of 12 to 60 months."
+    },
+    {
+      "id": "processing-fee",
+      "product": "personal_loan",
+      "question": "What is the processing fee?",
+      "answer": "The processing fee is 1.5% of the sanctioned amount (minimum ₹1,999) for personal loans, 1% for home decor loans, and 0.5% for top-ups. Processing fees are waived on pre-approved offers. Late payment charge is 2% per month on the overdue EMI."
+    },
+    {
+      "id": "emi-calculation",
+      "product": "general",
+      "question": "How is EMI calculated on reducing balance?",
+      "answer": "EMI uses the reducing-balance formula EMI = P × r × (1+r)^n / ((1+r)^n − 1), where P is principal, r the monthly rate (annual ÷ 12 ÷ 100), and n the tenure in months. Example: ₹5,00,000 at 11.5% for 48 months gives about ₹13,044 per month. Each EMI pays that month's interest first; the rest reduces principal."
+    },
+    {
+      "id": "flat-vs-reducing",
+      "product": "general",
+      "question": "What is the difference between flat rate and reducing balance?",
+      "answer": "Our loans use reducing-balance interest: interest accrues only on the outstanding principal. A flat-rate quote charges interest on the full principal for the whole tenure and is roughly 1.8x the equivalent reducing rate — a 7% flat rate costs about the same as 12.5% reducing. Always compare loans on the reducing-balance APR."
+    },
+    {
+      "id": "missed-emi",
+      "product": "general",
+      "question": "What happens if I miss an EMI?",
+      "answer": "A missed EMI does not change the EMI amount but adds a late charge of 2% per month on the overdue amount plus interest, and is reported to the credit bureau after 30 days. EMIs on auto-debit avoid this; a bounce anywhere can also shrink or suspend your pre-approved offers."
+    },
+    {
+      "id": "topup-what",
+      "product": "topup_loan",
+      "question": "What is a top-up loan and who is eligible?",
+      "answer": "A top-up is an additional loan on your existing active loan: minimal documentation, disbursal within 4 business hours for pre-approved customers. You need at least 12 EMIs paid, no bounces in the last 6 months, and a credit score of 700+. The amount is capped at 70% of principal already repaid or your pre-approved amount, whichever is lower."
+    },
+    {
+      "id": "topup-vs-new",
+      "product": "topup_loan",
+      "question": "Should I take a top-up or a new loan?",
+      "answer": "A top-up avoids fresh documentation, income proof, and a new hard credit inquiry; it prices at your base loan's rate minus 0.25% for clean repayment records, and bills as one combined EMI with the base loan. Take a new loan instead only if you need a tenure much longer than the base loan's remaining tenure plus 12 months."
+    },
+    {
+      "id": "balance-transfer",
+      "product": "balance_transfer",
+      "question": "How does a balance transfer work and what does it save?",
+      "answer": "A balance transfer moves your outstanding loan from another lender to us at a lower rate — typically 1–3% lower. Example: transferring ₹5,00,000 at 14% with 36 months left to 11% saves roughly ₹24,000 in total interest. It makes sense when the saving exceeds transfer costs and you have 12+ months of tenure remaining."
+    },
+    {
+      "id": "balance-transfer-process",
+      "product": "balance_transfer",
+      "question": "What are the charges and process for a balance transfer?",
+      "answer": "Processing fee is 1% of the transferred amount (often waived in campaigns); your existing lender may charge their foreclosure fee. Share your loan statement and foreclosure letter, we sanction the new loan, pay the old lender directly, and collect the NOC. End to end takes 5–7 working days. You can combine a transfer with a top-up at the new rate, subject to credit score 700+ and FOIR under 55%."
+    },
+    {
+      "id": "home-decor-coverage",
+      "product": "home_decor_loan",
+      "question": "What does the home decor loan cover?",
+      "answer": "It funds interior work on a home you own or rent: modular kitchens, wardrobes, furniture, painting, false ceilings, lighting, and smart-home fittings. Amounts run ₹1,00,000 to ₹15,00,000 for 12–60 months at 12.5%–15.5% per annum; renovating a self-owned home gets 0.5% off. Disbursal can go directly to an empanelled interior brand for extra discounts."
+    },
+    {
+      "id": "home-decor-partners",
+      "product": "home_decor_loan",
+      "question": "What partner benefits come with the home decor loan?",
+      "answer": "Booking through empanelled interior studios and furniture brands gets 5–10% partner discounts, a 12-month workmanship warranty on empanelled contractors, and no-cost EMI conversion on select furniture categories. Existing customers only need a vendor quotation; disbursal follows within 48 hours of document verification."
+    },
+    {
+      "id": "noc-what",
+      "product": "noc",
+      "question": "What is an NOC and why does it matter?",
+      "answer": "A No Objection Certificate (loan closure certificate) states the loan is fully repaid and the bank has no further claim on that LAN. It is required to update credit bureau records and as proof in future disputes — without it your credit report may keep showing the loan as active. NOCs are only issued for loans with status closed and zero outstanding; settled loans get a settlement letter instead."
+    },
+    {
+      "id": "noc-how",
+      "product": "noc",
+      "question": "How do I get my NOC on WhatsApp?",
+      "answer": "Verify your registered mobile number and the LAN, and the digital NOC (signed PDF) is generated within 15 working days of closure, sent on WhatsApp and email free of charge. A courier copy costs ₹250; duplicates for loans closed over 3 years ago take up to 21 working days. If the bureau still shows the loan active 45 days after issuance, raise a bureau dispute with the NOC attached."
+    },
+    {
+      "id": "documents-required",
+      "product": "general",
+      "question": "What documents are needed for a loan application?",
+      "answer": "Salaried: PAN, Aadhaar, last 3 months' salary slips, and 6 months' salary-account statement. Self-employed: PAN, Aadhaar, 2 years' ITR with computation, 12 months' current-account statement, and business proof. Pre-approved customers: only PAN + Aadhaar e-verification and e-sign. Documents upload on WhatsApp as photos or PDFs; failed items are listed for re-upload exactly."
+    },
+    {
+      "id": "disbursement-enach",
+      "product": "general",
+      "question": "How does disbursement work and what is eNACH mandate registration?",
+      "answer": "After e-sign and eNACH mandate registration (the auto-debit authorisation on your bank account), disbursement is initiated to your verified account: within 4 business hours for pre-approved loans, 24–48 hours otherwise. The first EMI is due on the 5th of the following month, with pro-rata broken-period interest for the gap added to it. The disbursement advice and amortisation schedule arrive on WhatsApp."
+    },
+    {
+      "id": "preapproved-what",
+      "product": "preapproval",
+      "question": "What does pre-approved mean and how do I use an offer?",
+      "answer": "A pre-approved offer is credit the bank has already sanctioned from your repayment history and bureau score. Accepting one skips income verification: confirm KYC, e-sign, and funds disburse within 24 hours (often 4 business hours), with zero processing fee. Type \"my offers\" on WhatsApp to see live offers; amounts cannot be increased without a full application."
+    },
+    {
+      "id": "preapproved-changes",
+      "product": "preapproval",
+      "question": "Why did my pre-approved offer change or disappear?",
+      "answer": "Offers refresh monthly from the bank's risk models. They shrink or vanish if a bureau score drops, an EMI bounces anywhere, credit utilisation rises sharply, or you use more than 3 hard inquiries in 60 days. Auto-debit EMIs and utilisation under 30% keep offers healthy. Declining an offer never affects your existing relationship."
+    }
+  ]
+}

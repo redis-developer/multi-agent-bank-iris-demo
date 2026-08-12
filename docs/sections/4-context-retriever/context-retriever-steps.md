@@ -76,12 +76,13 @@
    save any file in the Code panel (or `docker compose restart api` from
    the host).
 
-   > **How this maps to production:** in a real bank the operational data
-   > is *already* in the Redis Cloud database — kept in sync from core
-   > banking by **Redis Data Integration (RDI)** — and the Context
-   > Retriever models over those existing keys. `import_data` (an
-   > official client method) stands in for that pipeline here, since the
-   > workshop has no core banking system behind it.
+   > **This is the moment the bank moves in.** The imported records land
+   > in *your* Redis Cloud database under the key patterns your model
+   > declared — run `SCAN 0 MATCH loan:* COUNT 100` in the Redis Insight
+   > panel and compare with Section 1 step 5, when it was empty. In a
+   > real bank the data would *already* be there, kept in sync from core
+   > banking by **Redis Data Integration (RDI)**; `import_data` (an
+   > official client method) stands in for that pipeline here.
 
 6. **Look at what you didn't write.** In the Terminal panel:
 

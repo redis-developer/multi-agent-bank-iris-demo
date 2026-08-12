@@ -19,8 +19,8 @@ front of the question, and the model answers from it.
 That's retrieval-augmented generation (RAG), three moves:
 
 - **Retrieve** — embed the customer's question and run a vector search over
-  `idx:loan_docs` (the index you explored in Section 1). The chunks that come
-  back are the passages closest in meaning to the question.
+  `idx:faqs` (the index you explored in Section 1). The FAQs that come
+  back are the entries closest in meaning to the question.
 - **Augment** — lay those chunks into the prompt as numbered context entries
   ahead of the question.
 - **Generate** — the model answers *from the passages*, citing them like

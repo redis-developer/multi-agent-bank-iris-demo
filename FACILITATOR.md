@@ -12,7 +12,7 @@ anyone stall more than 2 minutes on an environment issue.
 | Time | Section | Beats to land |
 |---|---|---|
 | 0:00–0:10 | Setup check | Everyone sees the chat UI + fallback reply |
-| 0:10–0:25 | 1 Explore the bank | One Redis, four data shapes; semantic vs lexical search demo (step 5) |
+| 0:10–0:25 | 1 Explore the bank | Their cloud DB + the FAQ index; semantic vs lexical (step 4); the empty-bank teaser (step 5) pays off in Section 4 |
 | 0:25–0:45 | 2 Semantic routing | Observe-the-code section (no typing): read routes → thresholds → min-aggregation, then test live; the abstain-below-threshold moment (weather question) |
 | 0:45–1:15 | 3 RAG | First write-the-code exercise. "The model is a reader, not a knowledge base"; the gold-loan refusal (step 6) is the compliance argument. *Going deeper* (steps 8–14): build keyword + hybrid search and race all three modes — run it if the room is fast, else assign as homework; the eNACH-vs-paraphrase races (steps 10–12) make the strongest live demo |
 | 1:15–1:55 | 4 Context Retriever | Attendees provision the real service on Redis Cloud (step 3, ~5 min). Beats: the agents *starve* without a data layer (step 2), model-the-bank in `ContextModel` classes (step 4), one deploy call → surface + agent key + data import + generated tools (step 5), "look at what you didn't write" (step 6), identity injection + scoped agent keys (step 8) |
@@ -41,12 +41,15 @@ paying off.
   in the pre-workshop email (it's Step 0 of Getting started), and keep
   one shared set of service credentials on a slide as the fallback for
   anyone stuck at signup.
-- **VERIFY BEFORE THE DAY — Context Retriever end to end**: the Section 4
-  client integration (deploy + generated tool names + MCP calls) is built
-  against `redis-context-retriever` 0.0.6 and mock-tested; run the full
-  Section 4 flow once against a real service before the workshop. The
-  console flow for creating the service and where the admin key appears
-  should be confirmed at the same time — the product is young and moves.
+- **VERIFY BEFORE THE DAY — the cloud path end to end**: run Step 0 +
+  Sections 1 and 4 once against a real Redis Cloud database and Context
+  Retriever service. Three things to confirm: the client integration
+  (deploy + generated tool names + MCP calls — built against
+  `redis-context-retriever` 0.0.6, mock-tested only), the storage format
+  of imported records (the NOC action tool reads them; it tolerates JSON
+  and hash), and the cloud DB's Redis version — Section 3's *hybrid*
+  exercise needs FT.HYBRID (Redis 8.4+); if the free tier is older, demo
+  hybrid on the local fallback container or skip step 9's hybrid race.
 - **Service keys are shown once**: both Agent Memory and LangCache display
   the API key only at creation. Say it out loud before anyone clicks
   Create; regenerating from the service page is the recovery.
@@ -62,10 +65,10 @@ paying off.
   (recreate): a plain `restart` does NOT re-read `.env`. This is the #2
   "my config change did nothing".
 - **State weirdness after experiments**: `FLUSHALL` + restart api reseeds
-  in ~30s. (`FLUSHALL` also wipes the memory server's data — it shares the
-  same Redis; restart `agent-memory` too if it acts confused.) Note that
-  LangCache entries live in the cloud service and *survive* FLUSHALL —
-  clear them from the service's page in the Redis Cloud console.
+  the FAQs in ~30s — but it runs against the attendee's *cloud* DB, so it
+  also wipes Section 4's imported records (re-run the deploy) and the
+  memory server's data (restart `agent-memory` too). LangCache entries
+  live in their own service and survive — clear them from the console.
 - **Section 5 recall "doesn't work"**: 90% of the time it's the async
   extraction — the fact isn't searchable the instant the message is sent.
   Demo something else for 20 seconds, then search again.

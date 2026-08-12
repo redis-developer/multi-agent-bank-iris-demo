@@ -3,7 +3,7 @@
 1. **Read the retrieval you already have.** Open
    `code/python/src/retrieval/rag.py` — provided, not an exercise.
    `LoanDocsRetriever.search` embeds the query and runs a RedisVL
-   `VectorQuery` over `idx:loan_docs`; `format_context` lays chunks out as
+   `VectorQuery` over `idx:faqs`; `format_context` lays the FAQs out as
    numbered `[1] Document — Section` entries. Retrieval exists — nothing
    calls it yet.
 
@@ -30,9 +30,9 @@
    > What is the foreclosure charge on a personal loan?
 
    The answer now says 4% after 6 EMIs (nil for floating-rate) with `[n]`
-   citations, and the pipeline inspector lists which document sections were
-   retrieved — *Personal Loan Product Guide — Foreclosure and
-   part-prepayment* should be there.
+   citations, and the pipeline inspector lists which FAQs were retrieved —
+   *FAQ — Personal loans — What is the foreclosure charge…* should be
+   there.
 
 5. **Try meaning, not keywords.**
 
@@ -45,7 +45,7 @@
 
    > what are your gold loan interest rates?
 
-   There is no gold loan document, so the retrieved chunks won't contain the
+   There is no gold-loan FAQ, so the retrieved entries won't contain the
    answer, and the persona instructs the model to say so rather than invent
    a rate. Grounding is as much about refusing as answering.
 
@@ -53,7 +53,7 @@
    query the way the app runs it:
 
    ```bash
-   FT.SEARCH idx:loan_docs "@product:{personal_loan}" RETURN 2 doc_title section
+   FT.SEARCH idx:faqs "@product:{personal_loan}" RETURN 1 section
    ```
 
    and compare with what the inspector showed as citations.
@@ -116,7 +116,7 @@ with the app (`GET /api/retrieval/compare` — provided, in
     curl -s "http://api:8000/api/retrieval/compare?q=eNACH+mandate+registration&k=2" | jq
     ```
 
-    Keyword answers in ~2 ms and pins the Disbursement section exactly.
+    Keyword answers in ~2 ms and pins the disbursement/eNACH FAQ exactly.
     Vector needs an embedding round trip (~300 ms) for the same top hit.
     When the query *is* the term, the inverted index is unbeatable.
 
@@ -126,10 +126,11 @@ with the app (`GET /api/retrieval/compare` — provided, in
     curl -s "http://api:8000/api/retrieval/compare?q=how+much+do+I+pay+to+end+my+loan+before+the+tenure+finishes&k=2" | jq
     ```
 
-    Now keyword whiffs — it matches stray words ("loan", "pay") and returns
-    the *Top-up Guide*, nowhere near the answer. Vector lands on
-    *Foreclosure and part-prepayment* because it matched the meaning. This
-    asymmetry is why RAG defaults to vector search.
+    Now keyword whiffs — it matches stray words ("loan", "pay") and
+    returns the NOC FAQ, nowhere near the question. Vector lands on the
+    *ending-the-loan-early* FAQs (part-prepayment, foreclosure) because it
+    matched the meaning. This asymmetry is why RAG defaults to vector
+    search.
 
 12. **Race them: mixed query.**
 
@@ -138,8 +139,8 @@ with the app (`GET /api/retrieval/compare` — provided, in
     ```
 
     The query has an exact anchor (*eNACH*) **and** a paraphrase (*penalty
-    for ending early* → foreclosure). Keyword finds the eNACH doc but not
-    foreclosure; vector finds foreclosure but ranks the eNACH doc last.
+    for ending early* → foreclosure). Keyword finds the eNACH FAQ but not
+    foreclosure; vector finds foreclosure but ranks the eNACH FAQ low.
     Hybrid's fused list surfaces **both** in the top 3 — neither mode alone
     covers the query, RRF does.
 
@@ -147,9 +148,9 @@ with the app (`GET /api/retrieval/compare` — provided, in
     more than exact terms — try these in the Redis Insight panel:
 
     ```bash
-    FT.SEARCH idx:loan_docs "%forclosure%" RETURN 2 doc_title section
-    FT.SEARCH idx:loan_docs "\"balance transfer\"" RETURN 1 doc_title
-    FT.SEARCH idx:loan_docs "disburs*" RETURN 1 section
+    FT.SEARCH idx:faqs "%forclosure%" RETURN 1 section
+    FT.SEARCH idx:faqs "\"balance transfer\"" RETURN 1 section
+    FT.SEARCH idx:faqs "disburs*" RETURN 1 section
     ```
 
     Fuzzy matching (`%…%` tolerates the typo), exact phrases, and prefix

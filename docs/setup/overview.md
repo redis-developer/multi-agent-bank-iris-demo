@@ -30,20 +30,29 @@ component stack of [Redis Iris](https://redis.io/iris/).
 
 ## Step 0: Set up Redis Cloud
 
-The Redis Iris services this workshop builds against — the **Context
-Retriever** (Section 4), **Agent Memory** (Section 5), and **LangCache**
-(Section 6) — are managed services you provision from the Redis Cloud
-console. Do this before the exercises:
+This workshop runs on **your Redis Cloud database from the very first
+message** — the FAQ index, the agents' records, memory, everything lives
+there, and the Iris services you provision later (**Context Retriever** in
+Section 4, **Agent Memory** in Section 5, **LangCache** in Section 6)
+attach to it. Do this before booting:
 
 1. Sign up (or sign in) at <https://cloud.redis.io/>.
-2. Create a **free database** if you don't have one: **Databases → New
-   database → Free**. The free 30MB tier is enough; the Iris services
-   attach to it.
-3. Keep the console tab open — Sections 4, 5, and 6 each come back here to
-   create their service (Context Retriever, Agent Memory, LangCache).
+2. Create a **free database**: **Databases → New database → Free**. The
+   free 30MB tier is enough.
+3. On the database's page, copy the **public endpoint** and the **default
+   user password**, and put the connection string into `.env`:
+
+   ```bash
+   REDIS_URL=redis://default:<password>@<public-endpoint-host>:<port>
+   ```
+
+4. Keep the console tab open — Sections 4, 5, and 6 each come back here to
+   create their service.
 
 > Service API keys are shown **only once**, at creation time. When a
 > section has you create a service, copy the key immediately.
+> (If `REDIS_URL` is left unset, the stack falls back to a local Redis
+> container — offline mode; the facilitator may use it as a backup.)
 
 ## Boot the workshop
 

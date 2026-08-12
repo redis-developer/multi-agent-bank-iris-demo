@@ -35,8 +35,8 @@ a live servicing system.
 ```bash
 git clone <this-repo>
 cd multi-agent-bank-iris-demo
-cp .env.example .env        # set OPENAI_API_KEY
-./start.sh
+cp .env.example .env        # set OPENAI_API_KEY + REDIS_URL (your Redis
+./start.sh                  # Cloud database — see Getting started, Step 0)
 ```
 
 Then open **<http://localhost/>** — the workshop **workbench** (layout from
@@ -55,7 +55,8 @@ chat UI :3000, docs :3001, Redis Insight :5540, Agent Memory Server
 workbench/          the single-tab workshop shell (nginx + panels)
 code/python/        the app participants edit (5 files carry SECTION banners)
 code/web/           WhatsApp-style chat UI + pipeline inspector
-data/               seed dataset: customers, loans, offers, loan documents
+data/               FAQ knowledge base (seeded at boot) + the bank records
+                    that Section 4 imports through the Context Retriever
 docs/               Docsify workshop guide (sections 1–7 + reference)
 solutions/python/   per-section solution snapshots (starter, 2, 3, 4, 5, 6)
 docker/             container build files (api, terminal, vscode, web)

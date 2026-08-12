@@ -43,8 +43,8 @@ LANGCACHE_CACHE_ID = os.getenv("LANGCACHE_CACHE_ID", "")
 LANGCACHE_API_KEY = os.getenv("LANGCACHE_API_KEY", "")
 
 # Redis key / index names
-DOCS_INDEX_NAME = "idx:loan_docs"
-DOCS_KEY_PREFIX = "doc:"
+DOCS_INDEX_NAME = "idx:faqs"
+DOCS_KEY_PREFIX = "faq:"
 CUSTOMER_KEY_PREFIX = "customer:"
 LOAN_KEY_PREFIX = "loan:"
 OFFERS_KEY_PREFIX = "offers:"

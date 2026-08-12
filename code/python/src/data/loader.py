@@ -1,22 +1,34 @@
-"""Seed Redis with the workshop dataset.
+"""Seed the workshop's Redis Cloud database with the FAQ knowledge base.
 
-Runs once on API startup (idempotent):
-  * customers  -> HASH  customer:<id>
-  * loans      -> JSON  loan:<lan>          (+ set customer:<id>:loans)
-  * offers     -> JSON  offers:<customer_id>
-  * loan docs  -> chunked by `## ` heading, embedded, loaded into idx:loan_docs
+Runs once on API startup (idempotent). It loads ONE thing: the bank's
+FAQs (data/faqs.json), embedded into the vector index that powers the
+RAG section.
+
+Deliberately absent: customers, loans, and offers. The bank's structured
+records enter the database in Section 4 — imported through the Redis
+Context Retriever, the way RDI would feed it from core banking in
+production. Until then, the servicing agents have nothing to read, and
+that's the point.
 """
 
 import json
-import re
 
 import redis
 
 from src import config
 from src.llm.client import get_vectorizer
-from src.retrieval.rag import docs_index_schema
 
 from redisvl.index import SearchIndex
+
+PRODUCT_LABELS = {
+    "personal_loan": "Personal loans",
+    "topup_loan": "Top-up loans",
+    "balance_transfer": "Balance transfer",
+    "home_decor_loan": "Home decor loans",
+    "noc": "NOC",
+    "preapproval": "Pre-approved offers",
+    "general": "Loans in general",
+}
 
 
 def get_redis() -> redis.Redis:
@@ -24,83 +36,40 @@ def get_redis() -> redis.Redis:
 
 
 def ensure_loaded() -> dict:
-    """Load customers, loans, offers, and the loan-docs vector index."""
+    """Embed and index the FAQ knowledge base (skips if already loaded)."""
     r = get_redis()
-    summary = {"customers": 0, "loans": 0, "offers": 0, "doc_chunks": 0,
-               "skipped": False}
-
     if r.exists("workshop:loaded"):
-        summary["skipped"] = True
-        return summary
+        return {"faqs": 0, "skipped": True}
 
-    dataset = json.loads((config.DATA_DIR / "customers.json").read_text())
-
-    for customer in dataset["customers"]:
-        r.hset(f"{config.CUSTOMER_KEY_PREFIX}{customer['customer_id']}",
-               mapping={k: str(v) for k, v in customer.items()})
-        summary["customers"] += 1
-
-    for loan in dataset["loans"]:
-        r.json().set(f"{config.LOAN_KEY_PREFIX}{loan['lan']}", "$", loan)
-        r.sadd(f"{config.CUSTOMER_KEY_PREFIX}{loan['customer_id']}:loans",
-               loan["lan"])
-        summary["loans"] += 1
-
-    for entry in dataset["offers"]:
-        r.json().set(f"{config.OFFERS_KEY_PREFIX}{entry['customer_id']}", "$",
-                     entry["offers"])
-        summary["offers"] += 1
-
-    summary["doc_chunks"] = load_loan_docs()
-
+    count = load_faqs()
     r.set("workshop:loaded", "1")
-    return summary
+    return {"faqs": count, "skipped": False}
 
 
-def load_loan_docs() -> int:
-    """Chunk each loan document on its `## ` section headings and embed."""
-    chunks = []
-    for path in sorted((config.DATA_DIR / "loan_docs").glob("*.md")):
-        text = path.read_text()
-        title = _first_match(r"^# (.+)$", text) or path.stem
-        product = _first_match(r"^product: (.+)$", text) or "general"
-        for section, body in _split_sections(text):
-            chunks.append({
-                "chunk_id": f"{path.stem}:{_slug(section)}",
-                "doc_title": title,
-                "section": section,
-                "content": body,
-                "product": product,
-            })
+def load_faqs() -> int:
+    """One index record per FAQ: the question is the retrievable unit."""
+    faqs = json.loads((config.DATA_DIR / "faqs.json").read_text())["faqs"]
+
+    records = []
+    for faq in faqs:
+        label = PRODUCT_LABELS.get(faq["product"], faq["product"])
+        records.append({
+            "chunk_id": faq["id"],
+            "doc_title": f"FAQ — {label}",
+            "section": faq["question"],
+            "content": f"Q: {faq['question']}\nA: {faq['answer']}",
+            "product": faq["product"],
+        })
 
     vectorizer = get_vectorizer()
     embeddings = vectorizer.embed_many(
-        [f"{c['doc_title']} — {c['section']}\n{c['content']}" for c in chunks],
-        as_buffer=True,
-    )
-    for chunk, embedding in zip(chunks, embeddings):
-        chunk["embedding"] = embedding
+        [record["content"] for record in records], as_buffer=True)
+    for record, embedding in zip(records, embeddings):
+        record["embedding"] = embedding
 
+    from src.retrieval.rag import docs_index_schema
     index = SearchIndex.from_dict(docs_index_schema(),
                                   redis_url=config.REDIS_URL)
     index.create(overwrite=True, drop=True)
-    index.load(chunks, id_field="chunk_id")
-    return len(chunks)
-
-
-def _split_sections(text: str) -> list[tuple[str, str]]:
-    sections = []
-    parts = re.split(r"^## ", text, flags=re.MULTILINE)[1:]
-    for part in parts:
-        heading, _, body = part.partition("\n")
-        sections.append((heading.strip(), body.strip()))
-    return sections
-
-
-def _first_match(pattern: str, text: str) -> str | None:
-    match = re.search(pattern, text, flags=re.MULTILINE)
-    return match.group(1).strip() if match else None
-
-
-def _slug(value: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+    index.load(records, id_field="chunk_id")
+    return len(records)

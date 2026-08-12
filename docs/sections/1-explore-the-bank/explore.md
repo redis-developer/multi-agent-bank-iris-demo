@@ -1,30 +1,25 @@
 # Section 1: Explore the bank
 
-## One database, four shapes of data <!-- {docsify-ignore} -->
+## Your database, before the bank moves in <!-- {docsify-ignore} -->
 
-Everything the bot will need this workshop is already in Redis — the same
-Redis, four different shapes:
+Everything in this workshop runs against the Redis Cloud database you
+created in Step 0. Right now it holds exactly one thing, seeded at boot:
+the bank's **FAQ knowledge base** — ~20 question/answer pairs covering
+rates, foreclosure, top-ups, balance transfers, NOCs, documents, and
+disbursement. Each FAQ is stored with its text, a `product` tag, and a
+1536-dimension **embedding** of its meaning, all indexed in `idx:faqs`.
 
-- **Customer profiles** are hashes (`customer:CUST1001`) — flat field/value
-  lookups at key-access speed.
-- **Loans** are JSON documents (`loan:LAN20240001`) — nested, queryable, and
-  updatable in place (a disbursement flips `$.status` without rewriting the
-  document).
-- **Pre-approved offers** are JSON arrays per customer (`offers:CUST1001`),
-  refreshed by the bank's risk models.
-- **Loan policy documents** — the PDFs your customers ask questions about —
-  are chunked by section, embedded, and stored in the vector index
-  `idx:loan_docs`.
+That index is the raw material for Section 3's RAG: vector search finds
+FAQs by *what they mean*, not what they literally say — "how much to close
+my loan early" lands on the foreclosure answer even though the word
+"foreclosure" never appears in the question.
 
-That last one powers most of this workshop. Each chunk holds its text, its
-source document, a `product` tag, and a 1536-dimension embedding of its
-meaning. Vector search finds chunks by *what they mean*, not what they
-literally say: "how much to close my loan early" lands on the foreclosure
-section even though the word "foreclosure" never appears in the question.
-
-In production this loading pipeline is the job of ingestion (and Redis Data
-Integration keeps operational data in sync continuously). Here, the API
-container seeded everything on first boot so you can focus on the agent side.
+Notice what's *not* in the database yet: no customers, no loans, no
+offers. The bank's structured records arrive in **Section 4**, imported
+through the **Redis Context Retriever** — the same way RDI would feed them
+from core banking in production. Until then the bot can talk *about* loans
+(FAQs) but knows nothing about *your* loans. Watching that gap close is
+the arc of the workshop.
 
 ## The starter bot <!-- {docsify-ignore} -->
 
@@ -45,7 +40,7 @@ Iris context layer:
 
 [steps](explore-steps.md ':include')
 
-The data layer is ready. Next: teach the bot to recognise *which journey*
-each message belongs to — without spending a single LLM token.
+The knowledge base is ready. Next: teach the bot to recognise *which
+journey* each message belongs to — without spending a single LLM token.
 
 > **Next section →** [Section 2: Semantic routing](/sections/2-semantic-routing/routing.md)

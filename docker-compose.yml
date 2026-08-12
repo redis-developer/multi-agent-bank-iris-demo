@@ -98,7 +98,7 @@ services:
     ports:
       - "8088:8000"
     environment:
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
       - OPENAI_API_KEY=${OPENAI_API_KEY:?set OPENAI_API_KEY in .env}
       - LONG_TERM_MEMORY=true
       - DISABLE_AUTH=true
@@ -114,7 +114,7 @@ services:
     container_name: bank-agent-memory-worker
     command: ["agent-memory", "task-worker"]
     environment:
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
       - OPENAI_API_KEY=${OPENAI_API_KEY:?set OPENAI_API_KEY in .env}
       - LONG_TERM_MEMORY=true
       - DISABLE_AUTH=true
@@ -130,7 +130,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
       - AGENT_MEMORY_URL=http://agent-memory:8000
       - DATA_DIR=/workshop/data
       - OPENAI_API_KEY=${OPENAI_API_KEY:?set OPENAI_API_KEY in .env}

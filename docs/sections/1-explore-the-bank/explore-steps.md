@@ -1,53 +1,55 @@
 ## Steps
 
-1. **Meet a customer.** Open the **Redis Insight** panel from the workbench
-   tabs, go to its Workbench view, and run:
+1. **Point Redis Insight at your cloud database.** Open the **Redis
+   Insight** panel from the workbench tabs, choose **Add database
+   manually**, and paste the same connection details you put in `.env`
+   (host, port, username `default`, password). One time only — the panel
+   remembers it.
+
+2. **See the FAQ knowledge base.** In Insight's Workbench, run:
 
    ```bash
-   HGETALL customer:CUST1001
-   SMEMBERS customer:CUST1001:loans
+   FT.INFO idx:faqs
    ```
 
-   Ananya Sharma has two personal loans — one active, one closed. Keep her in
-   mind: she is the workshop's main persona.
-
-2. **Read her loans.**
+   Note `num_docs` (~20 FAQs) and the `embedding` field: HNSW, cosine,
+   1536 dims. Look at one record:
 
    ```bash
-   JSON.GET loan:LAN20240001 $
-   JSON.GET loan:LAN20220042 $.status
+   HGETALL faq:foreclosure-charge
    ```
 
-   The closed loan (`LAN20220042`) is what the NOC journey will act on in
-   Section 4.
+   Question, answer, `product` tag, and the embedding bytes — one
+   retrievable unit per FAQ.
 
-3. **Check her offers.**
+3. **Filter by product.**
 
    ```bash
-   JSON.GET offers:CUST1001 $
+   FT.SEARCH idx:faqs "@product:{noc}" RETURN 1 section
    ```
 
-   A pre-approved top-up and a festive personal loan — the raw material for
-   the sales agent's cross-sell pitch.
+   The `product` tag field answers exact filters instantly — no vectors
+   involved.
 
-4. **Inspect the vector index.**
-
-   ```bash
-   FT.INFO idx:loan_docs
-   FT.SEARCH idx:loan_docs "@product:{noc}" RETURN 2 doc_title section
-   ```
-
-   Note `num_docs` (the chunk count) and the `embedding` vector field: HNSW,
-   cosine, 1536 dims.
-
-5. **See semantic beat lexical.** Full-text search needs the right words:
+4. **See semantic beat lexical.** Full-text search needs the right words:
 
    ```bash
-   FT.SEARCH idx:loan_docs "closing loan early charges" RETURN 2 doc_title section
+   FT.SEARCH idx:faqs "closing loan early charges" RETURN 1 section
    ```
 
    Lexical search struggles unless terms match. The bot's retrieval
    (Section 3) will embed the *question* and match by meaning instead.
+
+5. **Look for the bank.**
+
+   ```bash
+   SCAN 0 MATCH customer:* COUNT 100
+   SCAN 0 MATCH loan:* COUNT 100
+   ```
+
+   Empty. The bank's structured records don't exist yet — they arrive in
+   Section 4, imported through the Context Retriever into this same
+   database. Remember this moment.
 
 6. **Send the bot a message.** In the **App** panel ask
    *"What is the foreclosure charge?"* — the bot already knows this belongs

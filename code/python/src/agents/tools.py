@@ -18,6 +18,20 @@ from langchain_core.tools import tool
 from src import config
 from src.data.loader import get_redis
 
+def _get_loan(r, lan: str):
+    """Read a loan record whether it was written as JSON (this app's action
+    tools) or as a hash (records imported through the Context Retriever)."""
+    key = f"{config.LOAN_KEY_PREFIX}{lan}"
+    try:
+        loan = r.json().get(key)
+        if loan:
+            return loan
+    except Exception:
+        pass
+    data = r.hgetall(key)
+    return data or None
+
+
 REQUIRED_DOCS = {
     "salaried": ["pan", "aadhaar", "salary slips", "bank statement"],
     "self_employed": ["pan", "aadhaar", "itr", "bank statement",
@@ -53,12 +67,12 @@ def calculate_emi(principal: float, annual_rate: float,
 def check_noc_eligibility(customer_id: str, lan: str) -> str:
     """Check whether an NOC can be issued for a loan: the loan must belong to
     the customer and its status must be 'closed' with zero outstanding."""
-    loan = get_redis().json().get(f"{config.LOAN_KEY_PREFIX}{lan}")
+    loan = _get_loan(get_redis(), lan)
     if not loan:
         return f"No loan found for LAN {lan}."
     if loan["customer_id"] != customer_id:
         return "This LAN does not belong to the verified customer."
-    if loan["status"] != "closed" or loan.get("outstanding", 1) != 0:
+    if loan["status"] != "closed" or float(loan.get("outstanding", 1)) != 0:
         return json.dumps({
             "eligible": False,
             "reason": f"Loan {lan} is {loan['status']} with outstanding "
@@ -74,7 +88,7 @@ def issue_noc(customer_id: str, lan: str) -> str:
     """Issue a digital NOC for a CLOSED loan. Always run
     check_noc_eligibility first. Returns the NOC reference number."""
     r = get_redis()
-    loan = r.json().get(f"{config.LOAN_KEY_PREFIX}{lan}")
+    loan = _get_loan(r, lan)
     if not loan or loan["status"] != "closed":
         return "Cannot issue NOC: loan is not closed."
     ref = f"NOC-{lan}-{date.today().strftime('%Y%m%d')}"
@@ -117,7 +131,6 @@ def generate_lan(customer_id: str, product: str, amount: float,
         "tenure_months": tenure_months, "status": "sanctioned",
         "outstanding": amount,
     })
-    r.sadd(f"{config.CUSTOMER_KEY_PREFIX}{customer_id}:loans", lan)
     return json.dumps({"lan": lan, "status": "sanctioned",
                        "next_step": "e-sign the sanction letter, then "
                                     "disbursement can be initiated."})
@@ -129,7 +142,7 @@ def initiate_disbursement(lan: str) -> str:
     'active' and returns the expected credit time."""
     r = get_redis()
     key = f"{config.LOAN_KEY_PREFIX}{lan}"
-    loan = r.json().get(key)
+    loan = r.json().get(key)  # disbursement applies to app-sanctioned loans
     if not loan:
         return f"No loan found for LAN {lan}."
     if loan["status"] != "sanctioned":

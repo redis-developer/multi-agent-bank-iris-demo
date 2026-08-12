@@ -3,19 +3,16 @@
 Run these in the **Redis Insight** panel's Workbench, or from the
 **Terminal** panel with `redis-cli -h redis`.
 
-## The bank's data
+## The bank's data (exists after Section 4's Context Retriever import)
 
 ```bash
-# Customers (hashes)
-HGETALL customer:CUST1001
-SMEMBERS customer:CUST1001:loans
+# Customers / loans / offers — key patterns come from the semantic model
+SCAN 0 MATCH customer:* COUNT 100
+SCAN 0 MATCH loan:* COUNT 100
+SCAN 0 MATCH offer:* COUNT 100
 
-# Loans (JSON)
-JSON.GET loan:LAN20240001 $
-JSON.GET loan:LAN20220042 $.status
-
-# Pre-approved offers (JSON)
-JSON.GET offers:CUST1001 $
+# Loans the bot sanctions itself are JSON
+JSON.GET loan:LAN20260001 $
 
 # NOCs issued during the workshop
 KEYS noc:*
@@ -27,14 +24,14 @@ KEYS noc:*
 # Every index the workshop creates
 FT._LIST
 
-# The loan documents index (Section 1/3)
-FT.INFO idx:loan_docs
+# The FAQ index (Sections 1/3)
+FT.INFO idx:faqs
 
-# Full-text over the chunks (classic search still works)
-FT.SEARCH idx:loan_docs "@content:foreclosure" RETURN 2 doc_title section
+# Full-text over the FAQs (classic search still works)
+FT.SEARCH idx:faqs "@content:foreclosure" RETURN 1 section
 
 # Filter by product tag
-FT.SEARCH idx:loan_docs "@product:{topup_loan}" RETURN 2 doc_title section
+FT.SEARCH idx:faqs "@product:{topup_loan}" RETURN 1 section
 ```
 
 ## Section artifacts

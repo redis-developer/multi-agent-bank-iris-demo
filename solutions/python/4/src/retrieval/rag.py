@@ -6,9 +6,9 @@ step behind the loan_docs agent. The GOING DEEPER exercises add
 `keyword_search` and `hybrid_search`, then race all three.        SOLVED.
 ═══════════════════════════════════════════════════════════════════════
 
-The loan policy documents (in production these are PDFs; here they are
-markdown copies of the same content) are chunked by section, embedded,
-and stored in the Redis index defined in `src/data/loader.py`. The same
+The bank's FAQ knowledge base (data/faqs.json — in production these
+answers come from the policy PDFs) is embedded at startup into the
+index defined in `src/data/loader.py`, one record per FAQ. The same
 index answers three kinds of query:
 
   * keyword — BM25 full-text over the chunk text: exact terms, stemming,

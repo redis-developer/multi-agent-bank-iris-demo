@@ -18,7 +18,10 @@ SOLVED THROUGH SECTION 5.
 
 import time
 
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from contextvars import ContextVar
+
+from langchain_core.messages import (AIMessage, AIMessageChunk, HumanMessage,
+                                     SystemMessage)
 
 from src import config
 from src.agents.graph import build_agent_graph
@@ -45,6 +48,11 @@ CANNED_REPLIES = {
                "LAN, and disbursement. (The journey agent goes live in "
                "Section 4.)",
 }
+
+# Set per-request by POST /api/chat/stream: a callable that receives the
+# reply's tokens as the graph generates them (None = no streaming; plain
+# POST /api/chat never sets it).
+TOKEN_SINK: ContextVar = ContextVar("wa_token_sink", default=None)
 
 FALLBACK_REPLY = ("Namaste! I'm your bank's WhatsApp assistant. I can help "
                   "with your existing loans, loan policy questions, NOCs for "
@@ -119,7 +127,7 @@ class ChatService:
             return self._canned_reply(route), route or "fallback", []
         prior = [HumanMessage(content=m["content"]) if m["role"] == "user"
                  else AIMessage(content=m["content"]) for m in history]
-        result = self.graph.invoke({
+        result = self._invoke_graph({
             "messages": prior + [HumanMessage(content=request.message)],
             "customer_id": request.customer_id,
             "route": route,
@@ -129,6 +137,29 @@ class ChatService:
         return (result["messages"][-1].content,
                 result.get("agent", "supervisor"),
                 result.get("citations", []))
+
+    def _invoke_graph(self, state: dict) -> dict:
+        """Provided: run the graph. When /api/chat/stream registered a
+        token sink for this request, the reply's tokens are pushed to it
+        as the model writes them — same graph, same final result. Tokens
+        from the supervisor's routing decision and from tool-call
+        arguments are not part of the reply, so they are filtered out."""
+        sink = TOKEN_SINK.get()
+        if sink is None:
+            return self.graph.invoke(state)
+        result = None
+        for mode, payload in self.graph.stream(
+                state, stream_mode=["messages", "values"]):
+            if mode == "values":
+                result = payload      # the last one is the final state
+                continue
+            chunk, meta = payload
+            if (isinstance(chunk, AIMessageChunk)
+                    and isinstance(chunk.content, str) and chunk.content
+                    and not chunk.tool_call_chunks
+                    and meta.get("langgraph_node") != "supervisor"):
+                sink(chunk.content)
+        return result
 
     @staticmethod
     def _response(reply: str, *, route: str | None, agent: str, t0: float,

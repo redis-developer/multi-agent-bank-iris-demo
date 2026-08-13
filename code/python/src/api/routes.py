@@ -119,3 +119,53 @@ def chat(request: ChatRequest, http_request: Request) -> ChatResponse:
                    "docker compose restart api",
         )
     return service.chat(request)
+
+
+@router.post("/chat/stream")
+def chat_stream(request: ChatRequest, http_request: Request):
+    """POST /api/chat as Server-Sent Events: `token` events carry the
+    reply as the model writes it; the final `done` event carries the same
+    payload as /api/chat (route, agent, cached, citations, latency).
+    Provided — not an exercise; the chat UI uses this endpoint."""
+    import json
+    import queue
+    import threading
+
+    from fastapi.responses import StreamingResponse
+
+    from src.chat.service import TOKEN_SINK
+
+    service = http_request.app.state.chat_service
+    if service is None:
+        raise HTTPException(
+            status_code=503,
+            detail="The chat pipeline failed to start — usually a missing "
+                   "or invalid OPENAI_API_KEY in .env. Fix it, then run: "
+                   "docker compose restart api",
+        )
+
+    events: queue.Queue = queue.Queue()
+
+    def work() -> None:
+        # The sink is a contextvar, so it is scoped to this request's
+        # worker thread — concurrent plain /api/chat calls never stream.
+        token = TOKEN_SINK.set(lambda text: events.put(("token", text)))
+        try:
+            events.put(("done", service.chat(request).model_dump()))
+        except Exception as error:
+            events.put(("error", f"{type(error).__name__}: {error}"))
+        finally:
+            TOKEN_SINK.reset(token)
+
+    threading.Thread(target=work, daemon=True).start()
+
+    def gen():
+        while True:
+            kind, payload = events.get()
+            yield f"data: {json.dumps({kind: payload})}\n\n"
+            if kind in ("done", "error"):
+                return
+
+    return StreamingResponse(gen(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache",
+                                      "X-Accel-Buffering": "no"})

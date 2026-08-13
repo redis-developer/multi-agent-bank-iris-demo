@@ -55,7 +55,9 @@ async function send() {
   const typing = addBubble("typing…", "bot typing");
 
   try {
-    const res = await fetch("/api/chat", {
+    // /api/chat/stream is SSE: `token` events stream the reply as the
+    // model writes it, `done` carries the /api/chat payload.
+    const res = await fetch("/api/chat/stream", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -64,17 +66,58 @@ async function send() {
         session_id: sessionId,
       }),
     });
-    const data = await res.json();
-    typing.remove();
     if (!res.ok) {
-      addBubble("⚠️ " + (data.detail || "Something went wrong."), "bot");
+      const err = await res.json().catch(() => ({}));
+      typing.remove();
+      addBubble("⚠️ " + (err.detail || "Something went wrong."), "bot");
       return;
     }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "", reply = "", bubble = null, data = null, failed = null;
+
+    const onEvent = evt => {
+      if (evt.token !== undefined) {
+        if (!bubble) { typing.remove(); bubble = addBubble("", "bot"); }
+        reply += evt.token;
+        bubble.innerHTML = format(reply);
+        chatEl.scrollTop = chatEl.scrollHeight;
+      } else if (evt.done) {
+        data = evt.done;
+      } else if (evt.error) {
+        failed = evt.error;
+      }
+    };
+
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const parts = buffer.split("\n\n");
+      buffer = parts.pop();
+      for (const part of parts)
+        if (part.startsWith("data: ")) onEvent(JSON.parse(part.slice(6)));
+    }
+
+    typing.remove();
+    if (failed || !data) {
+      addBubble("⚠️ " + (failed || "The reply never arrived."), "bot");
+      return;
+    }
+    // Cached / canned replies produce no token events — render whole.
+    // Streamed replies get the authoritative final text.
+    if (!bubble) bubble = addBubble(data.reply, "bot");
+    else bubble.innerHTML = format(data.reply);
     const chips = [`<span class="chip">route: ${data.route}</span>`,
                    `<span class="chip">agent: ${data.agent}</span>`,
                    `<span class="chip">${data.latency_ms} ms</span>`];
     if (data.cached) chips.push(`<span class="chip cached">⚡ cache hit</span>`);
-    addBubble(data.reply, "bot", chips.join(""));
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.innerHTML = chips.join("");
+    bubble.after(meta);
+    chatEl.scrollTop = chatEl.scrollHeight;
     setInspector(data);
   } catch (err) {
     typing.remove();

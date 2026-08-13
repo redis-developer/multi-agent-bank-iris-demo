@@ -14,6 +14,7 @@ def get_llm(temperature: float = 0.2) -> ChatOpenAI:
         api_key=config.OPENAI_API_KEY,
         base_url=config.OPENAI_BASE_URL,
         timeout=30,
+        streaming=True,  # tokens reach /api/chat/stream as they're written
     )
 
 

@@ -59,10 +59,9 @@ class Customer(ContextModel):
 #           description="The Loan Account Number (LAN), e.g. LAN20240001",
 #           is_key_component=True)
 #
-# Loan.product and the Offer key fields are already solved — read them
-# as two more worked examples. Every other field (principal, emi,
-# dates, ...) needs nothing. The deploy (step 6) checks every decision
-# and lists any that are still missing.
+# Every field without a TODO (principal, emi, dates, ...) is complete
+# as written — leave it alone. The deploy (step 6) checks every
+# decision and lists any that are still missing.
 # ═══════════════════════════════════════════════════════════════════════
 class Loan(ContextModel):
     """A loan account, identified by its LAN."""
@@ -81,7 +80,6 @@ class Loan(ContextModel):
     customer_id: str = ContextField(
         description="The owning customer's ID")
 
-    # solved for you — same pattern as your status TODO below:
     product: str = ContextField(
         description="The loan product", index="tag",
         allowed_values=["personal_loan", "topup_loan", "home_decor_loan"])
@@ -116,9 +114,6 @@ class Offer(ContextModel):
 
     __redis_key_template__ = "offer:{customer_id}:{product}"
 
-    # solved for you — a composite key: BOTH fields below are key
-    # components ("offer:{customer_id}:{product}"), and both are tags so
-    # the sales agent can filter offers by customer or product:
     customer_id: str = ContextField(
         description="The customer the offer belongs to",
         is_key_component=True, index="tag")

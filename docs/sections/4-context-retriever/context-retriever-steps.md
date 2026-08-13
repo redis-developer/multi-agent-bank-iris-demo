@@ -75,14 +75,13 @@
    | `Loan.status` | `index="tag"` + `allowed_values=[...]` | the NOC agent wants `closed` only |
    | `Offer.note` | `index="text"` | pitch notes are prose — match words, not values |
 
-   Two more patterns come pre-solved — read them on the way:
-   `Loan.product` (same shape as your `status` decision) and the
-   `Offer` key fields (a **composite** key: both `customer_id` and
-   `product` are key components *and* tags). Fields you *don't* index
-   (principal, EMI, dates…) still come back in results — indexing
-   decides what you can *look up by*, not what you get. Don't worry
-   about missing one: the deploy (step 6) checks every decision and
-   lists any that are still TODO.
+   Worth reading on the way: `Loan.product` (the same shape as your
+   `status` decision) and the `Offer` key fields (a **composite** key:
+   both `customer_id` and `product` are key components *and* tags).
+   Fields you *don't* index (principal, EMI, dates…) still come back in
+   results — indexing decides what you can *look up by*, not what you
+   get. Don't worry about missing one: the deploy (step 6) checks every
+   decision and lists any that are still TODO.
 
    > Modeling has three official paths — the Redis Cloud console UI, the
    > `ctxctl` CLI, and the Python client. The workshop uses the Python

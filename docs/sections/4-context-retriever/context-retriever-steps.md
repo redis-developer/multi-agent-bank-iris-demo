@@ -31,24 +31,18 @@
    The servicing agent that picked up the question has no path to that
    row: look at its toolbox in `src/agents/personas.py` — the ACTION
    tools are hand-written, but every READ tool is meant to come from the
-   Context Retriever, and nothing has been built there yet. All the
-   agents hold today is a placeholder — see for yourself in the
-   **Terminal** panel:
-
-   ```bash
-   curl -s http://api:8000/api/context/tools | jq
-   ```
+   Context Retriever, and nothing has been built there yet. 
 
    Closing that gap — from RAG over documents to a **context engine**
    with governed, schema-first access to the bank's entities (customers,
    loans, offers) — is what turns the generic reply into *"₹2,38,101
-   outstanding on LAN20240001"*. It's the same pattern every agent in
-   [redis/redis-iris-demos](https://github.com/redis/redis-iris-demos)
-   is built on.
+   outstanding on LAN20240001"*.
 
 3. **Create the Context Retriever service.** In the [Redis Cloud
    console](https://cloud.redis.io/), select **Context Retriever** from
-   the left-hand menu and create a service against your free database.
+   the left-hand menu, then choose **Custom service creation** (not
+   "Create with CLI" — the workshop drives the client itself) and create
+   the service against your free database.
    Copy the **admin API key** when it appears — *it is shown only once*.
    In the **Code** panel, open `.env` (workspace root, next to `src/`),
    add the line, and save:

@@ -40,11 +40,19 @@ if [[ ! -d "$SRC" ]]; then
   exit 1
 fi
 
+# A snapshot is the FULL state of every exercise file after that section:
+# earlier sections' files arrive solved, later sections' files arrive as
+# starters (so solving backwards reverts later work — that's intentional).
+# Only files that actually differ are copied.
 echo "Applying snapshot '$SNAPSHOT' to $DEST ..."
 ( cd "$SRC" && find . -type f -name '*.py' ) | while read -r file; do
   mkdir -p "$DEST/$(dirname "$file")"
-  cp "$SRC/$file" "$DEST/$file"
-  echo "  -> $file"
+  if cmp -s "$SRC/$file" "$DEST/$file" 2>/dev/null; then
+    echo "  == $file (already matches)"
+  else
+    cp "$SRC/$file" "$DEST/$file"
+    echo "  -> $file (updated)"
+  fi
 done
 
 # The chat pipeline is built once at startup, so restart the api container

@@ -33,6 +33,33 @@ paying off.
 - **Priya (CUST1003)** — closed loan, *no* offers (sales agent must be honest).
 - **Arjun (CUST1004)** — new customer, KYC pending (journey agent friction).
 
+## Pre-workshop email to participants
+
+Send this checklist at least two days before; items 2 and 3 are the ones
+people fail to do on the day.
+
+1. **A laptop with Docker Desktop** (or Docker Engine + Compose v2) and
+   **git** installed. Verify with `docker compose version`.
+2. **A free Redis Cloud account with a free database** — sign up at
+   <https://cloud.redis.io/>, then **Databases → New database → Free**
+   (30MB tier is enough). Keep the login: the workshop returns to the
+   console to provision Context Retriever (Section 4), Agent Memory
+   (Section 5), and LangCache (Section 6). Note the database's **public
+   endpoint** and **default-user password** — they go into `.env` at
+   setup.
+3. **An OpenAI API key** (LLM + embeddings), unless the facilitator is
+   handing out shared keys on the day.
+4. **A network that allows outbound HTTPS** to `api.openai.com` and
+   `cloud.redis.io` / `*.redis.io`, **and outbound TCP to your cloud
+   database's port** (a five-digit port like `16279`, not 443 —
+   corporate networks and strict VPNs often block it; test with
+   `redis-cli -u <your-REDIS_URL> ping` or plan to hotspot).
+5. **Free local ports**: 80 (workbench), 3000, 3001, 8000, 8088, 5540.
+6. A modern browser (Chrome/Edge/Firefox). No Python or IDE setup — the
+   workshop runs everything in containers, with VS Code and a terminal
+   in the browser. Exercises are copy-paste / uncomment level; basic
+   Python reading fluency is enough.
+
 ## Things that go wrong
 
 - **No Redis Cloud accounts on the day**: Sections 4 (Context Retriever —

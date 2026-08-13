@@ -1,7 +1,7 @@
 """Deploy the bank's semantic model to the Redis Context Retriever.
 
 ═══════════════════════════════════════════════════════════════════════
-SECTION 4 - CONTEXT RETRIEVER: this file is an exercise file.
+SECTION 4 - CONTEXT RETRIEVER: this file is an exercise file.    SOLVED.
 ═══════════════════════════════════════════════════════════════════════
 
 Run it from the Terminal panel once both Section 4 exercises are done
@@ -72,10 +72,17 @@ async def deploy() -> dict:
     #      service, validated against your model on the way in
     # Finish with:  return await _finish(client, surface, agent_key,
     #                                    imported, len(records))
+    # Solved.
     # ═══════════════════════════════════════════════════════════════════
-    return {"error": "The context surface is not built yet — complete the "
-                     "SECTION 4 (surface) banner in "
-                     "src/context/deploy.py, then re-run this deploy."}
+    surface = await client.create_context_surface(
+        config.CTX_ADMIN_KEY, SURFACE_NAME, data_model=data_model,
+        description="Bank Iris workshop surface")
+    agent_key = await client.create_agent_key(
+        config.CTX_ADMIN_KEY, surface.id, "wa-bot",
+        description="Scoped key for the WhatsApp bot's agents")
+    imported = await client.import_data(config.CTX_ADMIN_KEY, surface.id,
+                                        records)
+    return await _finish(client, surface, agent_key, imported, len(records))
 
 
 async def _finish(client, surface, agent_key, imported,

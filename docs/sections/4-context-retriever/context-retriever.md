@@ -44,13 +44,12 @@ patterns, ownership, relationships — and the retrieval tools are
   another customer's loan is simply refused, no matter what the LLM asks
   for.
 
-This section uses the **actual managed service**, provisioned from the
-Redis Cloud console you set up in Getting started. You'll model the bank's
-entities in code — `ContextModel` classes from the
-`redis-context-retriever` Python client — deploy them to a context
-surface, import the bank's records through the service, and watch the
-agents come alive on tools you never wrote: the service generates them
-from your model and serves them over MCP, called with a scoped agent key.
+You'll model the bank's entities in code — `ContextModel` classes from the
+`redis-context-retriever` Python client — then build a **context surface**
+(the service's name for a deployed model), import the bank's records
+through it, and watch the agents come alive on tools you never wrote: the
+service generates them from your model and serves them over MCP, called
+with a scoped agent key.
 
 [steps](context-retriever-steps.md ':include')
 

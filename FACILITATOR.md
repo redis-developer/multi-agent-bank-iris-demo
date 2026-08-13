@@ -41,15 +41,17 @@ paying off.
   in the pre-workshop email (it's Step 1 of Getting started), and keep
   one shared set of service credentials on a slide as the fallback for
   anyone stuck at signup.
-- **VERIFY BEFORE THE DAY — the cloud path end to end**: run Step 1 +
-  Sections 1 and 4 once against a real Redis Cloud database and Context
-  Retriever service. Three things to confirm: the client integration
-  (deploy + generated tool names + MCP calls — built against
-  `redis-context-retriever` 0.0.6, mock-tested only), the storage format
-  of imported records (the NOC action tool reads them; it tolerates JSON
-  and hash), and the cloud DB's Redis version — Section 3's *hybrid*
-  exercise needs FT.HYBRID (Redis 8.4+); if the free tier is older, demo
-  hybrid on the local fallback container or skip step 9's hybrid race.
+- **VERIFY BEFORE THE DAY — Section 4 against a live service**: the
+  cloud *database* path is verified (2026-08-13, free tier, Redis 8.6:
+  .env hot-reload → FAQ seeding, router index, and all three retrieval
+  modes including FT.HYBRID all pass on Redis Cloud). Still unverified:
+  the Context Retriever service itself — run Section 4 once end to end
+  (create the service, deploy, generated tool names, MCP calls — the
+  client integration is built against `redis-context-retriever` 0.0.6
+  and mock-tested only), and confirm the storage format of imported
+  records (the NOC action tool reads them; it tolerates JSON and hash).
+  Sections 5/6's managed services (Agent Memory, LangCache) also deserve
+  one live pass.
 - **Service keys are shown once**: both Agent Memory and LangCache display
   the API key only at creation. Say it out loud before anyone clicks
   Create; regenerating from the service page is the recovery.

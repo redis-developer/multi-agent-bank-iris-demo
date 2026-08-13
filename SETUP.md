@@ -84,7 +84,8 @@ and RedisVL's `OpenAITextVectorizer`).
 | 401 from OpenAI in api logs | Bad/expired key, or your proxy needs `OPENAI_BASE_URL` |
 | Replies say "brain is still being built" after solving a section | The reload usually takes 1–2s; check `docker compose logs api` for `Chat pipeline ready`, or restart with `docker compose restart api` |
 | Router behaves oddly after threshold experiments | Reset thresholds in `.env`, `FLUSHALL`, restart api |
-| Section 4: agents say the Context Retriever isn't deployed | Complete `src/context/models.py`, set `CTX_ADMIN_KEY` in `.env` (Code panel, save — api reloads), run `python -m src.context.deploy` from the Terminal, then reload the api |
+| Section 4: agents say the Context Retriever isn't deployed | Complete `src/context/models.py`, mint the admin key with `python -m src.context.bootstrap` (Terminal; writes `CTX_ADMIN_KEY` to `.env` — api reloads), run `python -m src.context.deploy`, then reload the api |
+| Section 4: bootstrap login fails | Wrong password, or the account signs in with Google/SSO (no password for direct login) — mint the key in the console instead: Context Retriever → Create with CLI, paste it into `.env` as `CTX_ADMIN_KEY` |
 | Section 6: "LangCache is not configured" in api logs | Set `LANGCACHE_URL` / `LANGCACHE_CACHE_ID` / `LANGCACHE_API_KEY` in `.env` (Code panel, save — api reloads) |
 | Section 6: 401/403 from LangCache | The service key is shown only once at creation — generate a new key from the service's page in the Redis Cloud console |
 | Section 5: follow-ups work but cross-session recall doesn't | Long-term extraction is a background job — wait a few seconds; check `docker compose logs agent-memory` |

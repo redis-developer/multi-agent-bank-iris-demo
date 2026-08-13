@@ -38,26 +38,33 @@
    loans, offers) — is what turns the generic reply into *"₹2,38,101
    outstanding on LAN20240001"*.
 
-3. **Create the Context Retriever service.** In the [Redis Cloud
-   console](https://cloud.redis.io/), select **Context Retriever** from
-   the left-hand menu, then choose **Create with CLI**. That path
-   provisions the service and hands you the **admin API key** with
-   nothing modeled yet — skip *Custom service creation*, which walks you
-   through clicking the entities together in the console; your entities
-   are about to live in code. Ignore the `ctxctl` commands the console
-   shows: the workshop drives the same admin API through the official
-   Python client instead.
-
-   Copy the **admin API key** when it appears — *it is shown only once*.
-   In the **Code** panel, open `.env` (workspace root, next to `src/`),
-   add the line, and save:
+3. **Bootstrap the service — mint the admin key in code.** Everything
+   the `redis-context-retriever` SDK can do, this workshop does in SDK
+   code — including the bootstrap the console page would do. From the
+   **Terminal** panel:
 
    ```bash
-   CTX_ADMIN_KEY=<your-admin-key>
+   cd /workshop/code/python
+   python -m src.context.bootstrap
    ```
 
-   The api watches `.env` and reloads itself within a few seconds of
-   the save — no restarts, no leaving the browser.
+   It asks for your Redis Cloud email + password, logs in with the
+   SDK's own Redis Cloud auth service (the same session your browser
+   console holds), mints the **admin API key** — the root credential
+   every later call authenticates with — and writes `CTX_ADMIN_KEY`
+   into `.env` for you. The api watches `.env` and reloads itself
+   within a few seconds — no restarts, no leaving the browser.
+   (`src/context/bootstrap.py` is provided — read it: two SDK calls,
+   a login and a key mint.)
+
+   > **Signing in to Redis Cloud with Google/SSO?** The direct login
+   > needs a password, so use the console fallback: at
+   > [cloud.redis.io](https://cloud.redis.io/) select **Context
+   > Retriever** → **Create with CLI**, copy the admin key it shows
+   > (*only once*), and paste it into `.env` in the **Code** panel as
+   > `CTX_ADMIN_KEY=<key>`. Either way, skip *Custom service creation*
+   > — that path clicks the entities together in the UI, and your
+   > entities are about to live in code.
 
 4. **Exercise — model the bank.** Open `src/context/models.py`. The
    `Customer` entity is the worked example: a `ContextModel` with a

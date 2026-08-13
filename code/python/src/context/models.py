@@ -45,31 +45,49 @@ class Customer(ContextModel):
 # The Loan and Offer entities are already written — every field, typed
 # and described. What's missing is how each field is *accessed*: which
 # fields form the Redis key, which are filterable, which are searchable.
-# Each `# TODO` below is one decision — solve it by adding the keyword
-# argument it names to the `ContextField(...)` call under it (see
-# Customer above for every pattern). The deploy (step 6) checks these
-# and tells you which are still missing.
+#
+# Seven decisions, each marked  # TODO(<field>)  — the name says which
+# field it belongs to, and that field is always DIRECTLY BELOW the
+# comment. Copy the argument(s) from the comment into that field's
+# ContextField(...) call. Like this:
+#
+#   Before:
+#       lan: str = ContextField(
+#           description="The Loan Account Number (LAN), e.g. LAN20240001")
+#   After:
+#       lan: str = ContextField(
+#           description="The Loan Account Number (LAN), e.g. LAN20240001",
+#           is_key_component=True)
+#
+# The other fields (principal, emi, dates, ...) need nothing — leave
+# them as they are. The deploy (step 6) checks every decision and lists
+# any that are still missing.
 # ═══════════════════════════════════════════════════════════════════════
 class Loan(ContextModel):
     """A loan account, identified by its LAN."""
 
     __redis_key_template__ = "loan:{lan}"
 
-    # TODO: the key template "loan:{lan}" is built from this field —
-    #       add  is_key_component=True
+    # TODO(lan) — the key "loan:{lan}" is built from this field.
+    #   Add to the ContextField below:
+    #       is_key_component=True
     lan: str = ContextField(
         description="The Loan Account Number (LAN), e.g. LAN20240001")
-    # TODO: "what's the outstanding on MY loans?" = filter by owner —
-    #       add  index="tag"
+
+    # TODO(customer_id) — "what's the outstanding on MY loans?" means
+    #   filtering loans by owner. Add to the ContextField below:
+    #       index="tag"
     customer_id: str = ContextField(
         description="The owning customer's ID")
-    # TODO: agents filter by product too, and the values are a closed
-    #       set — add
+
+    # TODO(product) — agents filter by product, and the values are a
+    #   closed set. Add to the ContextField below:
     #       index="tag",
     #       allowed_values=["personal_loan", "topup_loan",
     #                       "home_decor_loan"]
     product: str = ContextField(
         description="The loan product")
+
     principal: float = ContextField(
         description="Sanctioned amount in rupees")
     annual_rate: float = ContextField(
@@ -80,10 +98,14 @@ class Loan(ContextModel):
         description="Monthly instalment (EMI) in rupees")
     outstanding: float = ContextField(
         description="Current outstanding principal in rupees")
-    # TODO: the NOC agent needs closed loans only — add
-    #       index="tag", allowed_values=["sanctioned", "active", "closed"]
+
+    # TODO(status) — the NOC agent needs closed loans only.
+    #   Add to the ContextField below:
+    #       index="tag",
+    #       allowed_values=["sanctioned", "active", "closed"]
     status: str = ContextField(
         description="Loan lifecycle state")
+
     disbursed_on: str = ContextField(
         description="Disbursement date (YYYY-MM-DD)", default="")
     closed_on: str = ContextField(
@@ -96,15 +118,19 @@ class Offer(ContextModel):
 
     __redis_key_template__ = "offer:{customer_id}:{product}"
 
-    # TODO: a composite key — this field is part of it, and the sales
-    #       agent filters offers by customer.
-    #       add  is_key_component=True, index="tag"
+    # TODO(customer_id) — half of the composite key
+    #   "offer:{customer_id}:{product}", and the sales agent filters
+    #   offers by customer. Add to the ContextField below:
+    #       is_key_component=True, index="tag"
     customer_id: str = ContextField(
         description="The customer the offer belongs to")
-    # TODO: the other half of the key, also filterable —
-    #       add  is_key_component=True, index="tag"
+
+    # TODO(product) — the other half of the key, also filterable.
+    #   Add to the ContextField below:
+    #       is_key_component=True, index="tag"
     product: str = ContextField(
         description="The offered product")
+
     amount: float = ContextField(
         description="Pre-approved amount in rupees")
     annual_rate: float = ContextField(
@@ -113,8 +139,10 @@ class Offer(ContextModel):
         description="Maximum tenure in months", default=0)
     valid_till: str = ContextField(
         description="Offer expiry date (YYYY-MM-DD)", default="")
-    # TODO: pitch notes are prose, matched by words not exact values —
-    #       add  index="text"
+
+    # TODO(note) — pitch notes are prose, matched by words rather than
+    #   exact values. Add to the ContextField below:
+    #       index="text"
     note: str = ContextField(
         description="Offer conditions and pitch notes", default="")
 

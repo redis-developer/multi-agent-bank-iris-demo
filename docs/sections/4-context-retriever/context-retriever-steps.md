@@ -62,8 +62,11 @@
    The **Loan** and **Offer** entities are already written — every
    field, typed and described. What's left is the part that actually
    shapes the generated tools: **how each field is accessed**. Seven
-   `# TODO` markers, each one keyword argument (the comment names it —
-   copy it into the `ContextField(...)` call below it):
+   markers, each named after its field — `# TODO(status)` belongs to
+   the `status` field **directly below** the comment. Copy the
+   argument(s) shown in the comment into that field's
+   `ContextField(...)` call (the banner in the file shows a
+   before/after example):
 
    | Field | Add | Because |
    |---|---|---|

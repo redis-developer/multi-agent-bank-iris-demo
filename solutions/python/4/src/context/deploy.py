@@ -128,6 +128,13 @@ def _model_gaps(data_model: dict) -> list[str]:
         no_index = kind in ("index", "both") and not field.get("redis_indices")
         if no_key or no_index:
             gaps.append(f"{entity}.{name} needs {fix}")
+    # The reverse mistake: a TODO's arguments pasted onto the wrong field.
+    for (entity, name), field in fields.items():
+        if entity == "Customer" or (entity, name) in needed:
+            continue
+        if field.get("redis_indices") or field.get("is_key_component"):
+            gaps.append(f"{entity}.{name} should not be indexed — did a "
+                        "TODO land on the wrong field?")
     return gaps
 
 

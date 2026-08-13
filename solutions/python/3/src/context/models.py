@@ -40,21 +40,76 @@ class Customer(ContextModel):
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# SECTION 4 - CONTEXT RETRIEVER (model): declare the remaining entities —
-# Loan and Offer — following the Customer example above.
+# SECTION 4 - CONTEXT RETRIEVER (model): declare the remaining entities.
+# The Loan and Offer classes are written below, commented out. Two edits:
 #
-#   Loan  — key "loan:{lan}"; looked up by lan (is_key_component). Fields:
-#           customer_id (tag), product (tag: personal_loan / topup_loan /
-#           home_decor_loan), principal, annual_rate, tenure_months, emi,
-#           outstanding, status (tag: sanctioned / active / closed),
-#           disbursed_on, closed_on. Give every field a description the
-#           agents can act on.
-#   Offer — key "offer:{customer_id}:{product}"; both key components.
-#           Fields: amount, annual_rate, max_tenure_months, valid_till,
-#           note (text-indexed).
+#   1. Uncomment the two classes (select the block, press Cmd+/ or
+#      Ctrl+/ in the Code panel).
+#   2. Add both to BANK_ENTITIES at the bottom of the file:
+#          BANK_ENTITIES: list[type[ContextModel]] = [Customer, Loan,
+#                                                     Offer]
 #
-# Then add both classes to BANK_ENTITIES below.
+# As you uncomment, read what each declaration buys you: the key
+# template puts every record at a predictable Redis key; descriptions
+# are what the agents (and the generated tools) read; index="tag" makes
+# a field filterable; is_key_component fields form the key.
 # ═══════════════════════════════════════════════════════════════════════
+
+# class Loan(ContextModel):
+#     """A loan account, identified by its LAN."""
+#
+#     __redis_key_template__ = "loan:{lan}"
+#
+#     lan: str = ContextField(
+#         description="The Loan Account Number (LAN), e.g. LAN20240001",
+#         is_key_component=True)
+#     customer_id: str = ContextField(
+#         description="The owning customer's ID", index="tag")
+#     product: str = ContextField(
+#         description="The loan product", index="tag",
+#         allowed_values=["personal_loan", "topup_loan", "home_decor_loan"])
+#     principal: float = ContextField(
+#         description="Sanctioned amount in rupees")
+#     annual_rate: float = ContextField(
+#         description="Interest rate, percent per annum, reducing balance")
+#     tenure_months: int = ContextField(
+#         description="Loan tenure in months")
+#     emi: float = ContextField(
+#         description="Monthly instalment (EMI) in rupees")
+#     outstanding: float = ContextField(
+#         description="Current outstanding principal in rupees")
+#     status: str = ContextField(
+#         description="Loan lifecycle state", index="tag",
+#         allowed_values=["sanctioned", "active", "closed"])
+#     disbursed_on: str = ContextField(
+#         description="Disbursement date (YYYY-MM-DD)", default="")
+#     closed_on: str = ContextField(
+#         description="Closure date (YYYY-MM-DD); empty while active",
+#         default="")
+
+
+# class Offer(ContextModel):
+#     """A live pre-approved offer for a customer."""
+#
+#     __redis_key_template__ = "offer:{customer_id}:{product}"
+#
+#     customer_id: str = ContextField(
+#         description="The customer the offer belongs to",
+#         is_key_component=True, index="tag")
+#     product: str = ContextField(
+#         description="The offered product", is_key_component=True,
+#         index="tag")
+#     amount: float = ContextField(
+#         description="Pre-approved amount in rupees")
+#     annual_rate: float = ContextField(
+#         description="Offered rate, percent per annum")
+#     max_tenure_months: int = ContextField(
+#         description="Maximum tenure in months", default=0)
+#     valid_till: str = ContextField(
+#         description="Offer expiry date (YYYY-MM-DD)", default="")
+#     note: str = ContextField(
+#         description="Offer conditions and pitch notes", index="text",
+#         default="")
 
 
 # Every entity in this list is deployed to the Context Retriever surface.

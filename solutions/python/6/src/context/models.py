@@ -40,9 +40,14 @@ class Customer(ContextModel):
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# SECTION 4 - CONTEXT RETRIEVER (model): declare the remaining entities —
-# Loan and Offer. Solved.
+# SECTION 4 - CONTEXT RETRIEVER (model): declare the remaining entities.
+# Solved: the Loan and Offer classes are uncommented and both are in
+# BANK_ENTITIES. Read what each declaration buys you: the key template
+# puts every record at a predictable Redis key; descriptions are what
+# the agents (and the generated tools) read; index="tag" makes a field
+# filterable; is_key_component fields form the key.
 # ═══════════════════════════════════════════════════════════════════════
+
 class Loan(ContextModel):
     """A loan account, identified by its LAN."""
 
@@ -98,7 +103,6 @@ class Offer(ContextModel):
     note: str = ContextField(
         description="Offer conditions and pitch notes", index="text",
         default="")
-
 
 # Every entity in this list is deployed to the Context Retriever surface.
 BANK_ENTITIES: list[type[ContextModel]] = [Customer, Loan, Offer]

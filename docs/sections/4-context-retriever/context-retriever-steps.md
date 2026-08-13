@@ -38,9 +38,7 @@
    loans, offers) — is what turns the generic reply into *"₹2,38,101
    outstanding on LAN20240001"*.
 
-3. **Create the admin API key.** The one thing the client can't mint for
-   itself is its root credential. Open the console's [Admin keys
-   page](https://cloud.redis.io/#/context-retriever/admin-keys)
+3. **Create the admin API key.** The admin key is the credential developers use to manage Context Retriever itself — creating, updating, and deleting services/surfaces, and issuing agent keys. Open the console's [Admin keys page](https://cloud.redis.io/#/context-retriever/admin-keys)
    (**Context Retriever → Admin keys**), create a key, and copy it —
    *it is shown only once*. In the **Code** panel, open `.env`
    (workspace root, next to `src/`), add the line, and save:
@@ -50,23 +48,32 @@
    ```
 
    The api watches `.env` and reloads itself within a few seconds of
-   the save — no restarts, no leaving the browser.
-
-   That key is the *only* thing the console is for: skip the service
-   creation wizard entirely (it walks you through clicking entities
-   together in the UI, and skip the `ctxctl` CLI it offers too). Every
-   step from here — the service's surface, your database binding, the
-   agent key, the data import, the generated tools — is the official
-   `redis-context-retriever` Python client, in code you can read.
+   the save, no restarts required. From here, the context service's surface creation, your database binding, the
+   agent key creation, the data import and the tools generation will be done using the official `redis-context-retriever` Python client.
 
 4. **Exercise — model the bank.** Open `src/context/models.py`. The
    `Customer` entity is the worked example: a `ContextModel` with a
    `__redis_key_template__`, and a `ContextField` per attribute — the
    `description` is what the agents will read, `index="tag"` makes a field
    filterable, `index="text"` makes it searchable, `is_key_component=True`
-   marks the fields that form the key. Under the `SECTION 4` banner,
-   declare **Loan** and **Offer** the same way (the banner lists their
-   keys and fields), and add both to `BANK_ENTITIES`.
+   marks the fields that form the key.
+
+   Under the `SECTION 4` banner, the **Loan** and **Offer** entities are
+   already written — commented out. Two edits:
+
+   1. **Uncomment the two classes**: select the whole block and press
+      `Cmd+/` (`Ctrl+/` on Windows/Linux) in the Code panel.
+   2. **Register them for deployment** — at the bottom of the file:
+
+      ```python
+      BANK_ENTITIES: list[type[ContextModel]] = [Customer, Loan, Offer]
+      ```
+
+   Save, and read what you just enabled while the api reloads:
+   `loan:{lan}` puts every loan at a predictable Redis key;
+   `customer_id` is a tag, so agents can filter loans by owner;
+   `status` only allows `sanctioned` / `active` / `closed` — the model
+   is the contract everything downstream is generated from.
 
    > Modeling has three official paths — the Redis Cloud console UI, the
    > `ctxctl` CLI, and the Python client. The workshop uses the Python

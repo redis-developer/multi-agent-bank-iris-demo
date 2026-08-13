@@ -74,22 +74,37 @@ async def deploy() -> dict:
     async with _client() as client:
         # ═══════════════════════════════════════════════════════════════
         # SECTION 4 - CONTEXT RETRIEVER (surface): build the context
-        # surface.
-        #   1. create_context_surface(...) — deploy the model; the
-        #      *surface* is the deployed model, the unit the service
-        #      generates the retrieval tools from (it carries the
-        #      connection to YOUR database — provided, see _client below)
+        # surface. A context surface is simply your model, deployed:
+        # hand the service the model, and it gives back retrieval tools
+        # and a governed access point to the data. Three calls:
+        #
+        #   1. create_context_surface(...) — push the model to the
+        #      service (the surface also carries the connection to YOUR
+        #      database — built for you in _client below)
         #   2. create_agent_key(...) — mint the bot's scoped runtime
         #      credential (agents get a key, never database credentials)
-        #   3. import_data(...) — push the bank's records through the
-        #      service, one batch per entity, validated against your
-        #      model on the way in
-        # Finish with:  return await _finish(client, surface, agent_key,
-        #                                    imported, records)
+        #   3. import_data(...) — the bank's records, one batch per
+        #      entity, validated against your model on the way in
+        #
+        # The solution is written below, commented out. Select the
+        # block, press Cmd+/ (Ctrl+/ on Windows/Linux), save — the
+        # stub return underneath becomes unreachable and can be deleted.
         # ═══════════════════════════════════════════════════════════════
-        return {"error": "The context surface is not built yet — complete "
-                         "the SECTION 4 (surface) banner in "
-                         "src/context/deploy.py, then re-run this deploy."}
+        # surface = await client.create_context_surface(
+        #     config.CTX_ADMIN_KEY, SURFACE_NAME, data_model=data_model,
+        #     description="Customers, loans, and pre-approved offers for "
+        #                 "the bank's WhatsApp servicing bot")
+        # agent_key = await client.create_agent_key(
+        #     config.CTX_ADMIN_KEY, surface.id, "wa-bot",
+        #     description="Scoped key for the WhatsApp bot's agents")
+        # imported = [await client.import_data(config.CTX_ADMIN_KEY,
+        #                                      surface.id, batch)
+        #             for batch in records.values()]
+        # return await _finish(client, surface, agent_key, imported, records)
+        return {"error": "The context surface is not built yet — "
+                         "uncomment the solution block right above this "
+                         "return in src/context/deploy.py, then re-run "
+                         "this deploy."}
 
 
 

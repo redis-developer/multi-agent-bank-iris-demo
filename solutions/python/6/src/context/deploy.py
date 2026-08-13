@@ -74,18 +74,19 @@ async def deploy() -> dict:
     async with _client() as client:
         # ═══════════════════════════════════════════════════════════════
         # SECTION 4 - CONTEXT RETRIEVER (surface): build the context
-        # surface.
-        #   1. create_context_surface(...) — deploy the model; the
-        #      *surface* is the deployed model, the unit the service
-        #      generates the retrieval tools from (it carries the
-        #      connection to YOUR database — provided, see _client below)
+        # surface. A context surface is simply your model, deployed:
+        # hand the service the model, and it gives back retrieval tools
+        # and a governed access point to the data. Three calls:
+        #
+        #   1. create_context_surface(...) — push the model to the
+        #      service (the surface also carries the connection to YOUR
+        #      database — built for you in _client below)
         #   2. create_agent_key(...) — mint the bot's scoped runtime
         #      credential (agents get a key, never database credentials)
-        #   3. import_data(...) — push the bank's records through the
-        #      service, one batch per entity, validated against your
-        #      model on the way in
-        # Finish with:  return await _finish(client, surface, agent_key,
-        #                                    imported, records)
+        #   3. import_data(...) — the bank's records, one batch per
+        #      entity, validated against your model on the way in
+        #
+        # Solved: the three calls are live below.
         # ═══════════════════════════════════════════════════════════════
         surface = await client.create_context_surface(
             config.CTX_ADMIN_KEY, SURFACE_NAME, data_model=data_model,

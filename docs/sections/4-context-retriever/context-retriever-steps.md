@@ -88,40 +88,34 @@
    > client so the model lives in code, next to the bot that depends on
    > it; the same classes could be clicked together in the console.
 
-5. **Exercise — build the context surface.** A **context surface** is
-   your model, deployed: the unit the service generates retrieval tools
-   from. Open `src/context/deploy.py` — the scaffolding is provided (the
-   guards, the model export from your classes, the bank's records, the
-   reporting). Under the `SECTION 4 - CONTEXT RETRIEVER (surface)`
-   banner, drive the `redis-context-retriever` client yourself, replacing
-   the stub:
+5. **Exercise — build the context surface.** Don't let the name scare
+   you: a **context surface** is just *your model from step 4, deployed
+   to the service*. You hand it the model; it hands back generated
+   retrieval tools and a governed door to your data.
 
-   ```python
-   surface = await client.create_context_surface(
-       config.CTX_ADMIN_KEY, SURFACE_NAME, data_model=data_model,
-       description="Customers, loans, and pre-approved offers for "
-                   "the bank's WhatsApp servicing bot")
-   agent_key = await client.create_agent_key(
-       config.CTX_ADMIN_KEY, surface.id, "wa-bot",
-       description="Scoped key for the WhatsApp bot's agents")
-   imported = [await client.import_data(config.CTX_ADMIN_KEY,
-                                        surface.id, batch)
-               for batch in records.values()]
-   return await _finish(client, surface, agent_key, imported, records)
-   ```
+   Open `src/context/deploy.py` and find the `SECTION 4 - CONTEXT
+   RETRIEVER (surface)` banner. The solution is already written there,
+   commented out — same drill as step 4:
 
-   Three calls, three concepts: the **surface** (your deployed model),
-   the **agent key** (the bot's scoped, revocable runtime credential —
-   agents never hold database credentials), and the **import** (the
-   bank's records pushed *through the service* one entity at a time,
-   each batch validated against your model on the way in).
+   1. Select the commented block under the banner.
+   2. Press `Cmd+/` (`Ctrl+/` on Windows/Linux) and save. (The
+      `return {"error": ...}` stub below it is now unreachable —
+      delete it or leave it.)
 
-   One thing rides along that you didn't type: the surface is created
-   with a `data_source` — the connection to **your** Redis Cloud
-   database, built from `REDIS_URL` by the provided `_client()` helper
-   (the same thing `ctxctl context-surface create --redis-addr ...`
-   sends). That binding is how the service knows which database to
-   store and serve the bank's rows from.
+   You just enabled three client calls — read them, they're the whole
+   Context Retriever lifecycle:
+
+   | Call | What it creates | Why it matters |
+   |---|---|---|
+   | `create_context_surface` | the **surface** — your model, deployed | the service generates the tools from it |
+   | `create_agent_key` | the bot's **agent key** | scoped, revocable — agents never hold database credentials |
+   | `import_data` | the bank's **records**, one batch per entity | validated against your model on the way in |
+
+   One thing rides along that you didn't type: the surface carries a
+   `data_source` — the connection to **your** Redis Cloud database,
+   built from `REDIS_URL` by the provided `_client()` helper. That
+   binding is how the service knows which database to store and serve
+   the bank's rows from.
 
 6. **Run the deploy.** From the **Terminal** panel:
 

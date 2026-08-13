@@ -1,7 +1,7 @@
 """Deploy the bank's semantic model to the Redis Context Retriever.
 
 ═══════════════════════════════════════════════════════════════════════
-SECTION 4 - CONTEXT RETRIEVER: this file is an exercise file.    SOLVED.
+SECTION 4 - CONTEXT RETRIEVER: this file is an exercise file.
 ═══════════════════════════════════════════════════════════════════════
 
 Run it from the Terminal panel once both Section 4 exercises are done
@@ -10,20 +10,23 @@ Run it from the Terminal panel once both Section 4 exercises are done
     cd /workshop/code/python
     python -m src.context.deploy
 
-Provided here: the guards, the model export, the bank's records, and the
+Provided here: the guards, the client (extended to bind the surface to
+YOUR Redis database), the model export, the bank's records, and the
 reporting. The exercise is the heart of it — driving the
 `redis-context-retriever` client to build the **context surface** (your
 deployed model), mint the bot's scoped **agent key**, and import the
 records through the service.
 
-Requires CTX_ADMIN_KEY in .env (from your Context Retriever service in
-the Redis Cloud console). CTX_API_URL / CTX_MCP_URL default to the
-managed endpoints. (POST /api/context/deploy runs this same function.)
+Requires CTX_ADMIN_KEY in .env (shown once when you create the Context
+Retriever service in the Redis Cloud console). CTX_API_URL / CTX_MCP_URL
+default to the managed endpoints. (POST /api/context/deploy runs this
+same function.)
 """
 
 import asyncio
 import json
 import logging
+from urllib.parse import urlparse
 
 import redis
 
@@ -33,6 +36,8 @@ from src.context import models
 log = logging.getLogger("workshop")
 
 SURFACE_NAME = "bank-iris-workshop"
+
+_LOCAL_HOSTS = ("redis", "localhost", "127.0.0.1")
 
 
 async def deploy() -> dict:
@@ -45,11 +50,14 @@ async def deploy() -> dict:
                          "Loan and Offer entities in "
                          "src/context/models.py and add them to "
                          "BANK_ENTITIES (Section 4, first exercise)."}
+    if (urlparse(config.REDIS_URL).hostname or "") in _LOCAL_HOSTS:
+        return {"error": "REDIS_URL points at the local fallback Redis — "
+                         "the managed Context Retriever service must be "
+                         "able to reach YOUR database. Put your Redis "
+                         "Cloud connection string in .env (Getting "
+                         "started, step 1) and re-run this deploy."}
 
-    from context_surfaces import UnifiedClient
     from context_surfaces.context_model import export_data_model
-
-    client = UnifiedClient()
 
     # Provided: your ContextModel classes -> the deployable model
     # definition, and the bank's records built from the seed data.
@@ -61,32 +69,72 @@ async def deploy() -> dict:
     )
     records = _bank_records()
 
-    # ═══════════════════════════════════════════════════════════════════
-    # SECTION 4 - CONTEXT RETRIEVER (surface): build the context surface.
-    #   1. create_context_surface(...) — deploy the model; the *surface*
-    #      is the deployed model, the unit the service generates the
-    #      retrieval tools from
-    #   2. create_agent_key(...) — mint the bot's scoped runtime
-    #      credential (agents get a key, never database credentials)
-    #   3. import_data(...) — push the bank's records through the
-    #      service, validated against your model on the way in
-    # Finish with:  return await _finish(client, surface, agent_key,
-    #                                    imported, len(records))
-    # Solved.
-    # ═══════════════════════════════════════════════════════════════════
-    surface = await client.create_context_surface(
-        config.CTX_ADMIN_KEY, SURFACE_NAME, data_model=data_model,
-        description="Bank Iris workshop surface")
-    agent_key = await client.create_agent_key(
-        config.CTX_ADMIN_KEY, surface.id, "wa-bot",
-        description="Scoped key for the WhatsApp bot's agents")
-    imported = await client.import_data(config.CTX_ADMIN_KEY, surface.id,
-                                        records)
-    return await _finish(client, surface, agent_key, imported, len(records))
+    async with _client() as client:
+        # ═══════════════════════════════════════════════════════════════
+        # SECTION 4 - CONTEXT RETRIEVER (surface): build the context
+        # surface.
+        #   1. create_context_surface(...) — deploy the model; the
+        #      *surface* is the deployed model, the unit the service
+        #      generates the retrieval tools from (it carries the
+        #      connection to YOUR database — provided, see _client below)
+        #   2. create_agent_key(...) — mint the bot's scoped runtime
+        #      credential (agents get a key, never database credentials)
+        #   3. import_data(...) — push the bank's records through the
+        #      service, one batch per entity, validated against your
+        #      model on the way in
+        # Finish with:  return await _finish(client, surface, agent_key,
+        #                                    imported, records)
+        # ═══════════════════════════════════════════════════════════════
+        surface = await client.create_context_surface(
+            config.CTX_ADMIN_KEY, SURFACE_NAME, data_model=data_model,
+            description="Customers, loans, and pre-approved offers for "
+                        "the bank's WhatsApp servicing bot")
+        agent_key = await client.create_agent_key(
+            config.CTX_ADMIN_KEY, surface.id, "wa-bot",
+            description="Scoped key for the WhatsApp bot's agents")
+        imported = [await client.import_data(config.CTX_ADMIN_KEY,
+                                             surface.id, batch)
+                    for batch in records.values()]
+        return await _finish(client, surface, agent_key, imported, records)
+
+
+def _client():
+    """Provided: the official `redis-context-retriever` client, extended
+    with one field its high-level wrapper doesn't expose yet — the
+    surface's `data_source`, the embedded connection to YOUR Redis
+    database. The admin API expects it at surface creation (it is what
+    `ctxctl context-surface create --redis-addr ...` sends); the service
+    stores and serves the imported rows through this connection."""
+    from context_surfaces import UnifiedClient
+    from context_surfaces.models import (CreateContextSurfaceRequest,
+                                         DataSourceConnectionConfig,
+                                         DataSourceRequest)
+
+    class WorkshopClient(UnifiedClient):
+        async def create_context_surface(self, admin_key, name,
+                                         data_model=None, description=""):
+            if not self._api_client:
+                raise RuntimeError("Client not initialized. Use 'async "
+                                   "with' context manager.")
+            url = urlparse(config.REDIS_URL)
+            return await self._api_client.create_context_surface(
+                CreateContextSurfaceRequest(
+                    name=name, description=description,
+                    data_model=data_model,
+                    data_source=DataSourceRequest(
+                        type="redis",
+                        connection_config=DataSourceConnectionConfig(
+                            addr=f"{url.hostname}:{url.port or 6379}",
+                            username=url.username or "default",
+                            password=url.password or "",
+                            tls_enabled=url.scheme == "rediss"))),
+                admin_key=admin_key)
+
+    return WorkshopClient()
 
 
 async def _finish(client, surface, agent_key, imported,
-                  records_count: int) -> dict:
+                  records: dict) -> dict:
     """Provided: store the deployment so the agents' tool surface can find
     it, and report what the service generated."""
     _redis().hset(config.CTX_DEPLOYMENT_KEY, mapping={
@@ -96,9 +144,11 @@ async def _finish(client, surface, agent_key, imported,
     tools = await client.list_tools(agent_key.key)
     return {
         "surface_id": str(surface.id),
-        "records_imported": records_count,
-        "import_result": json.loads(imported.model_dump_json())
-        if hasattr(imported, "model_dump_json") else str(imported),
+        "records_imported": {entity: len(batch)
+                             for entity, batch in records.items()},
+        "import_result": [json.loads(r.model_dump_json())
+                          if hasattr(r, "model_dump_json") else str(r)
+                          for r in imported],
         "generated_tools": [t["name"] for t in tools],
         "next_step": "the agent key is stored — save any file in the Code "
                      "panel (or restart the api) so the agents pick up "
@@ -110,23 +160,21 @@ def _redis() -> redis.Redis:
     return redis.Redis.from_url(config.REDIS_URL, decode_responses=True)
 
 
-def _bank_records() -> list:
-    """Provided: build ContextModel records from the workshop seed data."""
+def _bank_records() -> dict[str, list]:
+    """Provided: the bank's records from the seed data, grouped per
+    entity — import_data validates each batch against a single entity's
+    model, so a batch must hold records of one type."""
     dataset = json.loads((config.DATA_DIR / "customers.json").read_text())
-    records: list = []
-    for customer in dataset["customers"]:
-        records.append(models.Customer(**{
-            k: customer[k] for k in models.Customer.model_fields
-            if k in customer}))
-    for loan in dataset["loans"]:
-        records.append(models.Loan(**{
-            k: loan[k] for k in models.Loan.model_fields if k in loan}))
-    for entry in dataset["offers"]:
-        for offer in entry["offers"]:
-            records.append(models.Offer(customer_id=entry["customer_id"], **{
-                k: offer[k] for k in models.Offer.model_fields
-                if k in offer}))
-    return records
+    customers = [models.Customer(**{
+        k: c[k] for k in models.Customer.model_fields if k in c})
+        for c in dataset["customers"]]
+    loans = [models.Loan(**{
+        k: loan[k] for k in models.Loan.model_fields if k in loan})
+        for loan in dataset["loans"]]
+    offers = [models.Offer(customer_id=entry["customer_id"], **{
+        k: offer[k] for k in models.Offer.model_fields if k in offer})
+        for entry in dataset["offers"] for offer in entry["offers"]]
+    return {"Customer": customers, "Loan": loans, "Offer": offers}
 
 
 if __name__ == "__main__":

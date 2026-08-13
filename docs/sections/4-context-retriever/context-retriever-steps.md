@@ -40,9 +40,14 @@
 
 3. **Create the Context Retriever service.** In the [Redis Cloud
    console](https://cloud.redis.io/), select **Context Retriever** from
-   the left-hand menu, then choose **Custom service creation** (not
-   "Create with CLI" — the workshop drives the client itself) and create
-   the service against your free database.
+   the left-hand menu, then choose **Create with CLI**. That path
+   provisions the service and hands you the **admin API key** with
+   nothing modeled yet — skip *Custom service creation*, which walks you
+   through clicking the entities together in the console; your entities
+   are about to live in code. Ignore the `ctxctl` commands the console
+   shows: the workshop drives the same admin API through the official
+   Python client instead.
+
    Copy the **admin API key** when it appears — *it is shown only once*.
    In the **Code** panel, open `.env` (workspace root, next to `src/`),
    add the line, and save:
@@ -79,20 +84,29 @@
    ```python
    surface = await client.create_context_surface(
        config.CTX_ADMIN_KEY, SURFACE_NAME, data_model=data_model,
-       description="Bank Iris workshop surface")
+       description="Customers, loans, and pre-approved offers for "
+                   "the bank's WhatsApp servicing bot")
    agent_key = await client.create_agent_key(
        config.CTX_ADMIN_KEY, surface.id, "wa-bot",
        description="Scoped key for the WhatsApp bot's agents")
-   imported = await client.import_data(config.CTX_ADMIN_KEY, surface.id,
-                                       records)
-   return await _finish(client, surface, agent_key, imported, len(records))
+   imported = [await client.import_data(config.CTX_ADMIN_KEY,
+                                        surface.id, batch)
+               for batch in records.values()]
+   return await _finish(client, surface, agent_key, imported, records)
    ```
 
    Three calls, three concepts: the **surface** (your deployed model),
    the **agent key** (the bot's scoped, revocable runtime credential —
    agents never hold database credentials), and the **import** (the
-   bank's records pushed *through the service*, validated against your
-   model on the way in).
+   bank's records pushed *through the service* one entity at a time,
+   each batch validated against your model on the way in).
+
+   One thing rides along that you didn't type: the surface is created
+   with a `data_source` — the connection to **your** Redis Cloud
+   database, built from `REDIS_URL` by the provided `_client()` helper
+   (the same thing `ctxctl context-surface create --redis-addr ...`
+   sends). That binding is how the service knows which database to
+   store and serve the bank's rows from.
 
 6. **Run the deploy.** From the **Terminal** panel:
 

@@ -90,21 +90,21 @@ async def deploy() -> dict:
         # block, press Cmd+/ (Ctrl+/ on Windows/Linux), save — the
         # stub return underneath becomes unreachable and can be deleted.
         # ═══════════════════════════════════════════════════════════════
-        # surface = await client.create_context_surface(
-        #     config.CTX_ADMIN_KEY, SURFACE_NAME, data_model=data_model,
-        #     description="Customers, loans, and pre-approved offers for "
-        #                 "the bank's WhatsApp servicing bot")
-        # agent_key = await client.create_agent_key(
-        #     config.CTX_ADMIN_KEY, surface.id, "wa-bot",
-        #     description="Scoped key for the WhatsApp bot's agents")
-        # imported = [await client.import_data(config.CTX_ADMIN_KEY,
-        #                                      surface.id, batch)
-        #             for batch in records.values()]
-        # return await _finish(client, surface, agent_key, imported, records)
-        return {"error": "The context surface is not built yet — "
-                         "uncomment the solution block right above this "
-                         "return in src/context/deploy.py, then re-run "
-                         "this deploy."}
+        surface = await client.create_context_surface(
+            config.CTX_ADMIN_KEY, SURFACE_NAME, data_model=data_model,
+            description="Customers, loans, and pre-approved offers for "
+                        "the bank's WhatsApp servicing bot")
+        agent_key = await client.create_agent_key(
+            config.CTX_ADMIN_KEY, surface.id, "wa-bot",
+            description="Scoped key for the WhatsApp bot's agents")
+        imported = [await client.import_data(config.CTX_ADMIN_KEY,
+                                             surface.id, batch)
+                        for batch in records.values()]
+        return await _finish(client, surface, agent_key, imported, records)
+        # return {"error": "The context surface is not built yet — "
+        #                  "uncomment the solution block right above this "
+        #                  "return in src/context/deploy.py, then re-run "
+        #                  "this deploy."}
 
 
 
@@ -116,10 +116,9 @@ def _model_gaps(data_model: dict) -> list[str]:
         ("Loan", "customer_id"): ("index", 'index="tag"'),
         ("Loan", "product"): ("index", 'index="tag"'),
         ("Loan", "status"): ("index", 'index="tag"'),
-        ("Offer", "customer_id"): ("both",
-                                   'is_key_component=True, index="tag"'),
-        ("Offer", "product"): ("both",
-                               'is_key_component=True, index="tag"'),
+        ("Offer", "offer_id"): ("key", "is_key_component=True"),
+        ("Offer", "customer_id"): ("index", 'index="tag"'),
+        ("Offer", "product"): ("index", 'index="tag"'),
         ("Offer", "note"): ("index", 'index="text"'),
     }
     fields = {(entity["name"], field["name"]): field
@@ -135,6 +134,10 @@ def _model_gaps(data_model: dict) -> list[str]:
         no_index = kind in ("index", "both") and not field.get("redis_indices")
         if no_key or no_index:
             gaps.append(f"{entity}.{name} needs {fix}")
+        elif kind == "key" and field.get("redis_indices"):
+            gaps.append(f"{entity}.{name} is a key component and must not "
+                        "also carry an index — the service rejects indexed "
+                        "key components (the key itself is the lookup path)")
     # The reverse mistake: a TODO's arguments pasted onto the wrong field.
     for (entity, name), field in fields.items():
         if entity == "Customer" or (entity, name) in needed:
@@ -218,8 +221,10 @@ def _bank_records() -> dict[str, list]:
     loans = [models.Loan(**{
         k: loan[k] for k in models.Loan.model_fields if k in loan})
         for loan in dataset["loans"]]
-    offers = [models.Offer(customer_id=entry["customer_id"], **{
-        k: offer[k] for k in models.Offer.model_fields if k in offer})
+    offers = [models.Offer(
+        offer_id=f"{entry['customer_id']}:{offer['product']}",
+        customer_id=entry["customer_id"], **{
+            k: offer[k] for k in models.Offer.model_fields if k in offer})
         for entry in dataset["offers"] for offer in entry["offers"]]
     return {"Customer": customers, "Loan": loans, "Offer": offers}
 

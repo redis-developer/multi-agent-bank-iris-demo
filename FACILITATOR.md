@@ -41,23 +41,22 @@ paying off.
   in the pre-workshop email (it's Step 1 of Getting started), and keep
   one shared set of service credentials on a slide as the fallback for
   anyone stuck at signup.
-- **VERIFY BEFORE THE DAY — Section 4 against a live service**: the
-  cloud *database* path is verified (2026-08-13, free tier, Redis 8.6:
-  .env hot-reload → FAQ seeding, router index, and all three retrieval
-  modes including FT.HYBRID all pass on Redis Cloud). Still unverified:
-  the Context Retriever service itself — run Section 4 once end to end
-  (admin key from the console's **Admin keys** page → deploy →
-  generated tool names → MCP calls — the client integration is built
-  against `redis-context-retriever` 0.0.6 and mock-tested only), and
-  confirm the storage format of imported records (the NOC action tool
-  reads them; it tolerates JSON and hash). Known-good facts to lean
-  on: the admin API authenticates with `X-API-Key`, and surface
-  creation must embed the database connection under
-  `data_source.connection_config` (deploy.py builds it from
-  `REDIS_URL`; this matches the current admin-API contract used by
-  `scripts/setup_surface.py` in github.com/redis/redis-iris-demos).
-  The admin key is the only console touch — minting it requires the
-  console session; everything after authenticates with the key.
+- **Section 4 LIVE-VERIFIED (2026-08-13)** on a real account and cloud
+  DB: admin key from the console's **Admin keys** page → surface with
+  embedded `data_source` → 11 records imported → 15 generated tools →
+  servicing / sales / NOC journeys and the identity boundary all pass
+  through the graph. Contract facts learned live (don't re-learn):
+  the admin API authenticates with `X-API-Key`; surface creation must
+  embed the database connection under `data_source.connection_config`;
+  **key-component fields must not carry an index** (the API rejects
+  them — that's why Offer keys on a synthetic `offer_id` while
+  customer_id/product stay plain tags); generated tools name their
+  customer argument generically (`value` on filter tools, `id` on
+  get_customer_by_id), so retriever.py aliases those to `customer_id`
+  to keep the identity injection real; unscoped `count_*` tools are
+  excluded from the agents' toolbox (a global count once answered
+  "do I have offers?"). Sections 5/6's managed services (Agent
+  Memory, LangCache) still deserve one live pass.
   Sections 5/6's managed services (Agent Memory, LangCache) also deserve
   one live pass.
 - **Service keys are shown once**: both Agent Memory and LangCache display
@@ -80,6 +79,12 @@ paying off.
 - **Keys on screen**: `.env` (with API keys) is now editable in the Code
   panel — presenters sharing their screen should keep it closed after
   editing.
+- **`.env` loses lines after a Code-panel save**: seen twice in testing —
+  the file ends mid-value (a truncated key) and the api goes degraded or
+  a key "disappears". Check the last line of `.env` is complete after
+  saving; VS Code's Timeline view (local history) holds the previous
+  content for recovery, and `nano /workshop/.env` in the Terminal is the
+  safe editor.
 - **State weirdness after experiments**: `FLUSHALL` + restart api reseeds
   the FAQs in ~30s — but it runs against the attendee's *cloud* DB, so it
   also wipes Section 4's imported records (re-run the deploy) and the

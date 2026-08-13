@@ -77,7 +77,9 @@
 
    Worth reading on the way: `Loan.product` (the same shape as your
    `status` decision) and the `Offer` key fields (a **composite** key:
-   both `customer_id` and `product` are key components *and* tags).
+   `customer_id` and `product` together form the key — and key
+   components carry no extra index, because the key itself is the
+   lookup path).
    Fields you *don't* index (principal, EMI, dates…) still come back in
    results — indexing decides what you can *look up by*, not what you
    get. Don't worry about missing one: the deploy (step 6) checks every

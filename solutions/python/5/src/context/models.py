@@ -42,9 +42,9 @@ class Customer(ContextModel):
 # ═══════════════════════════════════════════════════════════════════════
 # SECTION 4 - CONTEXT RETRIEVER (model): make the indexing decisions.
 # Solved: every `# TODO` is resolved — the key components form the Redis
-# keys, the tag indexes power the agents' filters (loans by owner and
-# status, offers by customer), and the text index makes the offer notes
-# searchable by meaning of words, not exact values.
+# keys (and are the lookup path: the service rejects an extra index on
+# them), the tag indexes power the agents' filters (loans by owner and
+# status), and the text index makes the offer notes searchable by words.
 # ═══════════════════════════════════════════════════════════════════════
 class Loan(ContextModel):
     """A loan account, identified by its LAN."""
@@ -82,14 +82,15 @@ class Loan(ContextModel):
 class Offer(ContextModel):
     """A live pre-approved offer for a customer."""
 
-    __redis_key_template__ = "offer:{customer_id}:{product}"
+    __redis_key_template__ = "offer:{offer_id}"
 
+    offer_id: str = ContextField(
+        description="The offer's ID — '<customer_id>:<product>'",
+        is_key_component=True)
     customer_id: str = ContextField(
-        description="The customer the offer belongs to",
-        is_key_component=True, index="tag")
+        description="The customer the offer belongs to", index="tag")
     product: str = ContextField(
-        description="The offered product", is_key_component=True,
-        index="tag")
+        description="The offered product", index="tag")
     amount: float = ContextField(
         description="Pre-approved amount in rupees")
     annual_rate: float = ContextField(

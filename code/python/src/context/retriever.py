@@ -19,6 +19,8 @@ explains what's missing, so the bot keeps working (and says why).
 import asyncio
 import json
 import logging
+import re
+from concurrent.futures import ThreadPoolExecutor
 
 from langchain_core.tools import StructuredTool
 from pydantic import Field, create_model
@@ -51,21 +53,38 @@ def context_read_tools() -> list[StructuredTool]:
         return [_placeholder_tool()]
 
     try:
-        listed = asyncio.run(_list_tools(agent_key))
+        listed = _run_async(_list_tools(agent_key))
     except Exception as error:
         log.warning("Context Retriever unreachable (%s) — agents get the "
                     "placeholder tool.", error)
         return [_placeholder_tool()]
 
-    tools = [_wrap_mcp_tool(agent_key, spec) for spec in listed]
+    # count_* aggregates have no customer scope — a chat agent asked
+    # "do I have offers?" must not answer with the bank-wide count, so
+    # the agents don't get them (they stay visible via list_tools).
+    tools = [_wrap_mcp_tool(agent_key, spec) for spec in listed
+             if not spec["name"].startswith("count_")]
     log.info("Context Retriever: %d generated tools loaded (%s)",
              len(tools), ", ".join(t.name for t in tools))
     return tools
 
 
+def _run_async(coro):
+    """`asyncio.run`, but safe when a loop is already running: the api
+    builds its tools during FastAPI startup — inside uvicorn's event
+    loop — where `asyncio.run()` is illegal, so fall back to a worker
+    thread that owns its own loop."""
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(coro)
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        return pool.submit(asyncio.run, coro).result()
+
+
 # Each call gets a fresh client: these coroutines run under their own
-# `asyncio.run`, and the MCP connection opened on one run's event loop
-# cannot be reused on the next. `async with` opens and closes it cleanly.
+# event loop, and the MCP connection opened on one loop cannot be
+# reused on the next. `async with` opens and closes it cleanly.
 
 async def _list_tools(agent_key: str) -> list[dict]:
     from context_surfaces import UnifiedClient
@@ -89,18 +108,35 @@ def _wrap_mcp_tool(agent_key: str, spec: dict) -> StructuredTool:
     properties = schema.get("properties", {})
     required = set(schema.get("required", []))
 
+    # Identity injection (graph.py) keys on an argument literally named
+    # customer_id — but the generated tools name theirs generically:
+    # filter_*_by_customer_id takes `value`, get_customer_by_id takes
+    # `id`. Alias those to customer_id so the session's verified
+    # customer is enforced on generated tools too, not just hand-written
+    # ones.
+    customer_arg = None
+    if re.fullmatch(r"filter_.+_by_customer_id", name) and \
+            "value" in properties:
+        customer_arg = "value"
+    elif name == "get_customer_by_id" and "id" in properties:
+        customer_arg = "id"
+
     fields = {}
     for arg, arg_schema in properties.items():
+        public = "customer_id" if arg == customer_arg else arg
         arg_type = _JSON_TYPES.get(arg_schema.get("type", "string"), str)
         default = ... if arg in required else None
-        fields[arg] = (arg_type if arg in required else arg_type | None,
-                       Field(default,
-                             description=arg_schema.get("description", "")))
+        fields[public] = (arg_type if arg in required else arg_type | None,
+                          Field(default,
+                                description=arg_schema.get("description",
+                                                           "")))
     args_model = create_model(f"{name}_args", **fields)
 
     def run(**kwargs) -> str:
+        if customer_arg and "customer_id" in kwargs:
+            kwargs[customer_arg] = kwargs.pop("customer_id")
         arguments = {k: v for k, v in kwargs.items() if v is not None}
-        result = asyncio.run(_query_tool(agent_key, name, arguments))
+        result = _run_async(_query_tool(agent_key, name, arguments))
         return result if isinstance(result, str) else json.dumps(
             result, default=str)
 

@@ -112,14 +112,15 @@ class Loan(ContextModel):
 class Offer(ContextModel):
     """A live pre-approved offer for a customer."""
 
-    __redis_key_template__ = "offer:{customer_id}:{product}"
+    __redis_key_template__ = "offer:{offer_id}"
 
+    offer_id: str = ContextField(
+        description="The offer's ID — '<customer_id>:<product>'",
+        is_key_component=True)
     customer_id: str = ContextField(
-        description="The customer the offer belongs to",
-        is_key_component=True, index="tag")
+        description="The customer the offer belongs to", index="tag")
     product: str = ContextField(
-        description="The offered product", is_key_component=True,
-        index="tag")
+        description="The offered product", index="tag")
 
     amount: float = ContextField(
         description="Pre-approved amount in rupees")

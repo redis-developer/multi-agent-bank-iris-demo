@@ -64,6 +64,10 @@ services:
     working_dir: /workshop
     environment:
       - REDIS_URL=${REDIS_URL:?set REDIS_URL in .env — your Redis Cloud database}
+      # Explicit path: an empty code/python/.env exists on the host (the
+      # mount target for the vscode panel's .env bind) and would shadow
+      # the real .env for find_dotenv.
+      - DOTENV_PATH=/workshop/.env
     volumes:
       - .:/workshop
 

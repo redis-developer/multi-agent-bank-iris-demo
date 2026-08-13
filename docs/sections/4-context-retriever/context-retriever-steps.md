@@ -61,7 +61,7 @@
 
    The **Loan** and **Offer** entities are already written — every
    field, typed and described. What's left is the part that actually
-   shapes the generated tools: **how each field is accessed**. Seven
+   shapes the generated tools: **how each field is accessed**. Four
    markers, each named after its field — `# TODO(status)` belongs to
    the `status` field **directly below** the comment. Copy the
    argument(s) shown in the comment into that field's
@@ -72,16 +72,17 @@
    |---|---|---|
    | `Loan.lan` | `is_key_component=True` | the key `loan:{lan}` is built from it |
    | `Loan.customer_id` | `index="tag"` | *"MY loans"* = filter by owner |
-   | `Loan.product` | `index="tag"` + `allowed_values=[...]` | filter by product, closed set |
    | `Loan.status` | `index="tag"` + `allowed_values=[...]` | the NOC agent wants `closed` only |
-   | `Offer.customer_id` | `is_key_component=True, index="tag"` | half the key, and sales filters by customer |
-   | `Offer.product` | `is_key_component=True, index="tag"` | the other half of the key |
    | `Offer.note` | `index="text"` | pitch notes are prose — match words, not values |
 
-   Fields you *don't* index (principal, EMI, dates…) still come back in
-   results — indexing decides what you can *look up by*, not what you
-   get. Don't worry about missing one: the deploy (step 6) checks every
-   decision and lists any that are still TODO.
+   Two more patterns come pre-solved — read them on the way:
+   `Loan.product` (same shape as your `status` decision) and the
+   `Offer` key fields (a **composite** key: both `customer_id` and
+   `product` are key components *and* tags). Fields you *don't* index
+   (principal, EMI, dates…) still come back in results — indexing
+   decides what you can *look up by*, not what you get. Don't worry
+   about missing one: the deploy (step 6) checks every decision and
+   lists any that are still TODO.
 
    > Modeling has three official paths — the Redis Cloud console UI, the
    > `ctxctl` CLI, and the Python client. The workshop uses the Python

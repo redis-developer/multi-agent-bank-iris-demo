@@ -82,10 +82,13 @@ people fail to do on the day.
   get_customer_by_id), so retriever.py aliases those to `customer_id`
   to keep the identity injection real; unscoped `count_*` tools are
   excluded from the agents' toolbox (a global count once answered
-  "do I have offers?"). Sections 5/6's managed services (Agent
-  Memory, LangCache) still deserve one live pass.
-  Sections 5/6's managed services (Agent Memory, LangCache) also deserve
-  one live pass.
+  "do I have offers?").
+- **Section 6 LangCache LIVE-VERIFIED (2026-08-14)** against a real
+  cloud service: store → semantic search hit (~400 ms round trip) →
+  per-entry delete (`DELETE /entries/{id}`; note the flush-all form
+  requires non-blank `attributes`). Still deserving one live pass:
+  Section 5's *managed* Agent Memory service (the "Go managed" steps —
+  the OSS container path is verified).
 - **Service keys are shown once**: both Agent Memory and LangCache display
   the API key only at creation. Say it out loud before anyone clicks
   Create; regenerating from the service page is the recovery.

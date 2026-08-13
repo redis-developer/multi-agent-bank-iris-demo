@@ -40,77 +40,84 @@ class Customer(ContextModel):
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# SECTION 4 - CONTEXT RETRIEVER (model): declare the remaining entities.
-# The Loan and Offer classes are written below, commented out. Two edits:
+# SECTION 4 - CONTEXT RETRIEVER (model): make the indexing decisions.
 #
-#   1. Uncomment the two classes (select the block, press Cmd+/ or
-#      Ctrl+/ in the Code panel).
-#   2. Add both to BANK_ENTITIES at the bottom of the file:
-#          BANK_ENTITIES: list[type[ContextModel]] = [Customer, Loan,
-#                                                     Offer]
-#
-# As you uncomment, read what each declaration buys you: the key
-# template puts every record at a predictable Redis key; descriptions
-# are what the agents (and the generated tools) read; index="tag" makes
-# a field filterable; is_key_component fields form the key.
+# The Loan and Offer entities are already written — every field, typed
+# and described. What's missing is how each field is *accessed*: which
+# fields form the Redis key, which are filterable, which are searchable.
+# Each `# TODO` below is one decision — solve it by adding the keyword
+# argument it names to the `ContextField(...)` call under it (see
+# Customer above for every pattern). The deploy (step 6) checks these
+# and tells you which are still missing.
 # ═══════════════════════════════════════════════════════════════════════
+class Loan(ContextModel):
+    """A loan account, identified by its LAN."""
 
-# class Loan(ContextModel):
-#     """A loan account, identified by its LAN."""
-#
-#     __redis_key_template__ = "loan:{lan}"
-#
-#     lan: str = ContextField(
-#         description="The Loan Account Number (LAN), e.g. LAN20240001",
-#         is_key_component=True)
-#     customer_id: str = ContextField(
-#         description="The owning customer's ID", index="tag")
-#     product: str = ContextField(
-#         description="The loan product", index="tag",
-#         allowed_values=["personal_loan", "topup_loan", "home_decor_loan"])
-#     principal: float = ContextField(
-#         description="Sanctioned amount in rupees")
-#     annual_rate: float = ContextField(
-#         description="Interest rate, percent per annum, reducing balance")
-#     tenure_months: int = ContextField(
-#         description="Loan tenure in months")
-#     emi: float = ContextField(
-#         description="Monthly instalment (EMI) in rupees")
-#     outstanding: float = ContextField(
-#         description="Current outstanding principal in rupees")
-#     status: str = ContextField(
-#         description="Loan lifecycle state", index="tag",
-#         allowed_values=["sanctioned", "active", "closed"])
-#     disbursed_on: str = ContextField(
-#         description="Disbursement date (YYYY-MM-DD)", default="")
-#     closed_on: str = ContextField(
-#         description="Closure date (YYYY-MM-DD); empty while active",
-#         default="")
+    __redis_key_template__ = "loan:{lan}"
+
+    # TODO: the key template "loan:{lan}" is built from this field —
+    #       add  is_key_component=True
+    lan: str = ContextField(
+        description="The Loan Account Number (LAN), e.g. LAN20240001")
+    # TODO: "what's the outstanding on MY loans?" = filter by owner —
+    #       add  index="tag"
+    customer_id: str = ContextField(
+        description="The owning customer's ID")
+    # TODO: agents filter by product too, and the values are a closed
+    #       set — add
+    #       index="tag",
+    #       allowed_values=["personal_loan", "topup_loan",
+    #                       "home_decor_loan"]
+    product: str = ContextField(
+        description="The loan product")
+    principal: float = ContextField(
+        description="Sanctioned amount in rupees")
+    annual_rate: float = ContextField(
+        description="Interest rate, percent per annum, reducing balance")
+    tenure_months: int = ContextField(
+        description="Loan tenure in months")
+    emi: float = ContextField(
+        description="Monthly instalment (EMI) in rupees")
+    outstanding: float = ContextField(
+        description="Current outstanding principal in rupees")
+    # TODO: the NOC agent needs closed loans only — add
+    #       index="tag", allowed_values=["sanctioned", "active", "closed"]
+    status: str = ContextField(
+        description="Loan lifecycle state")
+    disbursed_on: str = ContextField(
+        description="Disbursement date (YYYY-MM-DD)", default="")
+    closed_on: str = ContextField(
+        description="Closure date (YYYY-MM-DD); empty while active",
+        default="")
 
 
-# class Offer(ContextModel):
-#     """A live pre-approved offer for a customer."""
-#
-#     __redis_key_template__ = "offer:{customer_id}:{product}"
-#
-#     customer_id: str = ContextField(
-#         description="The customer the offer belongs to",
-#         is_key_component=True, index="tag")
-#     product: str = ContextField(
-#         description="The offered product", is_key_component=True,
-#         index="tag")
-#     amount: float = ContextField(
-#         description="Pre-approved amount in rupees")
-#     annual_rate: float = ContextField(
-#         description="Offered rate, percent per annum")
-#     max_tenure_months: int = ContextField(
-#         description="Maximum tenure in months", default=0)
-#     valid_till: str = ContextField(
-#         description="Offer expiry date (YYYY-MM-DD)", default="")
-#     note: str = ContextField(
-#         description="Offer conditions and pitch notes", index="text",
-#         default="")
+class Offer(ContextModel):
+    """A live pre-approved offer for a customer."""
+
+    __redis_key_template__ = "offer:{customer_id}:{product}"
+
+    # TODO: a composite key — this field is part of it, and the sales
+    #       agent filters offers by customer.
+    #       add  is_key_component=True, index="tag"
+    customer_id: str = ContextField(
+        description="The customer the offer belongs to")
+    # TODO: the other half of the key, also filterable —
+    #       add  is_key_component=True, index="tag"
+    product: str = ContextField(
+        description="The offered product")
+    amount: float = ContextField(
+        description="Pre-approved amount in rupees")
+    annual_rate: float = ContextField(
+        description="Offered rate, percent per annum")
+    max_tenure_months: int = ContextField(
+        description="Maximum tenure in months", default=0)
+    valid_till: str = ContextField(
+        description="Offer expiry date (YYYY-MM-DD)", default="")
+    # TODO: pitch notes are prose, matched by words not exact values —
+    #       add  index="text"
+    note: str = ContextField(
+        description="Offer conditions and pitch notes", default="")
 
 
 # Every entity in this list is deployed to the Context Retriever surface.
-BANK_ENTITIES: list[type[ContextModel]] = [Customer]
+BANK_ENTITIES: list[type[ContextModel]] = [Customer, Loan, Offer]

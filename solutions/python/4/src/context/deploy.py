@@ -46,11 +46,6 @@ async def deploy() -> dict:
                          "in the Redis Cloud console (Context Retriever -> "
                          "Admin keys), put it in .env, and re-run this "
                          "deploy."}
-    if len(models.BANK_ENTITIES) < 3:
-        return {"error": "The semantic model is incomplete — declare the "
-                         "Loan and Offer entities in "
-                         "src/context/models.py and add them to "
-                         "BANK_ENTITIES (Section 4, first exercise)."}
     if (urlparse(config.REDIS_URL).hostname or "") in _LOCAL_HOSTS:
         return {"error": "REDIS_URL points at a local or "
                          "container-internal Redis — there is no local "
@@ -69,6 +64,11 @@ async def deploy() -> dict:
                     "bank's WhatsApp servicing bot.",
         entities=models.BANK_ENTITIES,
     )
+    gaps = _model_gaps(data_model)
+    if gaps:
+        return {"error": "The semantic model still has TODOs — finish the "
+                         "indexing decisions in src/context/models.py "
+                         "(Section 4, first exercise): " + "; ".join(gaps)}
     records = _bank_records()
 
     async with _client() as client:
@@ -98,6 +98,37 @@ async def deploy() -> dict:
                                              surface.id, batch)
                     for batch in records.values()]
         return await _finish(client, surface, agent_key, imported, records)
+
+
+
+def _model_gaps(data_model: dict) -> list[str]:
+    """Provided: report the indexing decisions still missing from the
+    model — the `# TODO` markers in src/context/models.py."""
+    needed = {
+        ("Loan", "lan"): ("key", "is_key_component=True"),
+        ("Loan", "customer_id"): ("index", 'index="tag"'),
+        ("Loan", "product"): ("index", 'index="tag"'),
+        ("Loan", "status"): ("index", 'index="tag"'),
+        ("Offer", "customer_id"): ("both",
+                                   'is_key_component=True, index="tag"'),
+        ("Offer", "product"): ("both",
+                               'is_key_component=True, index="tag"'),
+        ("Offer", "note"): ("index", 'index="text"'),
+    }
+    fields = {(entity["name"], field["name"]): field
+              for entity in data_model.get("entities", [])
+              for field in entity.get("fields", [])}
+    gaps = []
+    for (entity, name), (kind, fix) in needed.items():
+        field = fields.get((entity, name))
+        if field is None:
+            gaps.append(f"{entity}.{name} is missing")
+            continue
+        no_key = kind in ("key", "both") and not field.get("is_key_component")
+        no_index = kind in ("index", "both") and not field.get("redis_indices")
+        if no_key or no_index:
+            gaps.append(f"{entity}.{name} needs {fix}")
+    return gaps
 
 
 def _client():

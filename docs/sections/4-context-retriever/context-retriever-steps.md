@@ -51,29 +51,34 @@
    the save, no restarts required. From here, the context service's surface creation, your database binding, the
    agent key creation, the data import and the tools generation will be done using the official `redis-context-retriever` Python client.
 
-4. **Exercise — model the bank.** Open `src/context/models.py`. The
-   `Customer` entity is the worked example: a `ContextModel` with a
-   `__redis_key_template__`, and a `ContextField` per attribute — the
-   `description` is what the agents will read, `index="tag"` makes a field
-   filterable, `index="text"` makes it searchable, `is_key_component=True`
-   marks the fields that form the key.
+4. **Exercise — make the indexing decisions.** Open
+   `src/context/models.py`. The `Customer` entity is the worked example:
+   a `ContextModel` with a `__redis_key_template__`, and a
+   `ContextField` per attribute — the `description` is what the agents
+   will read, `index="tag"` makes a field filterable, `index="text"`
+   makes it searchable, `is_key_component=True` marks the fields that
+   form the key.
 
-   Under the `SECTION 4` banner, the **Loan** and **Offer** entities are
-   already written — commented out. Two edits:
+   The **Loan** and **Offer** entities are already written — every
+   field, typed and described. What's left is the part that actually
+   shapes the generated tools: **how each field is accessed**. Seven
+   `# TODO` markers, each one keyword argument (the comment names it —
+   copy it into the `ContextField(...)` call below it):
 
-   1. **Uncomment the two classes**: select the whole block and press
-      `Cmd+/` (`Ctrl+/` on Windows/Linux) in the Code panel.
-   2. **Register them for deployment** — at the bottom of the file:
+   | Field | Add | Because |
+   |---|---|---|
+   | `Loan.lan` | `is_key_component=True` | the key `loan:{lan}` is built from it |
+   | `Loan.customer_id` | `index="tag"` | *"MY loans"* = filter by owner |
+   | `Loan.product` | `index="tag"` + `allowed_values=[...]` | filter by product, closed set |
+   | `Loan.status` | `index="tag"` + `allowed_values=[...]` | the NOC agent wants `closed` only |
+   | `Offer.customer_id` | `is_key_component=True, index="tag"` | half the key, and sales filters by customer |
+   | `Offer.product` | `is_key_component=True, index="tag"` | the other half of the key |
+   | `Offer.note` | `index="text"` | pitch notes are prose — match words, not values |
 
-      ```python
-      BANK_ENTITIES: list[type[ContextModel]] = [Customer, Loan, Offer]
-      ```
-
-   Save, and read what you just enabled while the api reloads:
-   `loan:{lan}` puts every loan at a predictable Redis key;
-   `customer_id` is a tag, so agents can filter loans by owner;
-   `status` only allows `sanctioned` / `active` / `closed` — the model
-   is the contract everything downstream is generated from.
+   Fields you *don't* index (principal, EMI, dates…) still come back in
+   results — indexing decides what you can *look up by*, not what you
+   get. Don't worry about missing one: the deploy (step 6) checks every
+   decision and lists any that are still TODO.
 
    > Modeling has three official paths — the Redis Cloud console UI, the
    > `ctxctl` CLI, and the Python client. The workshop uses the Python

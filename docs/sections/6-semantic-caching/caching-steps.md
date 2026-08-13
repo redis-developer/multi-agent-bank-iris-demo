@@ -79,20 +79,7 @@
    call-site (step 6). Convince yourself it's load-bearing: without it,
    one customer's balance could become another customer's cache hit.
 
-9. **Inspect the cache from the Terminal panel** — the same API your app
-   calls:
-
-   ```bash
-   curl -s -X POST "$LANGCACHE_URL/v1/caches/$LANGCACHE_CACHE_ID/entries/search" \
-     -H "Authorization: Bearer $LANGCACHE_API_KEY" \
-     -H 'Content-Type: application/json' \
-     -d '{"prompt": "foreclosure charges?"}' | jq
-   ```
-
-   (export the three values in the terminal first). The Redis Cloud
-   console's LangCache page also shows entries and hit-rate metrics.
-
-10. **(Optional) Break it on purpose.** Set
+9. **(Optional) Break it on purpose.** Set
    `CACHE_SIMILARITY_THRESHOLD=0.5` in `.env` (Code panel, save), and
    ask *"what is
    the processing fee on a personal loan?"* — at 0.5, this related-but-

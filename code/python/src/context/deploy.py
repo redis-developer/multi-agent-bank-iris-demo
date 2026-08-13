@@ -90,21 +90,21 @@ async def deploy() -> dict:
         # block, press Cmd+/ (Ctrl+/ on Windows/Linux), save — the
         # stub return underneath becomes unreachable and can be deleted.
         # ═══════════════════════════════════════════════════════════════
-        surface = await client.create_context_surface(
-            config.CTX_ADMIN_KEY, SURFACE_NAME, data_model=data_model,
-            description="Customers, loans, and pre-approved offers for "
-                        "the bank's WhatsApp servicing bot")
-        agent_key = await client.create_agent_key(
-            config.CTX_ADMIN_KEY, surface.id, "wa-bot",
-            description="Scoped key for the WhatsApp bot's agents")
-        imported = [await client.import_data(config.CTX_ADMIN_KEY,
-                                             surface.id, batch)
-                        for batch in records.values()]
-        return await _finish(client, surface, agent_key, imported, records)
-        # return {"error": "The context surface is not built yet — "
-        #                  "uncomment the solution block right above this "
-        #                  "return in src/context/deploy.py, then re-run "
-        #                  "this deploy."}
+        # surface = await client.create_context_surface(
+        #     config.CTX_ADMIN_KEY, SURFACE_NAME, data_model=data_model,
+        #     description="Customers, loans, and pre-approved offers for "
+        #                 "the bank's WhatsApp servicing bot")
+        # agent_key = await client.create_agent_key(
+        #     config.CTX_ADMIN_KEY, surface.id, "wa-bot",
+        #     description="Scoped key for the WhatsApp bot's agents")
+        # imported = [await client.import_data(config.CTX_ADMIN_KEY,
+        #                                      surface.id, batch)
+        #             for batch in records.values()]
+        # return await _finish(client, surface, agent_key, imported, records)
+        return {"error": "The context surface is not built yet — "
+                         "uncomment the solution block right above this "
+                         "return in src/context/deploy.py, then re-run "
+                         "this deploy."}
 
 
 

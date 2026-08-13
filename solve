@@ -48,7 +48,7 @@ echo "Applying snapshot '$SNAPSHOT' to $DEST ..."
 ( cd "$SRC" && find . -type f -name '*.py' ) | while read -r file; do
   mkdir -p "$DEST/$(dirname "$file")"
   if cmp -s "$SRC/$file" "$DEST/$file" 2>/dev/null; then
-    echo "  == $file (already matches)"
+    echo "  == $file (untouched)"
   else
     cp "$SRC/$file" "$DEST/$file"
     echo "  -> $file (updated)"

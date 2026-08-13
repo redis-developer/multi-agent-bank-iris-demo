@@ -1,7 +1,8 @@
 # Redis commands cheat sheet
 
 Run these in the **Redis Insight** panel's Workbench, or from the
-**Terminal** panel with `redis-cli -h redis`.
+**Terminal** panel with `redis-cli -u "$REDIS_URL"` — both talk to your
+Redis Cloud database, the workshop's only database.
 
 ## The bank's data (exists after Section 4's Context Retriever import)
 

@@ -10,14 +10,16 @@ from dotenv import dotenv_values, find_dotenv
 # injected at container creation — so editing .env in the Code panel and
 # saving reconfigures the api (uvicorn watches the file). Empty lines in
 # .env (the template ships every key blank) must NOT override, or a blank
-# REDIS_URL= would clobber the compose default.
+# key would clobber a value compose injected.
 for _key, _value in dotenv_values(
         os.getenv("DOTENV_PATH") or find_dotenv()).items():
     if _value:
         os.environ[_key] = _value
 
-# Redis
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
+# Redis — the attendee's Redis Cloud database is THE database (required;
+# there is no local fallback). start.sh and compose refuse to boot
+# without it.
+REDIS_URL = os.getenv("REDIS_URL", "")
 
 # LLM / embeddings (OpenAI-compatible)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")

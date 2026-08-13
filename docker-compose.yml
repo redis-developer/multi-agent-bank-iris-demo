@@ -55,26 +55,22 @@ services:
       /home/coder/code/python
 
   # The Terminal panel: ttyd + tmux with the repo mounted, so participants
-  # can run ./solve, curl the api / memory server, and use redis-cli.
+  # can run ./solve, curl the api / memory server, and use redis-cli
+  # against their cloud database (redis-cli -u "$REDIS_URL").
   terminal:
     build: ./docker/terminal
     container_name: bank-terminal
     restart: unless-stopped
     working_dir: /workshop
+    environment:
+      - REDIS_URL=${REDIS_URL:?set REDIS_URL in .env — your Redis Cloud database}
     volumes:
       - .:/workshop
 
-  redis:
-    image: redis:8.4
-    container_name: bank-redis
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 3s
-      timeout: 2s
-      retries: 10
-
+  # There is no local Redis: the attendee's Redis Cloud database (REDIS_URL
+  # in .env) is THE database — the managed Context Retriever, Agent Memory,
+  # and LangCache services all need to reach it. Section 1 adds it to
+  # Redis Insight manually.
   redisinsight:
     image: redis/redisinsight:latest
     container_name: bank-redisinsight
@@ -82,13 +78,7 @@ services:
       - "5540:5540"
     environment:
       - RI_PROXY_PATH=/redisinsight
-      - RI_REDIS_HOST=redis
-      - RI_REDIS_PORT=6379
-      - RI_REDIS_ALIAS=Workshop Redis
       - RI_ACCEPT_TERMS_AND_CONDITIONS=true
-    depends_on:
-      redis:
-        condition: service_healthy
 
   # Redis Agent Memory Server — the Agent Memory component of Redis Iris.
   # Owns working (session) memory and long-term memory, including automatic
@@ -106,13 +96,10 @@ services:
     volumes:
       - ./:/workshop-root:ro
     environment:
-      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      - REDIS_URL=${REDIS_URL:?set REDIS_URL in .env — your Redis Cloud database}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-unset}
       - LONG_TERM_MEMORY=true
       - DISABLE_AUTH=true
-    depends_on:
-      redis:
-        condition: service_healthy
 
   # The memory server's background worker: runs the scheduled extraction
   # tasks that promote working-memory turns into long-term memories.
@@ -125,13 +112,10 @@ services:
     volumes:
       - ./:/workshop-root:ro
     environment:
-      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      - REDIS_URL=${REDIS_URL:?set REDIS_URL in .env — your Redis Cloud database}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-unset}
       - LONG_TERM_MEMORY=true
       - DISABLE_AUTH=true
-    depends_on:
-      redis:
-        condition: service_healthy
 
   api:
     build:
@@ -141,7 +125,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      - REDIS_URL=${REDIS_URL:?set REDIS_URL in .env — your Redis Cloud database}
       - AGENT_MEMORY_URL=http://agent-memory:8000
       - DATA_DIR=/workshop/data
       - OPENAI_API_KEY=${OPENAI_API_KEY:?set OPENAI_API_KEY in .env}
@@ -161,8 +145,6 @@ services:
       - ./data:/workshop/data:ro
       - ./:/workshop-root:ro
     depends_on:
-      redis:
-        condition: service_healthy
       agent-memory:
         condition: service_started
     command: >

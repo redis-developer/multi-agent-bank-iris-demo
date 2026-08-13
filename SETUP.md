@@ -6,12 +6,14 @@
 - An **OpenAI API key** — used by the chat model (`gpt-4o-mini` by default),
   embeddings (`text-embedding-3-small`), and the Agent Memory Server's own
   extraction LLM
-- A **Redis Cloud account** (free tier) with a free database — Section 4
-  provisions a Context Retriever service, Section 5 an Agent Memory
-  service, and Section 6 LangCache, all from the console; create the
-  account and database before the workshop (Getting started, Step 1)
+- A **Redis Cloud account** (free tier) with a free database — **required**:
+  the cloud database is the workshop's only database (there is no local
+  Redis container). Section 4 provisions a Context Retriever service,
+  Section 5 an Agent Memory service, and Section 6 LangCache, all from
+  the console; create the account and database before the workshop
+  (Getting started, Step 1)
 - Ports free: 80 (workbench), 3000 (chat UI), 3001 (docs), 8000 (API),
-  8088 (Agent Memory Server), 5540 (Redis Insight), 6379 (Redis)
+  8088 (Agent Memory Server), 5540 (Redis Insight)
 
 ## Boot
 
@@ -19,8 +21,9 @@
 cp .env.example .env
 # fill in .env → OPENAI_API_KEY=sk-...
 #              → REDIS_URL=redis://default:<password>@<host>:<port>
-#                (your Redis Cloud database; empty = local fallback container)
-./start.sh                # = docker compose up -d --build
+#                (your Redis Cloud database — required, it is THE database)
+./start.sh                # = docker compose up -d --build (refuses to boot
+                          #   until both keys are filled in)
 ```
 
 Configure first, boot once: all keys go into `.env` right after cloning
@@ -42,8 +45,8 @@ docker compose logs -f api        # watch the pipeline (routing, tools, errors)
 # Code panel, save — the api reloads itself. If you ever change REDIS_URL
 # or OPENAI_API_KEY after boot: docker compose restart agent-memory
 # agent-memory-worker (they re-read .env on restart)
-docker compose down               # stop (keeps Redis data volume-free: data
-                                  # is reseeded from ./data on next boot)
+docker compose down               # stop the stack (your data is safe — it
+                                  # lives in your Redis Cloud database)
 ```
 
 ## Resetting state
@@ -53,7 +56,7 @@ docker compose down               # stop (keeps Redis data volume-free: data
   records (re-run `python -m src.context.deploy`) and the memory server's
   data:
   ```bash
-  docker compose exec redis redis-cli FLUSHALL
+  docker compose exec terminal sh -c 'redis-cli -u "$REDIS_URL" FLUSHALL'
   docker compose restart api      # reseeds everything
   ```
 - **Back to starter code**: `./solve reset`

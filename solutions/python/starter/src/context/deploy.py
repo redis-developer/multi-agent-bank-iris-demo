@@ -51,10 +51,11 @@ async def deploy() -> dict:
                          "src/context/models.py and add them to "
                          "BANK_ENTITIES (Section 4, first exercise)."}
     if (urlparse(config.REDIS_URL).hostname or "") in _LOCAL_HOSTS:
-        return {"error": "REDIS_URL points at the local fallback Redis — "
-                         "the managed Context Retriever service must be "
-                         "able to reach YOUR database. Put your Redis "
-                         "Cloud connection string in .env (Getting "
+        return {"error": "REDIS_URL points at a local or "
+                         "container-internal Redis — there is no local "
+                         "fallback; the managed Context Retriever "
+                         "service can only reach your Redis Cloud "
+                         "database. Fix REDIS_URL in .env (Getting "
                          "started, step 1) and re-run this deploy."}
 
     from context_surfaces.context_model import export_data_model

@@ -72,8 +72,8 @@ workbench. From here on, everything happens in this one browser tab:
 | **Instructions** (left) | These docs |
 | **App** panel | The WhatsApp-style chat UI + pipeline inspector |
 | **Code** panel | VS Code, opened on `code/python` |
-| **Terminal** panel | A shell at the repo root — `./solve`, `curl`, `redis-cli -h redis` |
-| **Redis Insight** panel | Connected to the workshop Redis |
+| **Terminal** panel | A shell at the repo root — `./solve`, `curl`, `redis-cli -u "$REDIS_URL"` (your cloud database) |
+| **Redis Insight** panel | Browse your cloud database (added once in Section 1, step 1) |
 
 (Each service is also exposed directly — api :8000, chat UI :3000, docs
 :3001, Redis Insight :5540, Agent Memory Server :8088 — if you prefer
@@ -83,8 +83,9 @@ separate tabs.)
 > — it's editable right in the **Code** panel at the workspace root, and
 > the api reloads itself when you save. Service API keys are shown **only
 > once**, at creation time: copy them immediately.
-> (If `REDIS_URL` is left empty, the stack falls back to a local Redis
-> container — offline mode; the facilitator may use it as a backup.)
+> Both keys in Step 1 are **required** — `./start.sh` refuses to boot
+> until they're filled in. There is no local Redis: your cloud database
+> is the workshop's only database.
 
 ## How the exercises work
 

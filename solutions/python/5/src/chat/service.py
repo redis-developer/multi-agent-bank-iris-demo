@@ -74,6 +74,7 @@ class ChatService:
         t0 = time.perf_counter()
 
         # ── SECTION 6 - SEMANTIC CACHING: check the cache before any work ──
+        # Replace the None below with:  self.cache.check(request.message)
         cached_reply = None
 
         if cached_reply is not None:
@@ -96,6 +97,11 @@ class ChatService:
                                   request.message, reply)
 
         # ── SECTION 6 - SEMANTIC CACHING: store shareable replies ──────────
+        # Only loan_docs answers are impersonal enough to share across
+        # customers. The solution is written below — select the two code
+        # lines, press Cmd+/ (Ctrl+/), save:
+        # if agent == "loan_docs":
+        #     self.cache.store(request.message, reply)
 
         return self._response(reply, route=route, agent=agent,
                               citations=citations, t0=t0)

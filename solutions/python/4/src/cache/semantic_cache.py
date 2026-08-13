@@ -54,22 +54,38 @@ class ReplyCache:
         """Return a cached reply for a semantically similar question.
 
         ═══════════════════════════════════════════════════════════════
-        SECTION 6 - SEMANTIC CACHING (search): POST the message to the
-        cache's /entries/search endpoint with the similarity threshold
-        from config, and return the matched response via the provided
-        _cached_response helper (None on a miss).
+        SECTION 6 - SEMANTIC CACHING (search): one POST to the cache's
+        /entries/search endpoint — the service embeds the prompt and
+        runs the similarity search, and a match above the threshold
+        returns the stored reply. The solution is written below,
+        commented out: select the block, press Cmd+/ (Ctrl+/ on
+        Windows/Linux), save.
         ═══════════════════════════════════════════════════════════════
         """
+        # if not self.configured:
+        #     return None
+        # response = self.http.post("/entries/search", json={
+        #     "prompt": message,
+        #     "similarityThreshold": config.CACHE_SIMILARITY_THRESHOLD,
+        # })
+        # response.raise_for_status()
+        # return _cached_response(response.json())
         return None
 
     def store(self, message: str, reply: str) -> None:
         """Store a freshly generated reply under this question.
 
         ═══════════════════════════════════════════════════════════════
-        SECTION 6 - SEMANTIC CACHING (store): POST the prompt/response
-        pair to the cache's /entries endpoint.
+        SECTION 6 - SEMANTIC CACHING (store): one POST to /entries with
+        the prompt/response pair. Same drill — uncomment and save.
         ═══════════════════════════════════════════════════════════════
         """
+        # if not self.configured:
+        #     return None
+        # self.http.post("/entries", json={
+        #     "prompt": message,
+        #     "response": reply,
+        # }).raise_for_status()
         return None
 
 

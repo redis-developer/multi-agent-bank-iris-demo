@@ -23,38 +23,48 @@
    The api watches `.env` and reloads within a few seconds of the save.
    Until these are set, it logs a warning and simply skips caching.
 
-3. **Open the exercise file** `code/python/src/cache/semantic_cache.py`.
-   The provided `__init__` already builds an authenticated httpx client
-   pointed at `/v1/caches/{cacheId}` — the two methods are stubs.
+3. **Open the exercise file** `src/cache/semantic_cache.py`. The
+   provided `__init__` already builds an authenticated httpx client
+   pointed at `/v1/caches/{cacheId}` — the two methods are stubs with
+   their solutions written inside, commented out.
 
-4. **Implement `check`** — the *search* half of cache-aside:
+4. **Exercise — bring `check` to life** (the *search* half of
+   cache-aside): select the commented block inside `check`, press
+   `Cmd+/` (`Ctrl+/` on Windows/Linux), save. Read what you enabled —
+   one POST to `/entries/search` with two parameters:
 
-   ```python
-   if not self.configured:
-       return None
-   response = self.http.post("/entries/search", json={
-       "prompt": message,
-       "similarityThreshold": config.CACHE_SIMILARITY_THRESHOLD,
-   })
-   response.raise_for_status()
-   return _cached_response(response.json())
-   ```
+   - `prompt` — the customer's message, as typed
+   - `similarityThreshold` — `config.CACHE_SIMILARITY_THRESHOLD`
+     (0.85): how close a paraphrase must be to count as "the same
+     question"
 
    LangCache embeds the prompt server-side and runs the similarity search
    inside the service — no OpenAI call happens on this path at all.
 
-5. **Implement `store`** — the other half:
+5. **Exercise — bring `store` to life**: same drill inside `store`. One
+   POST to `/entries` with the pair the cache will serve later:
+   `prompt` (the question) and `response` (the generated reply).
 
-   ```python
-   if not self.configured:
-       return None
-   self.http.post("/entries", json={
-       "prompt": message,
-       "response": reply,
-   }).raise_for_status()
-   ```
+6. **Wire the pipeline to the cache.** Open `src/chat/service.py` —
+   two `SECTION 6` banners in `chat()`:
 
-6. **Save and measure.** In the **App** panel ask:
+   - Under *check the cache before any work*, replace the `None`:
+
+     ```python
+     cached_reply = self.cache.check(request.message)
+     ```
+
+   - Under *store shareable replies*, uncomment the two code lines:
+
+     ```python
+     if agent == "loan_docs":
+         self.cache.store(request.message, reply)
+     ```
+
+   That `if` is the privacy rule: only the loan-docs agent's answers are
+   impersonal enough to share across customers.
+
+7. **Save and measure.** In the **App** panel ask:
 
    > What is the foreclosure charge on a personal loan?
 
@@ -67,12 +77,13 @@
    tokens, zero embedding calls from your app. The route chip reads
    `cache`: the router, graph, and LLM never ran.
 
-7. **Verify the personal-data rule.** Ask *"what's my outstanding
+8. **Verify the personal-data rule.** Ask *"what's my outstanding
    balance?"* twice. Never cached — it runs the servicing agent both
-   times, because only `loan_docs` replies are stored. That rule is one
-   `if` in `service.py`; find it and convince yourself it's load-bearing.
+   times, because of the one `if` you uncommented in step 6. Convince
+   yourself it's load-bearing: without it, one customer's balance could
+   become another customer's cache hit.
 
-8. **Inspect the cache from the Terminal panel** — the same API your app
+9. **Inspect the cache from the Terminal panel** — the same API your app
    calls:
 
    ```bash
@@ -85,7 +96,7 @@
    (export the three values in the terminal first). The Redis Cloud
    console's LangCache page also shows entries and hit-rate metrics.
 
-9. **(Optional) Break it on purpose.** Set
+10. **(Optional) Break it on purpose.** Set
    `CACHE_SIMILARITY_THRESHOLD=0.5` in `.env` (Code panel, save), and
    ask *"what is
    the processing fee on a personal loan?"* — at 0.5, this related-but-

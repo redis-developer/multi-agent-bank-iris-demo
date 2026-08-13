@@ -10,7 +10,7 @@ RUN apk add --no-cache ttyd tmux bash curl jq redis python3 py3-pip
 # Section 4: cd /workshop/code/python && python -m src.context.deploy
 RUN python3 -m venv /opt/ctx && \
     /opt/ctx/bin/pip install --no-cache-dir \
-        redis-context-retriever redis python-dotenv
+        redis-context-retriever==0.0.6 redis python-dotenv
 ENV PATH="/opt/ctx/bin:$PATH" \
     PYTHONPATH="/workshop/code/python"
 

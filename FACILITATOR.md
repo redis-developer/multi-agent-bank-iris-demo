@@ -15,7 +15,7 @@ anyone stall more than 2 minutes on an environment issue.
 | 0:10–0:25 | 1 Explore the bank | Their cloud DB + the FAQ index; semantic vs lexical (step 4); the empty-bank teaser (step 5) pays off in Section 4 |
 | 0:25–0:45 | 2 Semantic routing | Observe-the-code section (no typing): read routes → thresholds → min-aggregation, then test live; the abstain-below-threshold moment (weather question) |
 | 0:45–1:15 | 3 RAG | First write-the-code exercise. "The model is a reader, not a knowledge base"; the gold-loan refusal (step 6) is the compliance argument. *Going deeper* (steps 8–14): build keyword + hybrid search and race all three modes — run it if the room is fast, else assign as homework; the eNACH-vs-paraphrase races (steps 10–12) make the strongest live demo |
-| 1:15–1:55 | 4 Context Retriever | Attendees mint the admin key in SDK code (step 3, `python -m src.context.bootstrap` — prompts for cloud email+password; console **Create with CLI** is the Google/SSO fallback, ~5 min). Beats: RAG can't answer "what's MY outstanding?" — documents vs entities (step 2), model-the-bank in `ContextModel` classes (step 4), build the context surface — create_context_surface / agent key / import_data written by attendees (step 5), run the deploy → generated tools (step 6), "look at what you didn't write" (step 7), identity injection + scoped agent keys (step 9) |
+| 1:15–1:55 | 4 Context Retriever | Attendees create an admin key on the console's **Admin keys** page and paste it into `.env` (step 3, ~3 min — the only console touch; everything else is the Python client). Beats: RAG can't answer "what's MY outstanding?" — documents vs entities (step 2), model-the-bank in `ContextModel` classes (step 4), build the context surface — create_context_surface / agent key / import_data written by attendees (step 5), run the deploy → generated tools (step 6), "look at what you didn't write" (step 7), identity injection + scoped agent keys (step 9) |
 | 1:50–2:15 | 5 Agent memory | Memory is infrastructure, not prompts — the Agent Memory Server (Iris's Agent Memory) does extraction for you; the renovation → home-decor cross-sell demo (step 9) is the wow moment. Extraction is async: say the renovation line early, chat a bit, then demo the recall. "Go managed" (steps 11–14): provision the Redis Cloud service + curl tour — run it if accounts are ready, else homework |
 | 2:15–2:35 | 6 LangCache | Attendees provision a real cloud service (steps 1–2, ~5 min) — have Redis Cloud accounts created BEFORE the day. Latency drop live on screen; "no vectorizer, no schema, no index" is the beat; the "only impersonal answers" rule; the loose-threshold failure (step 9) if time allows |
 | 2:30–2:40 | 7 Wrap-up | The table mapping what they built → Redis Iris managed services |
@@ -46,22 +46,18 @@ paying off.
   .env hot-reload → FAQ seeding, router index, and all three retrieval
   modes including FT.HYBRID all pass on Redis Cloud). Still unverified:
   the Context Retriever service itself — run Section 4 once end to end
-  (`python -m src.context.bootstrap` → admin key, deploy, generated
-  tool names, MCP calls — the client integration is built against
-  `redis-context-retriever` 0.0.6 and mock-tested only), and confirm
-  the storage format of imported records (the NOC action tool reads
-  them; it tolerates JSON and hash). Known-good facts to lean on: the
-  admin API authenticates with `X-API-Key`, and surface creation must
-  embed the database connection under `data_source.connection_config`
-  (deploy.py builds it from `REDIS_URL`; this matches the current
-  admin-API contract used by `scripts/setup_surface.py` in
-  github.com/redis/redis-iris-demos). Admin keys need a Redis Cloud
-  *session*: the bootstrap gets one in SDK code via the direct
-  email+password login (`SMAuthService` — the same flow as `ctxctl
-  auth login`). Only its failure path is tested so far (fake
-  credentials → 403 + friendly fallback hint), so verify one real
-  login. Google/SSO accounts can't do direct login — the console
-  (**Create with CLI**) is the documented fallback and always works.
+  (admin key from the console's **Admin keys** page → deploy →
+  generated tool names → MCP calls — the client integration is built
+  against `redis-context-retriever` 0.0.6 and mock-tested only), and
+  confirm the storage format of imported records (the NOC action tool
+  reads them; it tolerates JSON and hash). Known-good facts to lean
+  on: the admin API authenticates with `X-API-Key`, and surface
+  creation must embed the database connection under
+  `data_source.connection_config` (deploy.py builds it from
+  `REDIS_URL`; this matches the current admin-API contract used by
+  `scripts/setup_surface.py` in github.com/redis/redis-iris-demos).
+  The admin key is the only console touch — minting it requires the
+  console session; everything after authenticates with the key.
   Sections 5/6's managed services (Agent Memory, LangCache) also deserve
   one live pass.
 - **Service keys are shown once**: both Agent Memory and LangCache display

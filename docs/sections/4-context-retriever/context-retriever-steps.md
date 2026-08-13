@@ -38,33 +38,26 @@
    loans, offers) — is what turns the generic reply into *"₹2,38,101
    outstanding on LAN20240001"*.
 
-3. **Bootstrap the service — mint the admin key in code.** Everything
-   the `redis-context-retriever` SDK can do, this workshop does in SDK
-   code — including the bootstrap the console page would do. From the
-   **Terminal** panel:
+3. **Create the admin API key.** The one thing the client can't mint for
+   itself is its root credential. Open the console's [Admin keys
+   page](https://cloud.redis.io/#/context-retriever/admin-keys)
+   (**Context Retriever → Admin keys**), create a key, and copy it —
+   *it is shown only once*. In the **Code** panel, open `.env`
+   (workspace root, next to `src/`), add the line, and save:
 
    ```bash
-   cd /workshop/code/python
-   python -m src.context.bootstrap
+   CTX_ADMIN_KEY=<your-admin-key>
    ```
 
-   It asks for your Redis Cloud email + password, logs in with the
-   SDK's own Redis Cloud auth service (the same session your browser
-   console holds), mints the **admin API key** — the root credential
-   every later call authenticates with — and writes `CTX_ADMIN_KEY`
-   into `.env` for you. The api watches `.env` and reloads itself
-   within a few seconds — no restarts, no leaving the browser.
-   (`src/context/bootstrap.py` is provided — read it: two SDK calls,
-   a login and a key mint.)
+   The api watches `.env` and reloads itself within a few seconds of
+   the save — no restarts, no leaving the browser.
 
-   > **Signing in to Redis Cloud with Google/SSO?** The direct login
-   > needs a password, so use the console fallback: at
-   > [cloud.redis.io](https://cloud.redis.io/) select **Context
-   > Retriever** → **Create with CLI**, copy the admin key it shows
-   > (*only once*), and paste it into `.env` in the **Code** panel as
-   > `CTX_ADMIN_KEY=<key>`. Either way, skip *Custom service creation*
-   > — that path clicks the entities together in the UI, and your
-   > entities are about to live in code.
+   That key is the *only* thing the console is for: skip the service
+   creation wizard entirely (it walks you through clicking entities
+   together in the UI, and skip the `ctxctl` CLI it offers too). Every
+   step from here — the service's surface, your database binding, the
+   agent key, the data import, the generated tools — is the official
+   `redis-context-retriever` Python client, in code you can read.
 
 4. **Exercise — model the bank.** Open `src/context/models.py`. The
    `Customer` entity is the worked example: a `ContextModel` with a

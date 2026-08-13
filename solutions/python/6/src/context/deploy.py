@@ -17,8 +17,8 @@ reporting. The exercise is the heart of it — driving the
 deployed model), mint the bot's scoped **agent key**, and import the
 records through the service.
 
-Requires CTX_ADMIN_KEY in .env (minted by `python -m
-src.context.bootstrap` — Section 4, step 3). CTX_API_URL / CTX_MCP_URL
+Requires CTX_ADMIN_KEY in .env (created on the console's Admin keys
+page — Section 4, step 3; shown only once). CTX_API_URL / CTX_MCP_URL
 default to the managed endpoints. (POST /api/context/deploy runs this
 same function.)
 """
@@ -42,9 +42,10 @@ _LOCAL_HOSTS = ("redis", "localhost", "127.0.0.1")
 
 async def deploy() -> dict:
     if not config.CTX_ADMIN_KEY:
-        return {"error": "CTX_ADMIN_KEY is not set — mint the admin key "
-                         "with `python -m src.context.bootstrap` (Section "
-                         "4, step 3), then re-run this deploy."}
+        return {"error": "CTX_ADMIN_KEY is not set — create an admin key "
+                         "in the Redis Cloud console (Context Retriever -> "
+                         "Admin keys), put it in .env, and re-run this "
+                         "deploy."}
     if len(models.BANK_ENTITIES) < 3:
         return {"error": "The semantic model is incomplete — declare the "
                          "Loan and Offer entities in "

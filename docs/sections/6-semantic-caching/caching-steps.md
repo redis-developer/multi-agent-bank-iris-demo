@@ -23,46 +23,42 @@
    The api watches `.env` and reloads within a few seconds of the save.
    Until these are set, it logs a warning and simply skips caching.
 
-3. **Open the exercise file** `src/cache/semantic_cache.py`. The
-   provided `__init__` already builds an authenticated httpx client
-   pointed at `/v1/caches/{cacheId}` — the two methods are stubs with
-   their solutions written inside, commented out.
+3. **Open the exercise file** `src/cache/semantic_cache.py`. Everything
+   is wired — the authenticated httpx client (`__init__`), the two
+   POSTs, the guards, and the pipeline already calls the cache on every
+   message (`service.py`, two provided `SECTION 6` banners). What's
+   missing is the part that matters: both request **payloads are
+   empty**, and an empty payload keeps the cache path off. The moment
+   you fill them, caching is live.
 
-4. **Exercise — bring `check` to life** (the *search* half of
-   cache-aside): select the commented block inside `check`, press
-   `Cmd+/` (`Ctrl+/` on Windows/Linux), save. Read what you enabled —
-   one POST to `/entries/search` with two parameters:
+4. **Exercise — fill `check`'s payload** (the *search* half of
+   cache-aside). Two parameters, spelled out in the banner right above
+   the empty `payload = { ... }`:
 
-   - `prompt` — the customer's message, as typed
-   - `similarityThreshold` — `config.CACHE_SIMILARITY_THRESHOLD`
-     (0.85): how close a paraphrase must be to count as "the same
-     question"
+   ```python
+   "prompt": message,
+   "similarityThreshold": config.CACHE_SIMILARITY_THRESHOLD,
+   ```
 
-   LangCache embeds the prompt server-side and runs the similarity search
-   inside the service — no OpenAI call happens on this path at all.
+   `prompt` is the customer's question as typed; the threshold (0.85
+   from config) is how close a paraphrase must be to count as "the same
+   question". LangCache embeds the prompt server-side and runs the
+   similarity search inside the service — no OpenAI call happens on
+   this path at all.
 
-5. **Exercise — bring `store` to life**: same drill inside `store`. One
-   POST to `/entries` with the pair the cache will serve later:
-   `prompt` (the question) and `response` (the generated reply).
+5. **Exercise — fill `store`'s payload**: the pair the cache will serve
+   on the next similar question:
 
-6. **Wire the pipeline to the cache.** Open `src/chat/service.py` —
-   two `SECTION 6` banners in `chat()`:
+   ```python
+   "prompt": message,
+   "response": reply,
+   ```
 
-   - Under *check the cache before any work*, replace the `None`:
-
-     ```python
-     cached_reply = self.cache.check(request.message)
-     ```
-
-   - Under *store shareable replies*, uncomment the two code lines:
-
-     ```python
-     if agent == "loan_docs":
-         self.cache.store(request.message, reply)
-     ```
-
-   That `if` is the privacy rule: only the loan-docs agent's answers are
-   impersonal enough to share across customers.
+6. **Read where the pipeline calls it** — `src/chat/service.py`, both
+   provided: `check` runs *before any other work* (a hit skips the
+   router, the graph, and every LLM call), and `store` runs only when
+   `agent == "loan_docs"` — the privacy rule: only the loan-docs
+   agent's answers are impersonal enough to share across customers.
 
 7. **Save and measure.** In the **App** panel ask:
 
@@ -79,9 +75,9 @@
 
 8. **Verify the personal-data rule.** Ask *"what's my outstanding
    balance?"* twice. Never cached — it runs the servicing agent both
-   times, because of the one `if` you uncommented in step 6. Convince
-   yourself it's load-bearing: without it, one customer's balance could
-   become another customer's cache hit.
+   times, because of the `loan_docs` guard you read at the store
+   call-site (step 6). Convince yourself it's load-bearing: without it,
+   one customer's balance could become another customer's cache hit.
 
 9. **Inspect the cache from the Terminal panel** — the same API your app
    calls:

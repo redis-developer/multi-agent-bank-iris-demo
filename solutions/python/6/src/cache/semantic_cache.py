@@ -54,18 +54,18 @@ class ReplyCache:
         """Return a cached reply for a semantically similar question.
 
         ═══════════════════════════════════════════════════════════════
-        SECTION 6 - SEMANTIC CACHING (search): POST the message to the
-        cache's /entries/search endpoint with the similarity threshold
-        from config, and return the matched response (None on a miss).
-        Solved.
+        SECTION 6 - SEMANTIC CACHING (search): solved — the payload
+        carries the question and the similarity threshold; the guard
+        keeps the path off when LangCache isn't configured.
         ═══════════════════════════════════════════════════════════════
         """
-        if not self.configured:
-            return None
-        response = self.http.post("/entries/search", json={
+        payload = {
             "prompt": message,
             "similarityThreshold": config.CACHE_SIMILARITY_THRESHOLD,
-        })
+        }
+        if not self.configured or not payload:
+            return None
+        response = self.http.post("/entries/search", json=payload)
         response.raise_for_status()
         return _cached_response(response.json())
 
@@ -73,17 +73,17 @@ class ReplyCache:
         """Store a freshly generated reply under this question.
 
         ═══════════════════════════════════════════════════════════════
-        SECTION 6 - SEMANTIC CACHING (store): POST the prompt/response
-        pair to the cache's /entries endpoint. Solved.
+        SECTION 6 - SEMANTIC CACHING (store): solved — the pair the
+        cache serves on the next semantically similar question.
         ═══════════════════════════════════════════════════════════════
         """
-        if not self.configured:
-            return None
-        self.http.post("/entries", json={
+        payload = {
             "prompt": message,
             "response": reply,
-        }).raise_for_status()
-
+        }
+        if not self.configured or not payload:
+            return None
+        self.http.post("/entries", json=payload).raise_for_status()
 
 def _cached_response(payload) -> str | None:
     """Pull the cached response text out of a LangCache search result

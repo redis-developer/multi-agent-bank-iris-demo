@@ -74,6 +74,9 @@ class ChatService:
         t0 = time.perf_counter()
 
         # ── SECTION 6 - SEMANTIC CACHING: check the cache before any work ──
+        # Provided: inert until Section 6's exercise fills the cache's
+        # request parameters (src/cache/semantic_cache.py) and .env has
+        # the LANGCACHE_* keys.
         cached_reply = self.cache.check(request.message)
 
         if cached_reply is not None:
@@ -96,6 +99,8 @@ class ChatService:
                                   request.message, reply)
 
         # ── SECTION 6 - SEMANTIC CACHING: store shareable replies ──────────
+        # Provided: only loan_docs answers are impersonal enough to share
+        # across customers — this guard is the privacy rule (Section 6).
         if agent == "loan_docs":
             self.cache.store(request.message, reply)
 

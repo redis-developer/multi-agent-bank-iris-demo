@@ -74,8 +74,10 @@ class ChatService:
         t0 = time.perf_counter()
 
         # ── SECTION 6 - SEMANTIC CACHING: check the cache before any work ──
-        # Replace the None below with:  self.cache.check(request.message)
-        cached_reply = None
+        # Provided: inert until Section 6's exercise fills the cache's
+        # request parameters (src/cache/semantic_cache.py) and .env has
+        # the LANGCACHE_* keys.
+        cached_reply = self.cache.check(request.message)
 
         if cached_reply is not None:
             return self._response(cached_reply, route="cache", agent="cache",
@@ -95,11 +97,10 @@ class ChatService:
         # ── SECTION 5 - AGENT MEMORY: remember this turn ───────────────────
 
         # ── SECTION 6 - SEMANTIC CACHING: store shareable replies ──────────
-        # Only loan_docs answers are impersonal enough to share across
-        # customers. The solution is written below — select the two code
-        # lines, press Cmd+/ (Ctrl+/), save:
-        # if agent == "loan_docs":
-        #     self.cache.store(request.message, reply)
+        # Provided: only loan_docs answers are impersonal enough to share
+        # across customers — this guard is the privacy rule (Section 6).
+        if agent == "loan_docs":
+            self.cache.store(request.message, reply)
 
         return self._response(reply, route=route, agent=agent,
                               citations=citations, t0=t0)

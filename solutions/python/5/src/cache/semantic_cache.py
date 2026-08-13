@@ -54,40 +54,45 @@ class ReplyCache:
         """Return a cached reply for a semantically similar question.
 
         ═══════════════════════════════════════════════════════════════
-        SECTION 6 - SEMANTIC CACHING (search): one POST to the cache's
-        /entries/search endpoint — the service embeds the prompt and
-        runs the similarity search, and a match above the threshold
-        returns the stored reply. The solution is written below,
-        commented out: select the block, press Cmd+/ (Ctrl+/ on
-        Windows/Linux), save.
+        SECTION 6 - SEMANTIC CACHING (search): the request plumbing is
+        wired — but the payload below is empty, and an empty payload
+        keeps the cache path OFF (the guard under it returns None).
+        Fill in the two parameters the search needs:
+
+            "prompt": message,
+            "similarityThreshold": config.CACHE_SIMILARITY_THRESHOLD,
+
+        `prompt` is the question as typed; the threshold (0.85 from
+        config) is how close a paraphrase must be to count as the same
+        question.
         ═══════════════════════════════════════════════════════════════
         """
-        # if not self.configured:
-        #     return None
-        # response = self.http.post("/entries/search", json={
-        #     "prompt": message,
-        #     "similarityThreshold": config.CACHE_SIMILARITY_THRESHOLD,
-        # })
-        # response.raise_for_status()
-        # return _cached_response(response.json())
-        return None
+        payload = {
+            # add the two search parameters here (see banner above)
+        }
+        if not self.configured or not payload:
+            return None
+        response = self.http.post("/entries/search", json=payload)
+        response.raise_for_status()
+        return _cached_response(response.json())
 
     def store(self, message: str, reply: str) -> None:
         """Store a freshly generated reply under this question.
 
         ═══════════════════════════════════════════════════════════════
-        SECTION 6 - SEMANTIC CACHING (store): one POST to /entries with
-        the prompt/response pair. Same drill — uncomment and save.
+        SECTION 6 - SEMANTIC CACHING (store): same shape — fill in the
+        pair the cache will serve on the next similar question:
+
+            "prompt": message,
+            "response": reply,
         ═══════════════════════════════════════════════════════════════
         """
-        # if not self.configured:
-        #     return None
-        # self.http.post("/entries", json={
-        #     "prompt": message,
-        #     "response": reply,
-        # }).raise_for_status()
-        return None
-
+        payload = {
+            # add the prompt/response pair here (see banner above)
+        }
+        if not self.configured or not payload:
+            return None
+        self.http.post("/entries", json=payload).raise_for_status()
 
 def _cached_response(payload) -> str | None:
     """Pull the cached response text out of a LangCache search result

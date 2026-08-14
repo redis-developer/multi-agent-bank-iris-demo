@@ -35,8 +35,7 @@ a live servicing system.
 ```bash
 git clone <this-repo>
 cd multi-agent-bank-iris-demo
-cp .env.example .env    # fill in OPENAI_API_KEY + REDIS_URL (your Redis
-                        # Cloud database) — see Getting started, Step 1
+cp .env.example .env    # fill in OPENAI_API_KEY + REDIS_URL (your Redis Cloud database) — see Getting started, Step 1
 ./start.sh
 ```
 

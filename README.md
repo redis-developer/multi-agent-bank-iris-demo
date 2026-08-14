@@ -36,7 +36,8 @@ a live servicing system.
 git clone <this-repo>
 cd multi-agent-bank-iris-demo
 cp .env.example .env    # fill in OPENAI_API_KEY + REDIS_URL (your Redis
-./start.sh              # Cloud database) — see Getting started, Step 1
+                        # Cloud database) — see Getting started, Step 1
+./start.sh
 ```
 
 Also runs in **GitHub Codespaces** (devcontainer included): open the repo

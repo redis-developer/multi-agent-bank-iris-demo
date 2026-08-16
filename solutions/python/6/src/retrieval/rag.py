@@ -1,9 +1,9 @@
 """Retrieval over the loan policy documents — three ways.
 
 ═══════════════════════════════════════════════════════════════════════
-SECTION 3 - RAG: `search` (vector) is PROVIDED — it is the retrieval
-step behind the loan_docs agent. The GOING DEEPER exercises add
-`keyword_search` and `hybrid_search`, then race all three.        SOLVED.
+SECTION 3 - RAG: the three exercises below each build one retrieval
+mode — `search` (vector), `keyword_search`, and `hybrid_search` —
+then race all three via GET /api/retrieval/compare.        SOLVED.
 ═══════════════════════════════════════════════════════════════════════
 
 The bank's FAQ knowledge base (data/faqs.json — in production these
@@ -38,9 +38,17 @@ class LoanDocsRetriever:
         )
 
     def search(self, query: str, k: int = config.RETRIEVAL_TOP_K,
-               product: str | None = None) -> list[dict]:
+               product: str | None = None) -> list[dict] | None:
         """Vector search: the top-k chunks closest in meaning to the query.
-        This is the *retrieve* step of RAG (provided)."""
+        This is the *retrieve* step of RAG — the loan_docs agent falls
+        back to a canned reply until it exists.
+
+        ═══════════════════════════════════════════════════════════════
+        SECTION 3 (vector): embed the query, build a VectorQuery over
+        the `embedding` field (filtered by `product` when given), and
+        return the chunks (include the distance via self._chunk). Solved.
+        ═══════════════════════════════════════════════════════════════
+        """
         embedding = self.vectorizer.embed(query)
         vector_query = VectorQuery(
             vector=embedding,
@@ -60,9 +68,9 @@ class LoanDocsRetriever:
         text — exact terms, stemming, no embeddings involved.
 
         ═══════════════════════════════════════════════════════════════
-        SECTION 3 - GOING DEEPER (keyword): build a TextQuery over the
+        SECTION 3 (keyword): build a TextQuery over the
         `content` field with the BM25STD scorer and return the chunks
-        (include the BM25 score). Solved.
+        (include the BM25 score in each dict, e.g. via self._chunk). Solved.
         ═══════════════════════════════════════════════════════════════
         """
         text_query = TextQuery(
@@ -84,7 +92,7 @@ class LoanDocsRetriever:
         via Redis's FT.HYBRID.
 
         ═══════════════════════════════════════════════════════════════
-        SECTION 3 - GOING DEEPER (hybrid): embed the query, then build a
+        SECTION 3 (hybrid): embed the query, then build a
         HybridQuery over the text field and the vector field with
         combination_method="RRF". Solved.
         ═══════════════════════════════════════════════════════════════

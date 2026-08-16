@@ -1,31 +1,36 @@
 ## Steps
 
-1. **Read the retrieval you already have.** Open
-   `code/python/src/retrieval/rag.py` — provided, not an exercise.
-   `LoanDocsRetriever.search` embeds the query and runs a RedisVL
-   `VectorQuery` over `idx:faqs`; `format_context` lays the FAQs out as
-   numbered `[1] Document — Section` entries. Retrieval exists — nothing
-   calls it yet.
+1. **Read the provided pipeline.** In `code/python/src/chat/service.py`,
+   the `loan_docs` branch under the `SECTION 3 - RAG / SECTION 4` banner
+   already routes loan questions into `_answer_from_loan_docs` — the whole
+   RAG pattern in five lines: `search` (retrieve), `format_context` into
+   the system prompt (augment), `llm.invoke` (generate), plus citations
+   for the UI. Nothing to write here — until retrieval exists, the helper
+   falls back to Section 2's canned reply.
 
-2. **Read the provided helper.** In `code/python/src/chat/service.py`, find
-   `_answer_from_loan_docs`. It is the whole RAG pattern in five lines:
-   `search` (retrieve), `format_context` into the system prompt (augment),
-   `llm.invoke` (generate), plus citations for the UI.
-
-3. **Route loan questions through it.** Under the
-   `SECTION 3 - RAG / SECTION 4 - MULTI-AGENT` banner, replace the canned
-   reply from Section 2 with:
+2. **Exercise 1 — vector search.** Open `code/python/src/retrieval/rag.py`,
+   find the `SECTION 3 (vector)` banner in `search`, and replace
+   `return None` with:
 
    ```python
-   if route == "loan_docs":
-       reply, agent, citations = self._answer_from_loan_docs(
-           request.message)
-   else:
-       reply, agent, citations = (self._canned_reply(route),
-                                  route or "fallback", [])
+   embedding = self.vectorizer.embed(query)
+   vector_query = VectorQuery(
+       vector=embedding,
+       vector_field_name="embedding",
+       return_fields=RETURN_FIELDS,
+       num_results=k,
+   )
+   if product:
+       vector_query.set_filter(Tag("product") == product)
+   results = self.index.query(vector_query)
+   return [self._chunk(r, distance=float(r["vector_distance"]))
+           for r in results]
    ```
 
-4. **Save and test.** The api reloads automatically when files change (uvicorn `--reload`; a second or two), then ask:
+   Embed the question, return the chunks closest in meaning — this is the
+   *retrieve* step of RAG, and it turns the whole loan_docs journey on.
+
+3. **Save and test.** The api reloads automatically when files change (uvicorn `--reload`; a second or two), then ask:
 
    > What is the foreclosure charge on a personal loan?
 
@@ -34,14 +39,14 @@
    *FAQ — Personal loans — What is the foreclosure charge…* should be
    there.
 
-5. **Try meaning, not keywords.**
+4. **Try meaning, not keywords.**
 
    > how much do I pay to close my loan early?
 
    No shared vocabulary with the document, same grounded answer — the
    vector search matched intent.
 
-6. **Test the honesty path.**
+5. **Test the honesty path.**
 
    > what are your gold loan interest rates?
 
@@ -49,7 +54,7 @@
    answer, and the persona instructs the model to say so rather than invent
    a rate. Grounding is as much about refusing as answering.
 
-7. **(Optional) Watch the retrieval itself.** In the Redis Insight panel, profile a
+6. **(Optional) Watch the retrieval itself.** In the Redis Insight panel, profile a
    query the way the app runs it:
 
    ```bash
@@ -60,15 +65,15 @@
 
 ---
 
-### Going deeper: keyword, vector, hybrid
+### The other two modes: keyword and hybrid
 
-The bot's RAG works. These exercises make you build the *other two*
-retrieval modes and race all three, using the compare endpoint that ships
-with the app (`GET /api/retrieval/compare` — provided, in
+The bot's RAG works on vector search. The next two exercises build the
+*other two* retrieval modes and race all three, using the compare endpoint
+that ships with the app (`GET /api/retrieval/compare` — provided, in
 `src/api/routes.py`).
 
-8. **Implement keyword search.** In `src/retrieval/rag.py`, find the
-   `SECTION 3 - GOING DEEPER (keyword)` banner in `keyword_search` and
+7. **Exercise 2 — keyword search.** In `src/retrieval/rag.py`, find the
+   `SECTION 3 (keyword)` banner in `keyword_search` and
    replace `return None` with a BM25 full-text query:
 
    ```python
@@ -87,8 +92,8 @@ with the app (`GET /api/retrieval/compare` — provided, in
 
    No vectorizer, no embedding call — just the inverted index and BM25.
 
-9. **Implement hybrid search.** Same file, `SECTION 3 - GOING DEEPER
-   (hybrid)` banner in `hybrid_search`:
+8. **Exercise 3 — hybrid search.** Same file, `SECTION 3 (hybrid)` banner
+   in `hybrid_search`:
 
    ```python
    embedding = self.vectorizer.embed(query)
@@ -110,17 +115,17 @@ with the app (`GET /api/retrieval/compare` — provided, in
    One query object, and Redis runs the text path and the KNN path and
    fuses the ranked lists with RRF — that's `FT.HYBRID` under the hood.
 
-10. **Race them: exact jargon.** Save, then in the **Terminal** panel:
+9. **Race them: exact jargon.** Save, then in the **Terminal** panel:
 
-    ```bash
-    curl -s "http://api:8000/api/retrieval/compare?q=eNACH+mandate+registration&k=2" | jq
-    ```
+   ```bash
+   curl -s "http://api:8000/api/retrieval/compare?q=eNACH+mandate+registration&k=2" | jq
+   ```
 
-    Keyword answers in ~2 ms and pins the disbursement/eNACH FAQ exactly.
-    Vector needs an embedding round trip (~300 ms) for the same top hit.
-    When the query *is* the term, the inverted index is unbeatable.
+   Keyword answers in ~2 ms and pins the disbursement/eNACH FAQ exactly.
+   Vector needs an embedding round trip (~300 ms) for the same top hit.
+   When the query *is* the term, the inverted index is unbeatable.
 
-11. **Race them: pure paraphrase.**
+10. **Race them: pure paraphrase.**
 
     ```bash
     curl -s "http://api:8000/api/retrieval/compare?q=how+much+do+I+pay+to+end+my+loan+before+the+tenure+finishes&k=2" | jq
@@ -132,7 +137,7 @@ with the app (`GET /api/retrieval/compare` — provided, in
     matched the meaning. This asymmetry is why RAG defaults to vector
     search.
 
-12. **Race them: mixed query.**
+11. **Race them: mixed query.**
 
     ```bash
     curl -s "http://api:8000/api/retrieval/compare?q=penalty+for+ending+my+eNACH+loan+early&k=3" | jq
@@ -144,7 +149,7 @@ with the app (`GET /api/retrieval/compare` — provided, in
     Hybrid's fused list surfaces **both** in the top 3 — neither mode alone
     covers the query, RRF does.
 
-13. **(Optional) Full-text tricks in Redis Insight.** The `TEXT` index does
+12. **(Optional) Full-text tricks in Redis Insight.** The `TEXT` index does
     more than exact terms — try these in the Redis Insight panel:
 
     ```bash
@@ -156,7 +161,7 @@ with the app (`GET /api/retrieval/compare` — provided, in
     Fuzzy matching (`%…%` tolerates the typo), exact phrases, and prefix
     matching — all from the same index your keyword search uses.
 
-14. **(Optional) Make the bot retrieve hybrid.** One line in
+13. **(Optional) Make the bot retrieve hybrid.** One line in
     `_answer_from_loan_docs` (in `service.py`) upgrades the RAG itself:
 
     ```python

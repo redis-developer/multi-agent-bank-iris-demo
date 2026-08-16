@@ -1,9 +1,10 @@
 """The chat pipeline — every WhatsApp message flows through here.
 
 ═══════════════════════════════════════════════════════════════════════
-EXERCISE FILE: sections 3, 4, 5, and 6 each replace one stub below.
-(Semantic routing — Section 2 — is already wired: you study it, then
-watch it classify every message that flows through here.)
+EXERCISE FILE: sections 4, 5, and 6 each replace one stub below.
+(Semantic routing — Section 2 — is already wired, and Section 3's RAG
+wiring is provided: its exercises are the three retrieval modes in
+src/retrieval/rag.py.)
 ═══════════════════════════════════════════════════════════════════════
 
 The full pipeline you will assemble over the workshop:
@@ -95,15 +96,23 @@ class ChatService:
         memories = []     # long-term: durable facts about the customer
 
         # ── SECTION 3 - RAG / SECTION 4 - MULTI-AGENT: generate the reply ──
-        reply, agent, citations = (self._canned_reply(route),
-                                   route or "fallback", [])
+        # Provided: loan questions flow through the RAG helper — grounded
+        # answers switch on when Section 3's vector search exists (canned
+        # until then). Section 4's exercise replaces this with the graph.
+        if route == "loan_docs":
+            reply, agent, citations = self._answer_from_loan_docs(
+                request.message)
+        else:
+            reply, agent, citations = (self._canned_reply(route),
+                                       route or "fallback", [])
 
         # ── SECTION 5 - AGENT MEMORY: remember this turn ───────────────────
 
         # ── SECTION 6 - SEMANTIC CACHING: store shareable replies ──────────
         # Provided: only loan_docs answers are impersonal enough to share
         # across customers — this guard is the privacy rule (Section 6).
-        if agent == "loan_docs":
+        # (`citations` keeps canned fallbacks out of the cache.)
+        if agent == "loan_docs" and citations:
             self.cache.store(request.message, reply)
 
         return self._response(reply, route=route, agent=agent,
@@ -116,9 +125,13 @@ class ChatService:
         return CANNED_REPLIES.get(route, FALLBACK_REPLY)
 
     def _answer_from_loan_docs(self, message: str):
-        """Section 3: RAG — retrieve policy chunks, augment, generate."""
+        """Section 3: RAG — retrieve policy chunks, augment, generate.
+        Canned until the vector `search` exercise (src/retrieval/rag.py)
+        is solved."""
         from src.agents import personas
         chunks = self.retriever.search(message)
+        if chunks is None:  # Section 3's vector exercise not solved yet
+            return self._canned_reply("loan_docs"), "loan_docs", []
         system = (personas.LOAN_DOCS["prompt"]
                   + "\n\nContext passages:\n"
                   + self.retriever.format_context(chunks))

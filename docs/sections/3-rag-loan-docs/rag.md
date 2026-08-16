@@ -24,9 +24,10 @@ That's retrieval-augmented generation (RAG), three moves:
 
 The system prompt (the `loan_docs` persona in `src/agents/personas.py`) is
 already written to enforce grounding: answer strictly from context, cite
-passages, never guess. What's missing is the plumbing that gets the context
-there — that's this section's first exercise, in the `loan_docs` branch of
-the chat pipeline.
+passages, never guess. The plumbing that gets the context there — the
+`loan_docs` branch of the chat pipeline — is provided too. What's missing
+is the retrieval itself: until you build it, the bot has nothing to ground
+on and falls back to the canned reply.
 
 ## Three ways to retrieve <!-- {docsify-ignore} -->
 
@@ -50,7 +51,7 @@ raw text, and that supports two more modes:
 
 Real bank queries mix both needs — "penalty for ending my eNACH loan early"
 has an exact anchor (*eNACH*) and a paraphrase (*penalty for ending early* =
-foreclosure charges). The *going deeper* exercises below make you build all
+foreclosure charges). This section's three exercises make you build all
 three modes and race them, so the retrieval choice behind your RAG stops
 being a default and becomes a decision.
 

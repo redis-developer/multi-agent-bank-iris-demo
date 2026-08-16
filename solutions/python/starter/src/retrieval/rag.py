@@ -1,9 +1,9 @@
 """Retrieval over the loan policy documents — three ways.
 
 ═══════════════════════════════════════════════════════════════════════
-SECTION 3 - RAG: `search` (vector) is PROVIDED — it is the retrieval
-step behind the loan_docs agent. The GOING DEEPER exercises add
-`keyword_search` and `hybrid_search`, then race all three.
+SECTION 3 - RAG: the three exercises below each build one retrieval
+mode — `search` (vector), `keyword_search`, and `hybrid_search` —
+then race all three via GET /api/retrieval/compare.
 ═══════════════════════════════════════════════════════════════════════
 
 The bank's FAQ knowledge base (data/faqs.json — in production these
@@ -38,21 +38,30 @@ class LoanDocsRetriever:
         )
 
     def search(self, query: str, k: int = config.RETRIEVAL_TOP_K,
-               product: str | None = None) -> list[dict]:
+               product: str | None = None) -> list[dict] | None:
         """Vector search: the top-k chunks closest in meaning to the query.
-        This is the *retrieve* step of RAG (provided)."""
-        embedding = self.vectorizer.embed(query)
-        vector_query = VectorQuery(
-            vector=embedding,
-            vector_field_name="embedding",
-            return_fields=RETURN_FIELDS,
-            num_results=k,
-        )
-        if product:
-            vector_query.set_filter(Tag("product") == product)
-        results = self.index.query(vector_query)
-        return [self._chunk(r, distance=float(r["vector_distance"]))
-                for r in results]
+        This is the *retrieve* step of RAG — the loan_docs agent falls
+        back to a canned reply until it exists.
+
+        ═══════════════════════════════════════════════════════════════
+        SECTION 3 (vector): embed the query, build a VectorQuery over
+        the `embedding` field (filtered by `product` when given), and
+        return the chunks (include the distance via self._chunk).
+        ═══════════════════════════════════════════════════════════════
+        """
+        # embedding = self.vectorizer.embed(query)
+        # vector_query = VectorQuery(
+        #     vector=embedding,
+        #     vector_field_name="embedding",
+        #     return_fields=RETURN_FIELDS,
+        #     num_results=k,
+        # )
+        # if product:
+        #     vector_query.set_filter(Tag("product") == product)
+        # results = self.index.query(vector_query)
+        # return [self._chunk(r, distance=float(r["vector_distance"]))
+        #         for r in results]
+        return None
 
     def keyword_search(self, query: str,
                        k: int = config.RETRIEVAL_TOP_K) -> list[dict] | None:
@@ -60,11 +69,22 @@ class LoanDocsRetriever:
         text — exact terms, stemming, no embeddings involved.
 
         ═══════════════════════════════════════════════════════════════
-        SECTION 3 - GOING DEEPER (keyword): build a TextQuery over the
+        SECTION 3 (keyword): build a TextQuery over the
         `content` field with the BM25STD scorer and return the chunks
         (include the BM25 score in each dict, e.g. via self._chunk).
         ═══════════════════════════════════════════════════════════════
         """
+        # text_query = TextQuery(
+        #     text=query,
+        #     text_field_name="content",
+        #     text_scorer="BM25STD",
+        #     return_fields=RETURN_FIELDS,
+        #     num_results=k,
+        #     stopwords=None,
+        # )
+        # results = self.index.query(text_query)
+        # return [self._chunk(r, score=round(float(r["score"]), 2))
+        #         for r in results]
         return None
 
     def hybrid_search(self, query: str,
@@ -74,11 +94,25 @@ class LoanDocsRetriever:
         via Redis's FT.HYBRID.
 
         ═══════════════════════════════════════════════════════════════
-        SECTION 3 - GOING DEEPER (hybrid): embed the query, then build a
+        SECTION 3 (hybrid): embed the query, then build a
         HybridQuery over the text field and the vector field with
         combination_method="RRF".
         ═══════════════════════════════════════════════════════════════
         """
+        # embedding = self.vectorizer.embed(query)
+        # hybrid_query = HybridQuery(
+        #     text=query,
+        #     text_field_name="content",
+        #     vector=embedding,
+        #     vector_field_name="embedding",
+        #     vector_search_method="KNN",
+        #     combination_method="RRF",
+        #     return_fields=RETURN_FIELDS,
+        #     num_results=k,
+        #     stopwords=None,
+        # )
+        # results = self.index.query(hybrid_query)
+        # return [self._chunk(r) for r in results]
         return None
 
     @staticmethod

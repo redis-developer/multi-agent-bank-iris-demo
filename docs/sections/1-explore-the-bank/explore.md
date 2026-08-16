@@ -2,24 +2,12 @@
 
 ## Your database, before the bank moves in <!-- {docsify-ignore} -->
 
-Everything in this workshop runs against the Redis Cloud database you
-connected in Step 1. Right now it holds exactly one thing, seeded at boot:
-the bank's **FAQ knowledge base** — ~20 question/answer pairs covering
+In the beginning, after seeding the database - your Redis Cloud instance only contains the bank's **FAQ knowledge base** — ~20 question/answer pairs containing
 rates, foreclosure, top-ups, balance transfers, NOCs, documents, and
-disbursement. Each FAQ is stored with its text, a `product` tag, and a
-1536-dimension **embedding** of its meaning, all indexed in `idx:faqs`.
+disbursement info. Each FAQ is stored with its text, a `product` tag, and a
+1536-dimension **vector embeddings embedding**, all indexed in `idx:faqs`.
 
-That index is the raw material for Section 3's RAG: vector search finds
-FAQs by *what they mean*, not what they literally say — "how much to close
-my loan early" lands on the foreclosure answer even though the word
-"foreclosure" never appears in the question.
-
-Notice what's *not* in the database yet: no customers, no loans, no
-offers. The bank's structured records arrive in **Section 4**, imported
-through the **Redis Context Retriever** — the same way RDI would feed them
-from core banking in production. Until then the bot can talk *about* loans
-(FAQs) but knows nothing about *your* loans. Watching that gap close is
-the arc of the workshop.
+In Section 3, you'll use this index to do a vector search. Your bot can talk *about* loans (FAQs) but knows nothing about *your* loans yet. You'll implement this in **Section 4**.
 
 ## The starter bot <!-- {docsify-ignore} -->
 

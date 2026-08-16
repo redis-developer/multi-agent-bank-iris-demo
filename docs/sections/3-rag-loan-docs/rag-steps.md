@@ -69,7 +69,7 @@
 
 The bot's RAG works on vector search. The next two exercises build the
 *other two* retrieval modes and race all three in the **Retrieval lab** —
-the panel under the pipeline inspector in the **App** view. It calls the
+the tab next to the Pipeline inspector in the **App** view. It calls the
 compare endpoint that ships with the app (`GET /api/retrieval/compare` —
 provided, in `src/api/routes.py`) and shows each mode's latency and top
 hits side by side. Try it now: modes you haven't built yet report *not

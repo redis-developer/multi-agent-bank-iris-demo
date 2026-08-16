@@ -128,7 +128,7 @@ async function send() {
 sendEl.addEventListener("click", send);
 inputEl.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
 
-document.querySelectorAll(".quick .q").forEach(btn =>
+document.querySelectorAll("#pane-inspector .quick .q").forEach(btn =>
   btn.addEventListener("click", () => { inputEl.value = btn.textContent; send(); }));
 
 document.getElementById("new-session").addEventListener("click", () => {
@@ -165,10 +165,12 @@ async function race() {
         const score = c.bm25_score !== undefined
           ? `bm25 ${c.bm25_score}`
           : c.distance !== undefined ? `dist ${c.distance}` : "";
-        return `<li title="${format(c.snippet)}">${format(c.section)}
-                ${score ? `<span class="lab-score">${score}</span>` : ""}</li>`;
+        return `<div class="lab-row" title="${format(c.snippet)}">
+                <span class="lab-rank">${c.rank}</span>
+                <span class="lab-sec">${format(c.section)}</span>
+                ${score ? `<span class="lab-score">${score}</span>` : ""}</div>`;
       }).join("");
-      return `<div class="lab-block">${head}<ol>${rows}</ol></div>`;
+      return `<div class="lab-block">${head}${rows}</div>`;
     }).join("");
   } catch {
     labResults.innerHTML =
@@ -180,6 +182,19 @@ document.getElementById("lab-run").addEventListener("click", race);
 labQ.addEventListener("keydown", e => { if (e.key === "Enter") race(); });
 document.querySelectorAll(".lab .lq").forEach(btn =>
   btn.addEventListener("click", () => { labQ.value = btn.textContent; race(); }));
+
+// ── sidebar tabs: pipeline inspector / retrieval lab ─────────────────
+const panes = {
+  "tab-inspector": document.getElementById("pane-inspector"),
+  "tab-lab": document.getElementById("pane-lab"),
+};
+document.querySelectorAll(".tabs .tab").forEach(tab =>
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tabs .tab").forEach(t =>
+      t.classList.toggle("active", t === tab));
+    Object.entries(panes).forEach(([id, pane]) =>
+      pane.hidden = id !== tab.id);
+  }));
 
 async function boot() {
   try {

@@ -38,38 +38,46 @@
   </div>
 
   <aside class="inspector">
-    <h2>Pipeline inspector</h2>
-    <p class="hint">What Redis did for the last message.</p>
-    <dl>
-      <dt>Route (semantic router)</dt><dd id="i-route">—</dd>
-      <dt>Agent</dt><dd id="i-agent">—</dd>
-      <dt>Semantic cache</dt><dd id="i-cached">—</dd>
-      <dt>Latency</dt><dd id="i-latency">—</dd>
-      <dt>Citations (RAG)</dt><dd id="i-citations">—</dd>
-    </dl>
-    <div class="quick">
-      <h3>Quick messages</h3>
-      <!-- The Section 4 journeys, phrased exactly as in the docs -->
-      <button class="q">what's the outstanding on my loans?</button>
-      <button class="q">I need an NOC</button>
-      <button class="q">do I have any offers?</button>
-    </div>
+    <nav class="tabs">
+      <button id="tab-inspector" class="tab active">Pipeline inspector</button>
+      <button id="tab-lab" class="tab">Retrieval lab · §3</button>
+    </nav>
 
-    <div class="lab">
-      <h3>Retrieval lab · Section 3</h3>
-      <p class="hint">Race keyword vs vector vs hybrid over the FAQ
-         index (<code>GET /api/retrieval/compare</code>).</p>
+    <section id="pane-inspector">
+      <p class="hint">What Redis did for the last message.</p>
+      <dl>
+        <dt>Route (semantic router)</dt><dd id="i-route">—</dd>
+        <dt>Agent</dt><dd id="i-agent">—</dd>
+        <dt>Semantic cache</dt><dd id="i-cached">—</dd>
+        <dt>Latency</dt><dd id="i-latency">—</dd>
+        <dt>Citations (RAG)</dt><dd id="i-citations">—</dd>
+      </dl>
+      <div class="quick">
+        <h3>Quick messages</h3>
+        <!-- The Section 4 journeys, phrased exactly as in the docs -->
+        <button class="q">what's the outstanding on my loans?</button>
+        <button class="q">I need an NOC</button>
+        <button class="q">do I have any offers?</button>
+      </div>
+    </section>
+
+    <section id="pane-lab" class="lab" hidden>
+      <p class="hint">Race keyword vs vector vs hybrid over the FAQ index —
+         no bot reply, just the retrieval.</p>
       <div class="lab-input">
         <input id="lab-q" type="text" placeholder="Query the loan docs"
                autocomplete="off" />
         <button id="lab-run">Race</button>
       </div>
-      <!-- The Section 3 races, phrased exactly as in the docs -->
-      <button class="q lq">eNACH mandate registration</button>
-      <button class="q lq">how much do I pay to end my loan before the tenure finishes</button>
-      <button class="q lq">penalty for ending my eNACH loan early</button>
+      <div class="quick">
+        <h3>The three races</h3>
+        <!-- The Section 3 races, phrased exactly as in the docs -->
+        <button class="q lq">eNACH mandate registration</button>
+        <button class="q lq">how much do I pay to end my loan before the tenure finishes</button>
+        <button class="q lq">penalty for ending my eNACH loan early</button>
+      </div>
       <div id="lab-results"></div>
-    </div>
+    </section>
   </aside>
 
   <script src="js/script.js"></script>

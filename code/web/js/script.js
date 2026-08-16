@@ -137,6 +137,50 @@ document.getElementById("new-session").addEventListener("click", () => {
             "bot typing");
 });
 
+// ── Retrieval lab (Section 3): race keyword vs vector vs hybrid ──────
+const labQ = document.getElementById("lab-q");
+const labResults = document.getElementById("lab-results");
+
+async function race() {
+  const q = labQ.value.trim();
+  if (!q) return;
+  labResults.innerHTML = `<p class="hint">racing…</p>`;
+  try {
+    const res = await fetch(
+      `/api/retrieval/compare?q=${encodeURIComponent(q)}&k=3`);
+    const data = await res.json();
+    if (data.error) {
+      labResults.innerHTML = `<p class="hint">⚠️ ${format(data.error)}</p>`;
+      return;
+    }
+    labResults.innerHTML = Object.entries(data.modes).map(([mode, r]) => {
+      const latency = r.latency_ms !== undefined
+        ? `<span class="chip">${r.latency_ms} ms</span>` : "";
+      const head =
+        `<div class="lab-head"><span class="lab-mode">${mode}</span>${latency}</div>`;
+      if (r.status || r.error)
+        return `<div class="lab-block">${head}
+                <p class="hint">${format(r.status || r.error)}</p></div>`;
+      const rows = r.results.map(c => {
+        const score = c.bm25_score !== undefined
+          ? `bm25 ${c.bm25_score}`
+          : c.distance !== undefined ? `dist ${c.distance}` : "";
+        return `<li title="${format(c.snippet)}">${format(c.section)}
+                ${score ? `<span class="lab-score">${score}</span>` : ""}</li>`;
+      }).join("");
+      return `<div class="lab-block">${head}<ol>${rows}</ol></div>`;
+    }).join("");
+  } catch {
+    labResults.innerHTML =
+      `<p class="hint">⚠️ Could not reach the api. Is the container up?</p>`;
+  }
+}
+
+document.getElementById("lab-run").addEventListener("click", race);
+labQ.addEventListener("keydown", e => { if (e.key === "Enter") race(); });
+document.querySelectorAll(".lab .lq").forEach(btn =>
+  btn.addEventListener("click", () => { labQ.value = btn.textContent; race(); }));
+
 async function boot() {
   try {
     const health = await fetch("/api/health").then(r => r.json());

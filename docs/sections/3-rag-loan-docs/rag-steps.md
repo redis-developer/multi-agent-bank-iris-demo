@@ -68,9 +68,12 @@
 ### The other two modes: keyword and hybrid
 
 The bot's RAG works on vector search. The next two exercises build the
-*other two* retrieval modes and race all three, using the compare endpoint
-that ships with the app (`GET /api/retrieval/compare` — provided, in
-`src/api/routes.py`).
+*other two* retrieval modes and race all three in the **Retrieval lab** —
+the panel under the pipeline inspector in the **App** view. It calls the
+compare endpoint that ships with the app (`GET /api/retrieval/compare` —
+provided, in `src/api/routes.py`) and shows each mode's latency and top
+hits side by side. Try it now: modes you haven't built yet report *not
+implemented*.
 
 7. **Exercise 2 — keyword search.** In `src/retrieval/rag.py`, find the
    `SECTION 3 (keyword)` banner in `keyword_search` and
@@ -115,21 +118,18 @@ that ships with the app (`GET /api/retrieval/compare` — provided, in
    One query object, and Redis runs the text path and the KNN path and
    fuses the ranked lists with RRF — that's `FT.HYBRID` under the hood.
 
-9. **Race them: exact jargon.** Save, then in the **Terminal** panel:
+9. **Race them: exact jargon.** Save, then in the Retrieval lab click
+   the first preset:
 
-   ```bash
-   curl -s "http://api:8000/api/retrieval/compare?q=eNACH+mandate+registration&k=2" | jq
-   ```
+   > eNACH mandate registration
 
    Keyword answers in ~2 ms and pins the disbursement/eNACH FAQ exactly.
    Vector needs an embedding round trip (~300 ms) for the same top hit.
    When the query *is* the term, the inverted index is unbeatable.
 
-10. **Race them: pure paraphrase.**
+10. **Race them: pure paraphrase.** Click the second preset:
 
-    ```bash
-    curl -s "http://api:8000/api/retrieval/compare?q=how+much+do+I+pay+to+end+my+loan+before+the+tenure+finishes&k=2" | jq
-    ```
+    > how much do I pay to end my loan before the tenure finishes
 
     Now keyword whiffs — it matches stray words ("loan", "pay") and
     returns the NOC FAQ, nowhere near the question. Vector lands on the
@@ -137,17 +137,18 @@ that ships with the app (`GET /api/retrieval/compare` — provided, in
     matched the meaning. This asymmetry is why RAG defaults to vector
     search.
 
-11. **Race them: mixed query.**
+11. **Race them: mixed query.** Click the third preset:
 
-    ```bash
-    curl -s "http://api:8000/api/retrieval/compare?q=penalty+for+ending+my+eNACH+loan+early&k=3" | jq
-    ```
+    > penalty for ending my eNACH loan early
 
     The query has an exact anchor (*eNACH*) **and** a paraphrase (*penalty
     for ending early* → foreclosure). Keyword finds the eNACH FAQ but not
     foreclosure; vector finds foreclosure but ranks the eNACH FAQ low.
     Hybrid's fused list surfaces **both** in the top 3 — neither mode alone
     covers the query, RRF does.
+
+    (Prefer the raw JSON? The same races run from the **Terminal** panel:
+    `curl -s "http://api:8000/api/retrieval/compare?q=...&k=3" | jq`.)
 
 12. **(Optional) Full-text tricks in Redis Insight.** The `TEXT` index does
     more than exact terms — try these in the Redis Insight panel:

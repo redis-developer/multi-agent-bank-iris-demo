@@ -54,6 +54,22 @@
       <button class="q">I need an NOC</button>
       <button class="q">do I have any offers?</button>
     </div>
+
+    <div class="lab">
+      <h3>Retrieval lab · Section 3</h3>
+      <p class="hint">Race keyword vs vector vs hybrid over the FAQ
+         index (<code>GET /api/retrieval/compare</code>).</p>
+      <div class="lab-input">
+        <input id="lab-q" type="text" placeholder="Query the loan docs"
+               autocomplete="off" />
+        <button id="lab-run">Race</button>
+      </div>
+      <!-- The Section 3 races, phrased exactly as in the docs -->
+      <button class="q lq">eNACH mandate registration</button>
+      <button class="q lq">how much do I pay to end my loan before the tenure finishes</button>
+      <button class="q lq">penalty for ending my eNACH loan early</button>
+      <div id="lab-results"></div>
+    </div>
   </aside>
 
   <script src="js/script.js"></script>

@@ -65,6 +65,17 @@ class LoanDocsRetriever:
         (include the BM25 score in each dict, e.g. via self._chunk).
         ═══════════════════════════════════════════════════════════════
         """
+        # text_query = TextQuery(
+        #     text=query,
+        #     text_field_name="content",
+        #     text_scorer="BM25STD",
+        #     return_fields=RETURN_FIELDS,
+        #     num_results=k,
+        #     stopwords=None,
+        # )
+        # results = self.index.query(text_query)
+        # return [self._chunk(r, score=round(float(r["score"]), 2))
+        #         for r in results]
         return None
 
     def hybrid_search(self, query: str,
@@ -79,6 +90,20 @@ class LoanDocsRetriever:
         combination_method="RRF".
         ═══════════════════════════════════════════════════════════════
         """
+        # embedding = self.vectorizer.embed(query)
+        # hybrid_query = HybridQuery(
+        #     text=query,
+        #     text_field_name="content",
+        #     vector=embedding,
+        #     vector_field_name="embedding",
+        #     vector_search_method="KNN",
+        #     combination_method="RRF",
+        #     return_fields=RETURN_FIELDS,
+        #     num_results=k,
+        #     stopwords=None,
+        # )
+        # results = self.index.query(hybrid_query)
+        # return [self._chunk(r) for r in results]
         return None
 
     @staticmethod

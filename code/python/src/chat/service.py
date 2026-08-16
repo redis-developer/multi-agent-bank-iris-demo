@@ -95,6 +95,12 @@ class ChatService:
         memories = []     # long-term: durable facts about the customer
 
         # ── SECTION 3 - RAG / SECTION 4 - MULTI-AGENT: generate the reply ──
+        #   if route == "loan_docs":
+        #       reply, agent, citations = self._answer_from_loan_docs(
+        #           request.message)
+        #   else:
+        #       reply, agent, citations = (self._canned_reply(route),
+        #                                  route or "fallback", [])
         reply, agent, citations = (self._canned_reply(route),
                                    route or "fallback", [])
 

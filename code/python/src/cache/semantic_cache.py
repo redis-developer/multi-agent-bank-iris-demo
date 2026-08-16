@@ -69,6 +69,8 @@ class ReplyCache:
         """
         payload = {
             # add the two search parameters here (see banner above)
+            # "prompt": message,
+            # "similarityThreshold": config.CACHE_SIMILARITY_THRESHOLD,
         }
         if not self.configured or not payload:
             return None
@@ -89,6 +91,8 @@ class ReplyCache:
         """
         payload = {
             # add the prompt/response pair here (see banner above)
+            # "prompt": message,
+            # "response": reply,
         }
         if not self.configured or not payload:
             return None

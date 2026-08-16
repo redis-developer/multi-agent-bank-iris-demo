@@ -91,14 +91,27 @@ class ChatService:
         route = route_message(self.router, request.message)
 
         # ── SECTION 5 - AGENT MEMORY: recall this customer's context ───────
+        #   history = self.memory.session_history(request.session_id)
+        #   memories = self.memory.recall(request.customer_id, request.message)
         history = []      # short-term: this session's prior turns
         memories = []     # long-term: durable facts about the customer
 
         # ── SECTION 3 - RAG / SECTION 4 - MULTI-AGENT: generate the reply ──
+        #   if route == "loan_docs":
+        #       reply, agent, citations = self._answer_from_loan_docs(
+        #           request.message)
+        #   else:
+        #       reply, agent, citations = (self._canned_reply(route),
+        #                                  route or "fallback", [])
+        # Section 4 (supersedes Section 3 — every message goes through the graph):
+        #   reply, agent, citations = self._run_graph(request, route, memories,
+        #                                             history)
         reply, agent, citations = (self._canned_reply(route),
                                    route or "fallback", [])
 
         # ── SECTION 5 - AGENT MEMORY: remember this turn ───────────────────
+        #   self.memory.remember_turn(request.session_id, request.customer_id,
+        #                             request.message, reply)
 
         # ── SECTION 6 - SEMANTIC CACHING: store shareable replies ──────────
         # Provided: only loan_docs answers are impersonal enough to share

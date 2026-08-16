@@ -45,6 +45,15 @@ class AgentMemory:
         does not exist yet).
         ═══════════════════════════════════════════════════════════════
         """
+        # response = self.http.get(
+        #     f"/v1/working-memory/{session_id}",
+        #     params={"recent_messages_limit": limit},
+        # )
+        # if response.status_code == 404:
+        #     return []  # first turn of a new session
+        # response.raise_for_status()
+        # return [{"role": m["role"], "content": m["content"]}
+        #         for m in response.json().get("messages", [])]
         return []
 
     def remember_turn(self, session_id: str, customer_id: str,
@@ -58,6 +67,15 @@ class AgentMemory:
         the working memory back with this customer's user_id.
         ═══════════════════════════════════════════════════════════════
         """
+        # messages = self.session_history(session_id, limit=50)
+        # messages += [
+        #     {"role": "user", "content": user_message},
+        #     {"role": "assistant", "content": reply},
+        # ]
+        # self.http.put(
+        #     f"/v1/working-memory/{session_id}",
+        #     json={"messages": messages, "user_id": customer_id},
+        # ).raise_for_status()
         return None
 
     def recall(self, customer_id: str, query: str, k: int = 3) -> list[str]:
@@ -70,4 +88,14 @@ class AgentMemory:
         return the memory texts.
         ═══════════════════════════════════════════════════════════════
         """
+        # response = self.http.post(
+        #     "/v1/long-term-memory/search",
+        #     json={
+        #         "text": query,
+        #         "user_id": {"eq": customer_id},
+        #         "limit": k,
+        #     },
+        # )
+        # response.raise_for_status()
+        # return [m["text"] for m in response.json().get("memories", [])]
         return []

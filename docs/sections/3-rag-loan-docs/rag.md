@@ -6,15 +6,11 @@ Ask a bare LLM "what is the foreclosure charge on a personal loan?" and it
 will answer — fluently, confidently, and from *some other bank's* general
 knowledge. Your foreclosure charge is 4% after 6 EMIs, nil for floating-rate
 loans, NOC within 15 working days. None of that is in the model's training
-data, and in a regulated industry, a made-up number in a customer chat is not
-a quirk — it's a compliance incident.
+data. A made-up number in a customer chat can be quite risky.
 
 ## Retrieve, augment, generate <!-- {docsify-ignore} -->
 
-The fix is to stop treating the model as a knowledge base and start treating
-it as a *reader*. The model's context — the text it reads before replying —
-is yours to compose. Put the right passage from the right policy document in
-front of the question, and the model answers from it.
+Don't treat the model as something that already knows the answer. Treat it as a reader. You choose what it reads before it replies — so hand it the right passage, and it answers from that.
 
 That's retrieval-augmented generation (RAG), three moves:
 
@@ -40,11 +36,10 @@ raw text, and that supports two more modes:
 
 - **Keyword (full-text)** — Redis indexes `TEXT` fields with an inverted
   index: each term points at the chunks containing it. Matches are ranked
-  with **BM25** (term frequency × rarity × field length). No embedding call,
-  so it answers in a millisecond or two — and nothing beats it on exact
+  with **BM25** (term frequency × rarity × field length). Best fit for matching exact
   jargon: a customer who types "eNACH" means *eNACH*, not "something
   semantically similar to auto-debit".
-- **Vector** — what you just wired: matches meaning, survives paraphrase,
+- **Vector** — matches meaning, survives paraphrase,
   costs an embedding call per query.
 - **Hybrid** — run both, then fuse the two ranked lists with **Reciprocal
   Rank Fusion (RRF)**. RRF works on ranks, not scores — which matters

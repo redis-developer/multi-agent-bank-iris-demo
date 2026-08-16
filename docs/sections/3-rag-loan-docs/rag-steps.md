@@ -121,11 +121,12 @@ implemented*.
 9. **Race them: exact jargon.** Save, then in the Retrieval lab click
    the first preset:
 
-   > eNACH mandate registration
+   > NOC
 
-   Keyword answers in ~2 ms and pins the disbursement/eNACH FAQ exactly.
-   Vector needs an embedding round trip (~300 ms) for the same top hit.
-   When the query *is* the term, the inverted index is unbeatable.
+   Keyword pins both NOC FAQs in a single Redis round trip. Vector
+   reaches the same hits but pays for an embedding call first — compare
+   the latency chips. When the query *is* the term, the inverted index
+   is unbeatable.
 
 10. **Race them: pure paraphrase.** Click the second preset:
 
@@ -139,13 +140,14 @@ implemented*.
 
 11. **Race them: mixed query.** Click the third preset:
 
-    > penalty for ending my eNACH loan early
+    > processing fee to close my loan before the tenure ends
 
-    The query has an exact anchor (*eNACH*) **and** a paraphrase (*penalty
-    for ending early* → foreclosure). Keyword finds the eNACH FAQ but not
-    foreclosure; vector finds foreclosure but ranks the eNACH FAQ low.
-    Hybrid's fused list surfaces **both** in the top 3 — neither mode alone
-    covers the query, RRF does.
+    The query has an exact anchor (*processing fee*) **and** a paraphrase
+    (*close before the tenure ends* → foreclosure). Keyword anchors on the
+    fee words and never finds foreclosure — the actual answer. Vector puts
+    foreclosure first. Hybrid's fused list keeps both signals: the fee FAQ
+    on top *and* foreclosure in the top 3 — RRF merges the two rankings
+    instead of asking you to pick a mode.
 
     (Prefer the raw JSON? The same races run from the **Terminal** panel:
     `curl -s "http://api:8000/api/retrieval/compare?q=...&k=3" | jq`.)

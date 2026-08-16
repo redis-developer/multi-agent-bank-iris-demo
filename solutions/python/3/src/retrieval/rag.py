@@ -12,7 +12,7 @@ index defined in `src/data/loader.py`, one record per FAQ. The same
 index answers three kinds of query:
 
   * keyword — BM25 full-text over the chunk text: exact terms, stemming,
-    ranked by term frequency. Unbeatable on precise jargon ("eNACH").
+    ranked by term frequency. Unbeatable on precise jargon ("NOC").
   * vector  — embed the question, return the chunks closest in meaning.
     Unbeatable on paraphrase ("how much to close my loan early").
   * hybrid  — run both, fuse the ranked lists with Reciprocal Rank

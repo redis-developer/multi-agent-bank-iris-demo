@@ -38,8 +38,8 @@ raw text, and that supports two more modes:
 - **Keyword (full-text)** — Redis indexes `TEXT` fields with an inverted
   index: each term points at the chunks containing it. Matches are ranked
   with **BM25** (term frequency × rarity × field length). Best fit for matching exact
-  jargon: a customer who types "eNACH" means *eNACH*, not "something
-  semantically similar to auto-debit".
+  jargon: a customer who types "NOC" means *NOC*, not "something
+  semantically similar to a closure certificate".
 - **Vector** — matches meaning, survives paraphrase,
   costs an embedding call per query.
 - **Hybrid** — run both, then fuse the two ranked lists with **Reciprocal
@@ -49,11 +49,11 @@ raw text, and that supports two more modes:
   [`FT.HYBRID`](https://redis.io/docs/latest/commands/ft.hybrid/); RedisVL
   wraps it as `HybridQuery`.
 
-Real bank queries mix both needs — "penalty for ending my eNACH loan early"
-has an exact anchor (*eNACH*) and a paraphrase (*penalty for ending early* =
-foreclosure charges). This section's three exercises make you build all
-three modes and race them, so the retrieval choice behind your RAG stops
-being a default and becomes a decision.
+Real bank queries mix both needs — "processing fee to close my loan before
+the tenure ends" has an exact anchor (*processing fee*) and a paraphrase
+(*close before the tenure ends* = foreclosure). This section's three
+exercises make you build all three modes and race them, so the retrieval
+choice behind your RAG stops being a default and becomes a decision.
 
 [steps](rag-steps.md ':include')
 

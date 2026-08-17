@@ -99,7 +99,8 @@ class ChatService:
         # ── SECTION 6 - SEMANTIC CACHING: store shareable replies ──────────
         # Provided: only loan_docs answers are impersonal enough to share
         # across customers — this guard is the privacy rule (Section 6).
-        if agent == "loan_docs":
+        # (`citations` keeps canned fallbacks out of the cache.)
+        if agent == "loan_docs" and citations:
             self.cache.store(request.message, reply)
 
         return self._response(reply, route=route, agent=agent,
@@ -112,9 +113,13 @@ class ChatService:
         return CANNED_REPLIES.get(route, FALLBACK_REPLY)
 
     def _answer_from_loan_docs(self, message: str):
-        """Section 3: RAG — retrieve policy chunks, augment, generate."""
+        """Section 3: RAG — retrieve policy chunks, augment, generate.
+        Canned until the vector `search` exercise (src/retrieval/rag.py)
+        is solved."""
         from src.agents import personas
         chunks = self.retriever.search(message)
+        if chunks is None:  # Section 3's vector exercise not solved yet
+            return self._canned_reply("loan_docs"), "loan_docs", []
         system = (personas.LOAN_DOCS["prompt"]
                   + "\n\nContext passages:\n"
                   + self.retriever.format_context(chunks))

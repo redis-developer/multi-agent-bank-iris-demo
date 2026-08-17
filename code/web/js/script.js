@@ -128,7 +128,7 @@ async function send() {
 sendEl.addEventListener("click", send);
 inputEl.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
 
-document.querySelectorAll(".quick .q").forEach(btn =>
+document.querySelectorAll("#pane-inspector .quick .q").forEach(btn =>
   btn.addEventListener("click", () => { inputEl.value = btn.textContent; send(); }));
 
 document.getElementById("new-session").addEventListener("click", () => {
@@ -136,6 +136,65 @@ document.getElementById("new-session").addEventListener("click", () => {
   addBubble("— new conversation thread started (fresh short-term memory) —",
             "bot typing");
 });
+
+// ── Retrieval lab (Section 3): race keyword vs vector vs hybrid ──────
+const labQ = document.getElementById("lab-q");
+const labResults = document.getElementById("lab-results");
+
+async function race() {
+  const q = labQ.value.trim();
+  if (!q) return;
+  labResults.innerHTML = `<p class="hint">racing…</p>`;
+  try {
+    const res = await fetch(
+      `/api/retrieval/compare?q=${encodeURIComponent(q)}&k=3`);
+    const data = await res.json();
+    if (data.error) {
+      labResults.innerHTML = `<p class="hint">⚠️ ${format(data.error)}</p>`;
+      return;
+    }
+    labResults.innerHTML = Object.entries(data.modes).map(([mode, r]) => {
+      const latency = r.latency_ms !== undefined
+        ? `<span class="chip">${r.latency_ms} ms</span>` : "";
+      const head =
+        `<div class="lab-head"><span class="lab-mode">${mode}</span>${latency}</div>`;
+      if (r.status || r.error)
+        return `<div class="lab-block">${head}
+                <p class="hint">${format(r.status || r.error)}</p></div>`;
+      const rows = r.results.map(c => {
+        const score = c.bm25_score !== undefined
+          ? `bm25 ${c.bm25_score}`
+          : c.distance !== undefined ? `dist ${c.distance}` : "";
+        return `<div class="lab-row" title="${format(c.snippet)}">
+                <span class="lab-rank">${c.rank}</span>
+                <span class="lab-sec">${format(c.section)}</span>
+                ${score ? `<span class="lab-score">${score}</span>` : ""}</div>`;
+      }).join("");
+      return `<div class="lab-block">${head}${rows}</div>`;
+    }).join("");
+  } catch {
+    labResults.innerHTML =
+      `<p class="hint">⚠️ Could not reach the api. Is the container up?</p>`;
+  }
+}
+
+document.getElementById("lab-run").addEventListener("click", race);
+labQ.addEventListener("keydown", e => { if (e.key === "Enter") race(); });
+document.querySelectorAll(".lab .lq").forEach(btn =>
+  btn.addEventListener("click", () => { labQ.value = btn.textContent; race(); }));
+
+// ── sidebar tabs: pipeline inspector / retrieval lab ─────────────────
+const panes = {
+  "tab-inspector": document.getElementById("pane-inspector"),
+  "tab-lab": document.getElementById("pane-lab"),
+};
+document.querySelectorAll(".tabs .tab").forEach(tab =>
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tabs .tab").forEach(t =>
+      t.classList.toggle("active", t === tab));
+    Object.entries(panes).forEach(([id, pane]) =>
+      pane.hidden = id !== tab.id);
+  }));
 
 async function boot() {
   try {

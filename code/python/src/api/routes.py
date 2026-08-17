@@ -62,8 +62,8 @@ def context_tools() -> dict:
 
 @router.get("/retrieval/compare")
 def retrieval_compare(q: str, k: int = 3, http_request: Request = None) -> dict:
-    """Race the three retrieval modes over the loan-docs index (Section 3,
-    'going deeper'). Provided — not an exercise."""
+    """Race the three retrieval modes over the loan-docs index (Section 3).
+    Provided — not an exercise."""
     import time
 
     service = http_request.app.state.chat_service
@@ -87,8 +87,8 @@ def retrieval_compare(q: str, k: int = 3, http_request: Request = None) -> dict:
         latency_ms = round((time.perf_counter() - t0) * 1000)
         if chunks is None:
             report["modes"][mode] = {
-                "status": "not implemented yet — see the SECTION 3 GOING "
-                          "DEEPER banner in src/retrieval/rag.py"}
+                "status": "not implemented yet — see the SECTION 3 "
+                          "banner in src/retrieval/rag.py"}
             continue
         report["modes"][mode] = {
             "latency_ms": latency_ms,

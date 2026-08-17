@@ -37,8 +37,11 @@ except IndexError:
     _DEFAULT_DATA_DIR = Path("/workshop/data")
 DATA_DIR = Path(os.getenv("DATA_DIR", str(_DEFAULT_DATA_DIR)))
 
-# Redis Agent Memory Server (the Agent Memory component of Redis Iris)
-AGENT_MEMORY_URL = os.getenv("AGENT_MEMORY_URL", "http://localhost:8088")
+# Redis Agent Memory (managed, Redis Cloud — Section 5). Provisioned in
+# the console; the section's steps walk through it.
+AGENT_MEMORY_URL = os.getenv("AGENT_MEMORY_URL", "")
+AGENT_MEMORY_STORE_ID = os.getenv("AGENT_MEMORY_STORE_ID", "")
+AGENT_MEMORY_API_KEY = os.getenv("AGENT_MEMORY_API_KEY", "")
 
 # Redis Context Retriever (managed, Redis Cloud — Section 4). The admin
 # key comes from the service you create in the console; the client's

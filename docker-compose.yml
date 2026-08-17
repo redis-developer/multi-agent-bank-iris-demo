@@ -84,43 +84,6 @@ services:
       - RI_PROXY_PATH=/redisinsight
       - RI_ACCEPT_TERMS_AND_CONDITIONS=true
 
-  # Redis Agent Memory Server — the Agent Memory component of Redis Iris.
-  # Owns working (session) memory and long-term memory, including automatic
-  # fact extraction from conversations (Section 5).
-  agent-memory:
-    image: redislabs/agent-memory-server:latest
-    container_name: bank-agent-memory
-    ports:
-      - "8088:8000"
-    # The entrypoint sources non-empty values from .env at start, so a
-    # plain `docker compose restart agent-memory agent-memory-worker`
-    # applies .env changes — no recreation needed.
-    entrypoint: ["/bin/sh", "/workshop-root/docker/agent-memory/entrypoint.sh"]
-    command: ["agent-memory", "api", "--host", "0.0.0.0", "--port", "8000"]
-    volumes:
-      - ./:/workshop-root:ro
-    environment:
-      - REDIS_URL=${REDIS_URL:?set REDIS_URL in .env — your Redis Cloud database}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-unset}
-      - LONG_TERM_MEMORY=true
-      - DISABLE_AUTH=true
-
-  # The memory server's background worker: runs the scheduled extraction
-  # tasks that promote working-memory turns into long-term memories.
-  # Without it, extraction is scheduled but never executes.
-  agent-memory-worker:
-    image: redislabs/agent-memory-server:latest
-    container_name: bank-agent-memory-worker
-    entrypoint: ["/bin/sh", "/workshop-root/docker/agent-memory/entrypoint.sh"]
-    command: ["agent-memory", "task-worker"]
-    volumes:
-      - ./:/workshop-root:ro
-    environment:
-      - REDIS_URL=${REDIS_URL:?set REDIS_URL in .env — your Redis Cloud database}
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-unset}
-      - LONG_TERM_MEMORY=true
-      - DISABLE_AUTH=true
-
   api:
     build:
       context: .
@@ -130,7 +93,9 @@ services:
       - "8000:8000"
     environment:
       - REDIS_URL=${REDIS_URL:?set REDIS_URL in .env — your Redis Cloud database}
-      - AGENT_MEMORY_URL=http://agent-memory:8000
+      - AGENT_MEMORY_URL=${AGENT_MEMORY_URL:-}
+      - AGENT_MEMORY_STORE_ID=${AGENT_MEMORY_STORE_ID:-}
+      - AGENT_MEMORY_API_KEY=${AGENT_MEMORY_API_KEY:-}
       - DATA_DIR=/workshop/data
       - OPENAI_API_KEY=${OPENAI_API_KEY:?set OPENAI_API_KEY in .env}
       - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
@@ -148,9 +113,6 @@ services:
       - ./code/python:/app
       - ./data:/workshop/data:ro
       - ./:/workshop-root:ro
-    depends_on:
-      agent-memory:
-        condition: service_started
     command: >
       uvicorn src.main:app --host 0.0.0.0 --port 8000
       --reload --reload-dir /app/src --reload-dir /workshop-root

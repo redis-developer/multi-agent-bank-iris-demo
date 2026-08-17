@@ -118,7 +118,7 @@ body {
 .quick { margin-top: 20px; }
 .quick h3 { font-size: 12px; color: #8696a0; text-transform: uppercase;
             margin-bottom: 8px; }
-.quick .q, .lab .q {
+.quick .q, .lab .q, .wipe .q {
   display: block; width: 100%; text-align: left; margin-bottom: 6px;
   background: #202c33; color: #e9edef; border: 1px solid #2a3942;
   border-radius: 8px; padding: 8px 10px; font-size: 13px; cursor: pointer;
@@ -134,6 +134,14 @@ body {
 }
 .tab:hover { color: #e9edef; }
 .tab.active { color: #e9edef; border-bottom-color: #00a884; }
+
+/* ── memory reset (Section 5) ────────────────────────────────── */
+.wipe { margin-top: 20px; }
+.wipe h3 { font-size: 12px; color: #8696a0; text-transform: uppercase;
+           margin-bottom: 8px; }
+.wipe .danger { border-color: #7a2e2e; }
+.wipe .danger:hover { background: #3a2226; }
+.wipe .hint { margin: 2px 0 0; }
 
 /* ── retrieval lab (Section 3) ───────────────────────────────── */
 .lab .quick { margin-top: 14px; }

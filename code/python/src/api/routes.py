@@ -108,6 +108,20 @@ def retrieval_compare(q: str, k: int = 3, http_request: Request = None) -> dict:
     return report
 
 
+@router.post("/memory/clear")
+def memory_clear(http_request: Request) -> dict:
+    """Reset button (provided): wipe session + long-term memory across
+    all sessions in the managed Agent Memory service. Seeded data (FAQs,
+    bank records) lives in Redis, not the memory service — untouched."""
+    service = http_request.app.state.chat_service
+    if service is None:
+        return {"error": "chat pipeline not started — check OPENAI_API_KEY"}
+    try:
+        return service.memory.clear_all()
+    except Exception as error:
+        return {"error": str(error)}
+
+
 @router.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest, http_request: Request) -> ChatResponse:
     service = http_request.app.state.chat_service

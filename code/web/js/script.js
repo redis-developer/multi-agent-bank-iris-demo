@@ -183,6 +183,26 @@ labQ.addEventListener("keydown", e => { if (e.key === "Enter") race(); });
 document.querySelectorAll(".lab .lq").forEach(btn =>
   btn.addEventListener("click", () => { labQ.value = btn.textContent; race(); }));
 
+// ── reset (Section 5): wipe the Agent Memory service ─────────────────
+document.getElementById("wipe-memory").addEventListener("click", async () => {
+  if (!confirm("Delete session + long-term memory for ALL sessions and "
+               + "customers? FAQs and bank data are untouched.")) return;
+  const status = document.getElementById("wipe-status");
+  status.textContent = "clearing…";
+  try {
+    const res = await fetch("/api/memory/clear", { method: "POST" });
+    const data = await res.json();
+    status.textContent = data.error
+      ? "⚠️ " + data.error
+      : data.configured === false
+        ? "Agent Memory isn't configured yet (Section 5) — nothing to clear."
+        : `Cleared ${data.sessions_deleted} sessions and `
+          + `${data.memories_deleted} long-term memories.`;
+  } catch {
+    status.textContent = "⚠️ Could not reach the api. Is the container up?";
+  }
+});
+
 // ── sidebar tabs: pipeline inspector / retrieval lab ─────────────────
 const panes = {
   "tab-inspector": document.getElementById("pane-inspector"),

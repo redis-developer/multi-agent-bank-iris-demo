@@ -85,17 +85,17 @@ class AgentMemory:
 
     def remember_turn(self, session_id: str, customer_id: str,
                       user_message: str, reply: str) -> None:
-        """Append this turn to the session as two events — the service
-        extracts long-term facts from them automatically in the
-        background. The session's owner (the privacy boundary `recall`
-        filters on) is taken from the first event's actorId, which is
-        why the customer's message must carry their customer_id.
+        """Create session memory: append this turn to the session as two
+        events. The service extracts long-term facts from them on the
+        extraction cadence you configured at creation (1 minute). The
+        session's owner (the privacy boundary `recall` filters on) is
+        taken from the first event's actorId, which is why the
+        customer's message must carry their customer_id.
 
         ═══════════════════════════════════════════════════════════════
-        SECTION 5 - AGENT MEMORY (session memory): fill in the two event
-        payloads — each needs who is speaking ("actorId"), their "role"
-        ("USER" or "ASSISTANT"), and the message "content" as a list of
-        text parts: [{"text": ...}].
+        SECTION 5 - AGENT MEMORY (create session memory): each event
+        needs who is speaking ("actorId"), their "role", and the message
+        "content". Uncomment the parameters below. Solved.
         ═══════════════════════════════════════════════════════════════
         """
         user_event = {
@@ -121,20 +121,18 @@ class AgentMemory:
         """Long-term: up to k extracted facts about this customer,
         closest in meaning to the current message.
 
-        ═══════════════════════════════════════════════════════════════
-        SECTION 5 - AGENT MEMORY (long-term): fill in the semantic-search
-        payload — the "text" to match, the "filter" that scopes the
-        search to this customer ({"ownerId": {"eq": ...}} — the privacy
-        boundary), and the result "limit". Solved.
-        ═══════════════════════════════════════════════════════════════
+        Provided — the entire long-term implementation is one semantic
+        search, filtered to this customer's ownerId (the privacy
+        boundary). The extraction that *fills* long-term memory is not
+        code at all: it runs server-side, on the cadence you set when
+        creating the service.
         """
-        payload = {
+        if not self.configured:
+            return []
+        response = self.http.post("/long-term-memory/search", json={
             "text": query,
             "filter": {"ownerId": {"eq": customer_id}},
             "limit": k,
-        }
-        if not self.configured or not payload:
-            return []
-        response = self.http.post("/long-term-memory/search", json=payload)
+        })
         response.raise_for_status()
         return [m["text"] for m in response.json().get("items", [])]

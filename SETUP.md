@@ -85,5 +85,5 @@ and RedisVL's `OpenAITextVectorizer`).
 | Section 6: "LangCache is not configured" in api logs | Set `LANGCACHE_URL` / `LANGCACHE_CACHE_ID` / `LANGCACHE_API_KEY` in `.env` (Code panel, save — api reloads) |
 | Section 6: 401/403 from LangCache | The service key is shown only once at creation — generate a new key from the service's page in the Redis Cloud console |
 | Section 5: "Agent Memory is not configured" in api logs | Set `AGENT_MEMORY_URL` / `AGENT_MEMORY_STORE_ID` / `AGENT_MEMORY_API_KEY` in `.env` (Code panel, save — api reloads) |
-| Section 5: follow-ups work but cross-session recall doesn't | Long-term extraction runs on the service's background cadence — give it a minute or two, then ask again |
+| Section 5: follow-ups work but cross-session recall doesn't | Long-term extraction runs on the service's cadence — the steps set it to 1 minute, so wait a minute and ask again (a Quick-created service may use a longer cadence) |
 | Port already in use | Change the left-hand port in `docker-compose.yml` |

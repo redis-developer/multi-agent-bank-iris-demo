@@ -88,8 +88,8 @@ class ChatService:
 
         # ── SECTION 5 - AGENT MEMORY: recall this customer's context ───────
         # Provided: no-ops until the managed Agent Memory service is
-        # configured in .env — Section 5's exercises fill the payloads
-        # in src/memory/redis_memory.py.
+        # configured in .env — Section 5 sets the extraction strategy at
+        # service creation and completes src/memory/redis_memory.py.
         history = self.memory.session_history(request.session_id)
         memories = self.memory.recall(request.customer_id, request.message)
 

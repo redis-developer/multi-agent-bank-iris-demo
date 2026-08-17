@@ -36,9 +36,13 @@ Here is the part you *don't* write: as events land in session memory, the
 service **automatically extracts durable facts** in the background —
 "renovating their home this year", "prefers short tenures" — using its own
 LLM, its own embeddings, its own vector index, and stores them against the
-session's owner. Your app's entire long-term memory implementation is one
-search call: `POST …/long-term-memory/search` with the current message as
-the query and the customer as the `ownerId` filter.
+session's owner. How aggressively it does that is the **extraction
+strategy**, and it lives on the service, not in your code: the extraction
+cadence (you'll set it to 1 minute, so facts become recallable within a
+minute of being said), per-tier TTLs, summarization, custom memory types,
+sensitive-data exclusions. Your app's entire long-term memory
+implementation is one search call: `POST …/long-term-memory/search` with
+the current message as the query and the customer as the `ownerId` filter.
 
 Recall is semantic, which is the point: when the customer says "I need some
 extra funds", the memory "renovating their home this year" surfaces because
@@ -47,9 +51,11 @@ home decor loan instead of a generic personal loan. The `ownerId` filter is
 the privacy boundary: one customer's facts can never surface in another's
 conversation.
 
-Compare what Section 3 took (a schema, a vectorizer, a query) with what this
-section takes (two payloads over HTTPS) — that difference is what "memory
-as a managed service" means.
+This section's two exercises mirror that split: configure the extraction
+strategy on the service (console), and create session memory from the app
+(one payload). Compare what Section 3 took (a schema, a vectorizer, a
+query) with that — the difference is what "memory as a managed service"
+means.
 
 [steps](memory-steps.md ':include')
 

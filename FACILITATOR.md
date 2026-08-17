@@ -16,7 +16,7 @@ anyone stall more than 2 minutes on an environment issue.
 | 0:25–0:45 | 2 Semantic routing | Observe-the-code section (no typing): read routes → thresholds → min-aggregation, then test live; the abstain-below-threshold moment (weather question) |
 | 0:45–1:15 | 3 RAG | First write-the-code exercises: the three retrieval modes (vector, keyword, hybrid). "The model is a reader, not a knowledge base"; the gold-loan refusal (step 5) is the compliance argument. Keyword + hybrid (steps 7–11) race all three modes — run them if the room is fast, else assign as homework; the jargon-vs-paraphrase races (steps 9–11) make the strongest live demo |
 | 1:15–1:55 | 4 Context Retriever | Attendees create an admin key on the console's **Admin keys** page and paste it into `.env` (step 3, ~3 min — the only console touch; everything else is the Python client). Beats: RAG can't answer "what's MY outstanding?" — documents vs entities (step 2), index-the-model in `ContextModel` classes (step 4, fill-in-the-kwarg TODOs — the deploy names any missed ones), build the context surface — the three client calls ship commented out, attendees uncomment and read them (step 5), run the deploy → generated tools (step 6), "look at what you didn't write" (step 7), identity injection + scoped agent keys (step 9) |
-| 1:50–2:15 | 5 Agent memory | Memory is infrastructure, not prompts — attendees provision the managed Agent Memory service (Quick create, ~3 min; the API key is shown once) and fill two payloads in `redis_memory.py` (steps 5–6). The renovation → home-decor cross-sell demo (step 8) is the wow moment. Extraction is async: say the renovation line early, chat a bit, then demo the recall |
+| 1:50–2:15 | 5 Agent memory | Memory is infrastructure, not prompts — exercise 1 is the console: **Create custom service** with the extraction strategy (1-minute cadence, TTLs; ~4 min; the API key is shown once). Exercise 2 is uncommenting the session-event parameters in `redis_memory.py` (step 5). The renovation → home-decor cross-sell demo (step 7) is the wow moment: say the renovation line, wait ~a minute (the cadence), demo the recall |
 | 2:15–2:35 | 6 LangCache | Attendees provision a real cloud service (steps 1–2, ~5 min) — have Redis Cloud accounts created BEFORE the day. Latency drop live on screen; "no vectorizer, no schema, no index" is the beat; the "only impersonal answers" rule; the loose-threshold failure (step 9) if time allows |
 | 2:30–2:40 | 7 Wrap-up | The table mapping what they built → Redis Iris managed services |
 
@@ -122,7 +122,10 @@ people fail to do on the day.
   their APIs) if needed.
 - **Section 5 recall "doesn't work"**: 90% of the time it's the async
   extraction — the fact isn't searchable the instant the message is sent.
-  Demo something else for 20 seconds, then search again.
+  The steps set the extraction cadence to 1 minute; demo something else
+  for a minute, then search again. (If they Quick-created the service
+  instead of following step 2, the cadence may be much longer — that's
+  the other 10%.)
 - **Corporate proxies**: `OPENAI_BASE_URL` in `.env`; test it before the day.
 
 ## Solution snapshots

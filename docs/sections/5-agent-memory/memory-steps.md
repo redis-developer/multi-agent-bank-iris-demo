@@ -79,17 +79,8 @@
    **⟳ new chat** (fresh session, session memory gone) and ask *"I need
    some extra funds, what are my options?"*. The sales agent leads with
    the **home decor loan**: long-term memory recalled the renovation
-   across sessions. See what was extracted — in the **Terminal** panel
-   (paste your own three values):
-
-   ```bash
-   curl -s -X POST \
-     -H "Authorization: Bearer <API_KEY>" -H 'Content-Type: application/json' \
-     "<ENDPOINT>/v1/stores/<STORE_ID>/long-term-memory/search" \
-     -d '{"text": "renovation plans",
-          "filter": {"ownerId": {"eq": "CUST1001"}},
-          "limit": 5}' | jq
-   ```
+   across sessions — a fact nobody's code wrote, extracted by the
+   service on its own.
 
 8. **Verify isolation.** Switch to Rohit (CUST1002) and ask the same
    "extra funds" question — no renovation memory surfaces. The `ownerId`

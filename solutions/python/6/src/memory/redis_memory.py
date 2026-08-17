@@ -1,71 +1,140 @@
-"""Agent memory via the Redis Agent Memory Server (Redis Iris).
+"""Agent memory via Redis Agent Memory (managed, on Redis Cloud).
 
 ═══════════════════════════════════════════════════════════════════════
 SECTION 5 - AGENT MEMORY: solved.
 ═══════════════════════════════════════════════════════════════════════
 
-The Agent Memory Server — the Agent Memory component of Redis Iris — runs
-as its own service (the `agent-memory` container) and gives every agent
-two tiers of memory over a simple REST API:
+Agent Memory is a managed Redis Iris service: you provision it in the
+Redis Cloud console (the Section 5 steps walk through it) and it gives
+every agent two tiers of memory over a small REST API:
 
-  * Working memory (short-term) — the ordered message log of one
-    conversation session.
-  * Long-term memory — durable facts the server **automatically extracts**
-    from working memory in the background, searchable per user.
+  * Session memory (short-term) — the ordered event log of one
+    conversation session. POST each turn's messages as events; GET the
+    session to give the agents the conversation so far.
+    POST /v1/stores/{storeId}/session-memory/events
 
-Notice what is NOT in this file: no extraction prompt, no vectorizer, no
-index schema. The memory server owns all of that.
+  * Long-term memory — as session events arrive, the service
+    **automatically extracts durable facts** ("renovating their home
+    this year") in the background — its own LLM, its own embeddings,
+    its own vector index — and makes them searchable per customer.
+    POST /v1/stores/{storeId}/long-term-memory/search
+
+Notice what is NOT in this file: no extraction prompt, no vectorizer,
+no index schema. The managed service owns all of that. Until the three
+AGENT_MEMORY_* keys are set in .env, every method is a harmless no-op
+and the bot simply stays amnesiac.
 """
+
+import logging
+from datetime import datetime, timezone
 
 import httpx
 
 from src import config
 
+logger = logging.getLogger("workshop")
+
+BOT_ACTOR_ID = "bank-bot"
+
+
+def _utc_now() -> str:
+    """Client-supplied event timestamp (the API requires one, in UTC)."""
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
 
 class AgentMemory:
-    """Thin client over the Agent Memory Server's REST API."""
+    """Thin client over the managed Agent Memory service's REST API."""
 
-    def __init__(self, base_url: str = config.AGENT_MEMORY_URL):
-        self.http = httpx.Client(base_url=base_url, timeout=15)
+    def __init__(self):
+        self.configured = all([config.AGENT_MEMORY_URL,
+                               config.AGENT_MEMORY_STORE_ID,
+                               config.AGENT_MEMORY_API_KEY])
+        if not self.configured:
+            logger.warning(
+                "Agent Memory is not configured — the bot stays amnesiac "
+                "until AGENT_MEMORY_URL / AGENT_MEMORY_STORE_ID / "
+                "AGENT_MEMORY_API_KEY are set in .env (Section 5).")
+            return
+        self.http = httpx.Client(
+            base_url=(f"{config.AGENT_MEMORY_URL.rstrip('/')}"
+                      f"/v1/stores/{config.AGENT_MEMORY_STORE_ID}"),
+            headers={"Authorization":
+                     f"Bearer {config.AGENT_MEMORY_API_KEY}"},
+            timeout=15,
+        )
 
     def session_history(self, session_id: str,
                         limit: int = 12) -> list[dict]:
         """Short-term: the session's prior messages, oldest first, as
-        [{"role": "user"|"assistant", "content": str}, ...]."""
-        response = self.http.get(
-            f"/v1/working-memory/{session_id}",
-            params={"recent_messages_limit": limit},
-        )
+        [{"role": "user"|"assistant", "content": str}, ...].
+
+        Provided — it reads back whatever remember_turn wrote: GET the
+        session, keep the last `limit` USER/ASSISTANT events, flatten
+        each event's content parts into one string.
+        """
+        if not self.configured:
+            return []
+        response = self.http.get(f"/session-memory/{session_id}")
         if response.status_code == 404:
             return []  # first turn of a new session
         response.raise_for_status()
-        return [{"role": m["role"], "content": m["content"]}
-                for m in response.json().get("messages", [])]
+        events = response.json().get("events", [])[-limit:]
+        return [{"role": e["role"].lower(),
+                 "content": " ".join(p.get("text", "") for p in e["content"])}
+                for e in events if e["role"] in ("USER", "ASSISTANT")]
 
     def remember_turn(self, session_id: str, customer_id: str,
                       user_message: str, reply: str) -> None:
-        """Append this turn to the session's working memory. The server
-        extracts long-term facts from it automatically in the background."""
-        messages = self.session_history(session_id, limit=50)
-        messages += [
-            {"role": "user", "content": user_message},
-            {"role": "assistant", "content": reply},
-        ]
-        self.http.put(
-            f"/v1/working-memory/{session_id}",
-            json={"messages": messages, "user_id": customer_id},
-        ).raise_for_status()
+        """Append this turn to the session as two events — the service
+        extracts long-term facts from them automatically in the
+        background. The session's owner (the privacy boundary `recall`
+        filters on) is taken from the first event's actorId, which is
+        why the customer's message must carry their customer_id.
+
+        ═══════════════════════════════════════════════════════════════
+        SECTION 5 - AGENT MEMORY (session memory): fill in the two event
+        payloads — each needs who is speaking ("actorId"), their "role"
+        ("USER" or "ASSISTANT"), and the message "content" as a list of
+        text parts: [{"text": ...}].
+        ═══════════════════════════════════════════════════════════════
+        """
+        user_event = {
+            "actorId": customer_id,
+            "role": "USER",
+            "content": [{"text": user_message}],
+        }
+        bot_event = {
+            "actorId": BOT_ACTOR_ID,
+            "role": "ASSISTANT",
+            "content": [{"text": reply}],
+        }
+        if not self.configured or not user_event or not bot_event:
+            return None
+        for event in (user_event, bot_event):
+            self.http.post("/session-memory/events", json={
+                "sessionId": session_id,
+                "createdAt": _utc_now(),
+                **event,
+            }).raise_for_status()
 
     def recall(self, customer_id: str, query: str, k: int = 3) -> list[str]:
-        """Long-term: up to k extracted facts about this customer, closest
-        in meaning to the current message."""
-        response = self.http.post(
-            "/v1/long-term-memory/search",
-            json={
-                "text": query,
-                "user_id": {"eq": customer_id},
-                "limit": k,
-            },
-        )
+        """Long-term: up to k extracted facts about this customer,
+        closest in meaning to the current message.
+
+        ═══════════════════════════════════════════════════════════════
+        SECTION 5 - AGENT MEMORY (long-term): fill in the semantic-search
+        payload — the "text" to match, the "filter" that scopes the
+        search to this customer ({"ownerId": {"eq": ...}} — the privacy
+        boundary), and the result "limit". Solved.
+        ═══════════════════════════════════════════════════════════════
+        """
+        payload = {
+            "text": query,
+            "filter": {"ownerId": {"eq": customer_id}},
+            "limit": k,
+        }
+        if not self.configured or not payload:
+            return []
+        response = self.http.post("/long-term-memory/search", json=payload)
         response.raise_for_status()
-        return [m["text"] for m in response.json().get("memories", [])]
+        return [m["text"] for m in response.json().get("items", [])]

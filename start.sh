@@ -32,7 +32,6 @@ docker compose up -d --build
 echo
 echo "Workshop is starting:"
 echo "  Workbench      http://localhost/          <- open this"
-echo "  (direct: chat UI :3000, docs :3001, api :8000, Redis Insight :5540,"
-echo "   Agent Memory Server :8088)"
+echo "  (direct: chat UI :3000, docs :3001, api :8000, Redis Insight :5540)"
 echo
 echo "First boot builds images and seeds the FAQ knowledge base (~1-2 min)."

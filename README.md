@@ -10,7 +10,7 @@ LangChain, and LangGraph** — one Redis Iris component per section:
 | 2. Semantic routing | Read & test the provided message router (observe-the-code section) | RedisVL `SemanticRouter` |
 | 3. RAG over loan docs | Grounded policy answers with citations, plus a keyword / vector / hybrid retrieval lab | RedisVL `VectorQuery`, `TextQuery` (BM25), `HybridQuery` (`FT.HYBRID` + RRF) |
 | 4. The Context Retriever | Model the bank in `ContextModel` classes, deploy a context surface on Redis Cloud, and run the agents on service-generated MCP tools (the multi-agent graph is provided plumbing) | **Redis Context Retriever** (managed) via `redis-context-retriever` |
-| 5. Agent memory | Session threads + auto-extracted customer facts; then provision the **managed Agent Memory service** on Redis Cloud | Redis Agent Memory Server (self-hosted) + Redis Cloud |
+| 5. Agent memory | Session threads + auto-extracted customer facts via the **managed Agent Memory service**, provisioned on Redis Cloud during the workshop | Redis Agent Memory (managed) |
 | 6. Semantic caching | Zero-token answers for repeat questions via **LangCache**, provisioned on Redis Cloud during the workshop | Redis LangCache (managed) |
 | 7. Wrap-up | — | Map to Redis Iris (LangCache, Agent Memory, Context Retriever, RDI) |
 
@@ -50,8 +50,7 @@ one browser tab framing the Instructions sidebar plus **Code** (VS Code),
 Insight** panels, all same-origin behind a single nginx.
 
 Each service is also exposed directly: api <http://localhost:8000/api/health>,
-chat UI :3000, docs :3001, Redis Insight :5540, Agent Memory Server
-<http://localhost:8088/v1/health>.
+chat UI :3000, docs :3001, Redis Insight :5540.
 
 ## Repository layout
 

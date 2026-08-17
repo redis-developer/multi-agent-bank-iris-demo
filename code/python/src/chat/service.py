@@ -1,10 +1,10 @@
 """The chat pipeline — every WhatsApp message flows through here.
 
 ═══════════════════════════════════════════════════════════════════════
-EXERCISE FILE: sections 4, 5, and 6 each replace one stub below.
-(Semantic routing — Section 2 — is already wired, and Section 3's RAG
-wiring is provided: its exercises are the three retrieval modes in
-src/retrieval/rag.py.)
+EXERCISE FILE: Section 4 replaces one stub below. (Semantic routing —
+Section 2 — is already wired, and the Section 3 / 5 / 6 wiring here is
+provided: those exercises live in their own files — src/retrieval/rag.py,
+src/memory/redis_memory.py, and src/cache/semantic_cache.py.)
 ═══════════════════════════════════════════════════════════════════════
 
 The full pipeline you will assemble over the workshop:
@@ -92,8 +92,11 @@ class ChatService:
         route = route_message(self.router, request.message)
 
         # ── SECTION 5 - AGENT MEMORY: recall this customer's context ───────
-        history = []      # short-term: this session's prior turns
-        memories = []     # long-term: durable facts about the customer
+        # Provided: no-ops until the managed Agent Memory service is
+        # configured in .env — Section 5's exercises fill the payloads
+        # in src/memory/redis_memory.py.
+        history = self.memory.session_history(request.session_id)
+        memories = self.memory.recall(request.customer_id, request.message)
 
         # ── SECTION 3 - RAG / SECTION 4 - MULTI-AGENT: generate the reply ──
         # Provided: loan questions flow through the RAG helper — grounded
@@ -106,7 +109,9 @@ class ChatService:
             reply, agent, citations = (self._canned_reply(route),
                                        route or "fallback", [])
 
-        # ── SECTION 5 - AGENT MEMORY: remember this turn ───────────────────
+        # ── SECTION 5 - AGENT MEMORY: remember this turn (provided) ────────
+        self.memory.remember_turn(request.session_id, request.customer_id,
+                                  request.message, reply)
 
         # ── SECTION 6 - SEMANTIC CACHING: store shareable replies ──────────
         # Provided: only loan_docs answers are impersonal enough to share

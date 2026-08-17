@@ -83,10 +83,13 @@ class ChatService:
             return self._response(cached_reply, route="cache", agent="cache",
                                   cached=True, t0=t0)
 
-        # ── SECTION 2 - SEMANTIC ROUTING: classify the message ─────────────
+        # ── SECTION 2 - SEMANTIC ROUTING: classify the message (provided) ──
         route = route_message(self.router, request.message)
 
         # ── SECTION 5 - AGENT MEMORY: recall this customer's context ───────
+        # Provided: no-ops until the managed Agent Memory service is
+        # configured in .env — Section 5's exercises fill the payloads
+        # in src/memory/redis_memory.py.
         history = self.memory.session_history(request.session_id)
         memories = self.memory.recall(request.customer_id, request.message)
 
@@ -94,7 +97,7 @@ class ChatService:
         reply, agent, citations = self._run_graph(request, route, memories,
                                                   history)
 
-        # ── SECTION 5 - AGENT MEMORY: remember this turn ───────────────────
+        # ── SECTION 5 - AGENT MEMORY: remember this turn (provided) ────────
         self.memory.remember_turn(request.session_id, request.customer_id,
                                   request.message, reply)
 

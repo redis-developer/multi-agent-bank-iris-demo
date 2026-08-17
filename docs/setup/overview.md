@@ -76,8 +76,7 @@ workbench. From here on, everything happens in this one browser tab:
 | **Redis Insight** panel | Browse your cloud database (added once in Section 1, step 1) |
 
 (Each service is also exposed directly — api :8000, chat UI :3000, docs
-:3001, Redis Insight :5540, Agent Memory Server :8088 — if you prefer
-separate tabs.)
+:3001, Redis Insight :5540 — if you prefer separate tabs.)
 
 > The service keys you create later (Sections 4 and 6) go into `.env` too
 > — it's editable right in the **Code** panel at the workspace root, and

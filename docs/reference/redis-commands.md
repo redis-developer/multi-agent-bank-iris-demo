@@ -41,14 +41,13 @@ FT.SEARCH idx:faqs "@product:{topup_loan}" RETURN 1 section
 # Section 2 — the semantic router's reference embeddings
 FT.SEARCH wa-journey-router "*" LIMIT 0 5 RETURN 2 reference route_name
 
-# Section 5 — the Agent Memory Server keeps its own keys in this Redis
-SCAN 0 MATCH *memory* COUNT 200
-
-# Section 5 — but its REST API is the intended window (from your terminal):
-#   curl http://agent-memory:8000/v1/working-memory/
-#   curl -s -X POST http://agent-memory:8000/v1/long-term-memory/search \
+# Section 5 — memory lives in the managed Agent Memory service (Redis
+# Cloud), not this Redis. Inspect it via its REST API from the Terminal
+# panel (fill in your endpoint / store id / API key from Section 5):
+#   curl -s -X POST -H "Authorization: Bearer <API_KEY>" \
 #     -H 'Content-Type: application/json' \
-#     -d '{"text": "renovation", "user_id": {"eq": "CUST1001"}, "limit": 5}'
+#     "<ENDPOINT>/v1/stores/<STORE_ID>/long-term-memory/search" \
+#     -d '{"text": "renovation", "filter": {"ownerId": {"eq": "CUST1001"}}, "limit": 5}'
 
 # Section 6 — the cache lives in LangCache (Redis Cloud), not this Redis.
 # Inspect it via its REST API from the Terminal panel:
@@ -65,5 +64,5 @@ GET counter:lan
 ```bash
 # Wipe everything and reseed on next api restart
 FLUSHALL
-# then, from the host: docker compose restart api agent-memory
+# then, from the host: docker compose restart api
 ```

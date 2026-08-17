@@ -3,9 +3,8 @@
 ## Requirements
 
 - Docker Desktop (or Docker Engine with Compose v2)
-- An **OpenAI API key** — used by the chat model (`gpt-4o-mini` by default),
-  embeddings (`text-embedding-3-small`), and the Agent Memory Server's own
-  extraction LLM
+- An **OpenAI API key** — used by the chat model (`gpt-4o-mini` by default)
+  and embeddings (`text-embedding-3-small`)
 - A **Redis Cloud account** (free tier) with a free database — **required**:
   the cloud database is the workshop's only database (there is no local
   Redis container). Section 4 provisions a Context Retriever service,
@@ -13,7 +12,7 @@
   the console; create the account and database before the workshop
   (Getting started, Step 1)
 - Ports free: 80 (workbench), 3000 (chat UI), 3001 (docs), 8000 (API),
-  8088 (Agent Memory Server), 5540 (Redis Insight)
+  5540 (Redis Insight)
 
 ## Boot
 
@@ -41,10 +40,8 @@ Verify: `curl http://localhost:8000/api/health` →
 ```bash
 docker compose logs -f api        # watch the pipeline (routing, tools, errors)
 ./solve <2|3|4|5|6|full|reset>    # apply a solution snapshot (api auto-reloads)
-# mid-workshop .env edits (CTX_ADMIN_KEY, LANGCACHE_*): open .env in the
-# Code panel, save — the api reloads itself. If you ever change REDIS_URL
-# or OPENAI_API_KEY after boot: docker compose restart agent-memory
-# agent-memory-worker (they re-read .env on restart)
+# mid-workshop .env edits (CTX_ADMIN_KEY, AGENT_MEMORY_*, LANGCACHE_*):
+# open .env in the Code panel, save — the api reloads itself.
 docker compose down               # stop the stack (your data is safe — it
                                   # lives in your Redis Cloud database)
 ```
@@ -87,5 +84,6 @@ and RedisVL's `OpenAITextVectorizer`).
 | Section 4: agents say the Context Retriever isn't deployed | Complete `src/context/models.py`, create an admin key in the console (Context Retriever → Admin keys) and set `CTX_ADMIN_KEY` in `.env` (Code panel, save — api reloads), run `python -m src.context.deploy` from the Terminal, then reload the api |
 | Section 6: "LangCache is not configured" in api logs | Set `LANGCACHE_URL` / `LANGCACHE_CACHE_ID` / `LANGCACHE_API_KEY` in `.env` (Code panel, save — api reloads) |
 | Section 6: 401/403 from LangCache | The service key is shown only once at creation — generate a new key from the service's page in the Redis Cloud console |
-| Section 5: follow-ups work but cross-session recall doesn't | Long-term extraction is a background job — wait a few seconds; check `docker compose logs agent-memory` |
+| Section 5: "Agent Memory is not configured" in api logs | Set `AGENT_MEMORY_URL` / `AGENT_MEMORY_STORE_ID` / `AGENT_MEMORY_API_KEY` in `.env` (Code panel, save — api reloads) |
+| Section 5: follow-ups work but cross-session recall doesn't | Long-term extraction runs on the service's background cadence — give it a minute or two, then ask again |
 | Port already in use | Change the left-hand port in `docker-compose.yml` |

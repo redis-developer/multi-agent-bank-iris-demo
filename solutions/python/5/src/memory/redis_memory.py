@@ -117,6 +117,48 @@ class AgentMemory:
                 **event,
             }).raise_for_status()
 
+    def clear_all(self) -> dict:
+        """Wipe the memory service: delete every session's event log and
+        every long-term memory, across all sessions and customers. The
+        FAQs, bank records, and other seeded data live in your Redis
+        database — not in the memory service — so they are untouched.
+        Provided — the chat UI's reset button calls this; not an
+        exercise."""
+        if not self.configured:
+            return {"configured": False,
+                    "sessions_deleted": 0, "memories_deleted": 0}
+        sessions_deleted = 0
+        token = None
+        while True:
+            params = {"limit": 1000, "includeAll": "true"}
+            if token:
+                params["pageToken"] = token
+            response = self.http.get("/session-memory", params=params)
+            response.raise_for_status()
+            data = response.json()
+            for session_id in data.get("items", []):
+                self.http.delete(
+                    f"/session-memory/{session_id}").raise_for_status()
+                sessions_deleted += 1
+            token = data.get("nextPageToken")
+            if not token:
+                break
+        memories_deleted = 0
+        for _ in range(1000):  # bulk-delete caps at 100 ids per call
+            response = self.http.post("/long-term-memory/search",
+                                      json={"limit": 100})
+            response.raise_for_status()
+            items = response.json().get("items", [])
+            if not items:
+                break
+            self.http.request("DELETE", "/long-term-memory", json={
+                "memoryIds": [m["id"] for m in items],
+            }).raise_for_status()
+            memories_deleted += len(items)
+        return {"configured": True,
+                "sessions_deleted": sessions_deleted,
+                "memories_deleted": memories_deleted}
+
     def recall(self, customer_id: str, query: str, k: int = 3) -> list[str]:
         """Long-term: up to k extracted facts about this customer,
         closest in meaning to the current message.

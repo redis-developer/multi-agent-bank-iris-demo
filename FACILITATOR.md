@@ -118,8 +118,9 @@ people fail to do on the day.
   the FAQs in ~30s — but it runs against the attendee's *cloud* DB, so it
   also wipes Section 4's imported records (re-run the deploy). Agent
   Memory sessions/memories and LangCache entries live in their own
-  managed services and survive — clear them from the console (or via
-  their APIs) if needed.
+  managed services and survive — the chat UI's **Clear memory** button
+  (inspector sidebar) wipes all Agent Memory sessions + long-term
+  memories; LangCache entries clear from the console.
 - **Section 5 recall "doesn't work"**: 90% of the time it's the async
   extraction — the fact isn't searchable the instant the message is sent.
   The steps set the extraction cadence to 1 minute; demo something else
